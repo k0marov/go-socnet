@@ -60,7 +60,7 @@ func (s *StubProfileService) UpdateAvatar(user auth.User, avatar server.AvatarDa
 var dummyProfileService = &StubProfileService{}
 
 func addAuthDataToRequest(r *http.Request, user auth.User) *http.Request {
-	ctx := context.WithValue(r.Context(), "User", user)
+	ctx := context.WithValue(r.Context(), auth.UserContextKey, user)
 	return r.WithContext(ctx)
 }
 

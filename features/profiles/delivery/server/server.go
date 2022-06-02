@@ -119,7 +119,7 @@ func setJsonHeader(w http.ResponseWriter) {
 }
 
 func getUserOrAddUnauthorized(w http.ResponseWriter, r *http.Request) (auth.User, bool) {
-	user, castSuccess := r.Context().Value("User").(auth.User) // try to cast this to User
+	user, castSuccess := r.Context().Value(auth.UserContextKey).(auth.User) // try to cast this to User
 	if !castSuccess {
 		w.WriteHeader(http.StatusUnauthorized)
 		return auth.User{}, false
