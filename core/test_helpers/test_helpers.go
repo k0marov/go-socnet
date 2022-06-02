@@ -84,6 +84,7 @@ func AssertHTTPError(t testing.TB, response *httptest.ResponseRecorder, err clie
 	var got client_errors.ClientError
 	json.NewDecoder(response.Body).Decode(&got)
 
+	AssertJSON(t, response)
 	Assert(t, got, err, "error response")
 	Assert(t, response.Code, statusCode, "status code")
 }
