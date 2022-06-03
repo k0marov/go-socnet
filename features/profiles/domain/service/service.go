@@ -1,6 +1,7 @@
 package service
 
 import (
+	"core/client_errors"
 	core_entities "core/entities"
 	"errors"
 	"fmt"
@@ -22,11 +23,12 @@ func NewProfileService(store ProfileStore) *ProfileService {
 	return &ProfileService{store}
 }
 
-func (p *ProfileService) GetOrCreateDetailed(user core_entities.User) (entities.DetailedProfile, error) {
+func (p *ProfileService) GetDetailed(user core_entities.User) (entities.DetailedProfile, error) {
 	profile, err := p.store.GetByIdDetailed(user.Id)
 	if err != nil {
 		if err == ErrProfileNotFound {
-			return p.createAndReturn(user)
+			return entities.DetailedProfile{}, client_errors.ProfileNotFound
+			// return p.createAndReturn(user)
 		}
 		return entities.DetailedProfile{}, fmt.Errorf("got an error while getting profile in a service: %w", err)
 	}
@@ -37,7 +39,8 @@ func (p *ProfileService) GetOrCreateDetailed(user core_entities.User) (entities.
 const DefaultAbout = ""
 const DefaultAvatarPath = ""
 
-func (p *ProfileService) createAndReturn(user core_entities.User) (entities.DetailedProfile, error) {
+// this should be invoked when a new user is registered
+func (p *ProfileService) CreateProfileForUser(user core_entities.User) (entities.DetailedProfile, error) {
 	newProfile := entities.DetailedProfile{
 		Profile: entities.Profile{
 			Id:         user.Id,

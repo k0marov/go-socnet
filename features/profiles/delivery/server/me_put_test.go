@@ -114,7 +114,7 @@ func TestHTTPServer_Put_Me_Avatar(t *testing.T) {
 			req := createRequestWithAuth("", "")
 			srv.ServeHTTP(response, req)
 
-			AssertHTTPError(t, response, client_errors.AvatarNotProvidedError, http.StatusBadRequest)
+			AssertHTTPError(t, response, client_errors.AvatarNotProvidedError)
 		})
 		t.Run("error case - post body is not multipart form", func(t *testing.T) {
 			service := &StubProfileService{}
@@ -128,7 +128,7 @@ func TestHTTPServer_Put_Me_Avatar(t *testing.T) {
 
 			srv.ServeHTTP(response, request)
 
-			AssertHTTPError(t, response, client_errors.BodyIsNotMultipartForm, http.StatusBadRequest)
+			AssertHTTPError(t, response, client_errors.BodyIsNotMultipartForm)
 		})
 	})
 	baseTestServerErrorHandling(t, func() *http.Request { return createRequestWithAuth(goodAvatarPath, RandomString()) })

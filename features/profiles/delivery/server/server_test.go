@@ -44,6 +44,7 @@ func baseTestServerErrorHandling(t *testing.T, createRequestWithAuth func() *htt
 			randomClientError := client_errors.ClientError{
 				DetailCode:     RandomString(),
 				ReadableDetail: RandomString(),
+				HTTPCode:       RandomInt() + 400,
 			}
 			srv := server.NewHTTPServer(&StubProfileService{returnedError: randomClientError, doNotPanic: true})
 
@@ -51,7 +52,7 @@ func baseTestServerErrorHandling(t *testing.T, createRequestWithAuth func() *htt
 			response := httptest.NewRecorder()
 			srv.ServeHTTP(response, request)
 
-			AssertHTTPError(t, response, randomClientError, http.StatusBadRequest)
+			AssertHTTPError(t, response, randomClientError)
 		})
 		t.Run("it is a server error - just return status code 500", func(t *testing.T) {
 			randomError := errors.New(RandomString())
@@ -75,16 +76,16 @@ func TestHTTPServer_Me_IncorrectMethod(t *testing.T) {
 }
 
 type StubProfileService struct {
-	getOrCreateDetailed func(core_entities.User) (entities.DetailedProfile, error)
-	update              func(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
-	updateAvatar        func(user core_entities.User, avatar server.AvatarData) (entities.DetailedProfile, error)
-	returnedError       error
-	doNotPanic          bool
+	getDetailed   func(core_entities.User) (entities.DetailedProfile, error)
+	update        func(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
+	updateAvatar  func(user core_entities.User, avatar server.AvatarData) (entities.DetailedProfile, error)
+	returnedError error
+	doNotPanic    bool
 }
 
-func (s *StubProfileService) GetOrCreateDetailed(user core_entities.User) (entities.DetailedProfile, error) {
-	if s.getOrCreateDetailed != nil {
-		return s.getOrCreateDetailed(user)
+func (s *StubProfileService) GetDetailed(user core_entities.User) (entities.DetailedProfile, error) {
+	if s.getDetailed != nil {
+		return s.getDetailed(user)
 	}
 	if s.doNotPanic {
 		return entities.DetailedProfile{}, s.returnedError

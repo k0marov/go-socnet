@@ -18,7 +18,7 @@ type AvatarData struct {
 }
 
 type ProfileService interface {
-	GetOrCreateDetailed(core_entities.User) (entities.DetailedProfile, error)
+	GetDetailed(core_entities.User) (entities.DetailedProfile, error)
 	Update(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
 	UpdateAvatar(core_entities.User, AvatarData) (entities.DetailedProfile, error)
 }
@@ -58,14 +58,14 @@ func getUserOrAddUnauthorized(w http.ResponseWriter, r *http.Request) (core_enti
 func handleServiceError(w http.ResponseWriter, err error) {
 	clientError, isClientError := err.(client_errors.ClientError)
 	if isClientError {
-		throwClientError(w, clientError, http.StatusBadRequest)
+		throwClientError(w, clientError)
 	} else {
 		http.Error(w, "", http.StatusInternalServerError)
 	}
 }
 
-func throwClientError(w http.ResponseWriter, clientError client_errors.ClientError, statusCode int) {
+func throwClientError(w http.ResponseWriter, clientError client_errors.ClientError) {
 	setJsonHeader(w)
 	errorJson, _ := json.Marshal(clientError)
-	http.Error(w, string(errorJson), statusCode)
+	http.Error(w, string(errorJson), clientError.HTTPCode)
 }

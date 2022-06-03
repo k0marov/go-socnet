@@ -11,7 +11,7 @@ func (srv *HTTPServer) profilesMeGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	setJsonHeader(w)
-	profile, err := srv.profileService.GetOrCreateDetailed(user)
+	profile, err := srv.profileService.GetDetailed(user)
 	if err != nil {
 		handleServiceError(w, err)
 		return

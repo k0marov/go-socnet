@@ -26,7 +26,7 @@ func TestHTTPServer_GET_Me(t *testing.T) {
 	t.Run("should return 200 and a profile if authentication details are provided via context", func(t *testing.T) {
 		wantedProfile := RandomDetailedProfile()
 		service := &StubProfileService{
-			getOrCreateDetailed: func(u core_entities.User) (entities.DetailedProfile, error) {
+			getDetailed: func(u core_entities.User) (entities.DetailedProfile, error) {
 				if u == user {
 					return wantedProfile, nil
 				}

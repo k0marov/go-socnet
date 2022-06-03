@@ -47,7 +47,7 @@ func (srv *HTTPServer) profilesMeUpdateAvatar(w http.ResponseWriter, r *http.Req
 
 	avatarData, clientError := _parseAvatar(r)
 	if clientError != client_errors.NoError {
-		throwClientError(w, clientError, http.StatusBadRequest)
+		throwClientError(w, clientError)
 		return
 	}
 
