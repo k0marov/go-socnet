@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"profiles/domain/entities"
 	"profiles/domain/values"
-	"strings"
 
 	auth "github.com/k0marov/golang-auth"
 )
@@ -36,86 +35,11 @@ func (srv *HTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		srv.profilesMeGet(w, r)
 	} else if r.Method == http.MethodPut {
-		srv.profilesMePost(w, r)
+		srv.profilesMePut(w, r)
 	} else {
 		http.Error(w, "", http.StatusMethodNotAllowed)
 		return
 	}
-}
-
-func (srv *HTTPServer) profilesMePost(w http.ResponseWriter, r *http.Request) {
-	url := strings.TrimSuffix(r.URL.String(), "/")
-	if strings.HasSuffix(url, "avatar") {
-		srv.profilesMeUpdateAvatar(w, r)
-	} else {
-		srv.profilesMeUpdate(w, r)
-	}
-}
-
-func (srv *HTTPServer) profilesMeUpdate(w http.ResponseWriter, r *http.Request) {
-	user, ok := getUserOrAddUnauthorized(w, r)
-	if !ok {
-		return
-	}
-
-	setJsonHeader(w)
-
-	var updateData values.ProfileUpdateData
-	json.NewDecoder(r.Body).Decode(&updateData)
-
-	updatedProfile, err := srv.profileService.Update(user, updateData)
-	if err != nil {
-		handleServiceError(w, err)
-		return
-	}
-
-	json.NewEncoder(w).Encode(updatedProfile)
-}
-
-const MaxFileSize = 2.5 * 1000 * 1000
-
-func (srv *HTTPServer) profilesMeUpdateAvatar(w http.ResponseWriter, r *http.Request) {
-	user, ok := getUserOrAddUnauthorized(w, r)
-	if !ok {
-		return
-	}
-
-	err := r.ParseMultipartForm(MaxFileSize)
-	if err != nil {
-		throwClientError(w, client_errors.BodyIsNotMultipartForm, http.StatusBadRequest)
-	}
-	file, fileHeader, err := r.FormFile("avatar")
-	if err != nil {
-		throwClientError(w, client_errors.AvatarNotProvidedError, http.StatusBadRequest)
-		return
-	}
-	if fileHeader.Size > MaxFileSize {
-		throwClientError(w, client_errors.AvatarTooBigError, http.StatusBadRequest)
-		return
-	}
-
-	setJsonHeader(w)
-	profile, err := srv.profileService.UpdateAvatar(user, AvatarData{file, fileHeader.Filename})
-	if err != nil {
-		handleServiceError(w, err)
-		return
-	}
-
-	json.NewEncoder(w).Encode(profile)
-}
-
-func (srv *HTTPServer) profilesMeGet(w http.ResponseWriter, r *http.Request) {
-	user, ok := getUserOrAddUnauthorized(w, r)
-	if !ok {
-		return
-	}
-	setJsonHeader(w)
-	profile, err := srv.profileService.GetOrCreateDetailed(user)
-	if err != nil {
-		handleServiceError(w, err)
-		return
-	}
-	json.NewEncoder(w).Encode(profile)
 }
 
 func setJsonHeader(w http.ResponseWriter) {
