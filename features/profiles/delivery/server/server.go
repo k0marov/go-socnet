@@ -2,6 +2,7 @@ package server
 
 import (
 	"core/client_errors"
+	core_entities "core/entities"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -18,9 +19,9 @@ type AvatarData struct {
 }
 
 type ProfileService interface {
-	GetOrCreate(auth.User) (entities.Profile, error)
-	Update(auth.User, values.ProfileUpdateData) (entities.Profile, error)
-	UpdateAvatar(auth.User, AvatarData) (entities.Profile, error)
+	GetOrCreateDetailed(core_entities.User) (entities.DetailedProfile, error)
+	Update(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
+	UpdateAvatar(core_entities.User, AvatarData) (entities.DetailedProfile, error)
 }
 
 type HTTPServer struct {
@@ -34,8 +35,11 @@ func NewHTTPServer(service ProfileService) *HTTPServer {
 func (srv *HTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		srv.profilesMeGet(w, r)
-	} else if r.Method == http.MethodPost {
+	} else if r.Method == http.MethodPut {
 		srv.profilesMePost(w, r)
+	} else {
+		http.Error(w, "", http.StatusMethodNotAllowed)
+		return
 	}
 }
 
@@ -106,7 +110,7 @@ func (srv *HTTPServer) profilesMeGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	setJsonHeader(w)
-	profile, err := srv.profileService.GetOrCreate(user)
+	profile, err := srv.profileService.GetOrCreateDetailed(user)
 	if err != nil {
 		handleServiceError(w, err)
 		return
@@ -118,13 +122,13 @@ func setJsonHeader(w http.ResponseWriter) {
 	w.Header().Add("contentType", "application/json")
 }
 
-func getUserOrAddUnauthorized(w http.ResponseWriter, r *http.Request) (auth.User, bool) {
-	user, castSuccess := r.Context().Value(auth.UserContextKey).(auth.User) // try to cast this to User
+func getUserOrAddUnauthorized(w http.ResponseWriter, r *http.Request) (core_entities.User, bool) {
+	authUser, castSuccess := r.Context().Value(auth.UserContextKey).(auth.User) // try to cast this to User
 	if !castSuccess {
 		w.WriteHeader(http.StatusUnauthorized)
-		return auth.User{}, false
+		return core_entities.User{}, false
 	}
-	return user, true
+	return core_entities.UserFromAuth(authUser), true
 }
 
 func handleServiceError(w http.ResponseWriter, err error) {

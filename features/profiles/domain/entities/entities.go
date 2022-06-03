@@ -5,3 +5,8 @@ type Profile struct {
 	Username string
 	About    string
 }
+
+type DetailedProfile struct {
+	Profile
+	// ...
+}

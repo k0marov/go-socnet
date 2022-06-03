@@ -2,14 +2,19 @@ package test_helpers
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"math/rand"
 	"net/http/httptest"
 	"os"
+	"profiles/domain/entities"
 	"reflect"
 	"testing"
 
 	"core/client_errors"
+	core_entities "core/entities"
+
+	auth "github.com/k0marov/golang-auth"
 )
 
 func CreateTempFile(t testing.TB, initialData string) (*os.File, func()) {
@@ -120,6 +125,37 @@ func CheckInSlice[T comparable](elem T, slice []T) bool {
 		}
 	}
 	return false
+}
+
+func RandomError() error {
+	return errors.New(RandomString())
+}
+
+func RandomUser() core_entities.User {
+	return core_entities.User{
+		Id:       RandomString(),
+		Username: RandomString(),
+	}
+}
+
+func RandomAuthUser() auth.User {
+	return auth.User{
+		Id:       RandomString(),
+		Username: RandomString(),
+	}
+}
+
+func RandomDetailedProfile() entities.DetailedProfile {
+	return entities.DetailedProfile{
+		Profile: RandomProfile(),
+	}
+}
+
+func RandomProfile() entities.Profile {
+	return entities.Profile{
+		Id:       RandomString(),
+		Username: RandomString(),
+	}
 }
 
 func RandomString() string {

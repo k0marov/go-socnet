@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"core/client_errors"
+	core_entities "core/entities"
 	. "core/test_helpers"
 	"encoding/json"
 	"errors"
@@ -20,42 +21,6 @@ import (
 
 	auth "github.com/k0marov/golang-auth"
 )
-
-type StubProfileService struct {
-	getOrCreate   func(auth.User) (entities.Profile, error)
-	update        func(auth.User, values.ProfileUpdateData) (entities.Profile, error)
-	updateAvatar  func(user auth.User, avatar server.AvatarData) (entities.Profile, error)
-	returnedError error
-	doNotPanic    bool
-}
-
-func (s *StubProfileService) GetOrCreate(user auth.User) (entities.Profile, error) {
-	if s.getOrCreate != nil {
-		return s.getOrCreate(user)
-	}
-	if s.doNotPanic {
-		return entities.Profile{}, s.returnedError
-	}
-	panic("getOrCreate method shouldn't have been called")
-}
-func (s *StubProfileService) Update(user auth.User, updateData values.ProfileUpdateData) (entities.Profile, error) {
-	if s.update != nil {
-		return s.update(user, updateData)
-	}
-	if s.doNotPanic {
-		return entities.Profile{}, s.returnedError
-	}
-	panic("Update method shouldn't have been called")
-}
-func (s *StubProfileService) UpdateAvatar(user auth.User, avatar server.AvatarData) (entities.Profile, error) {
-	if s.updateAvatar != nil {
-		return s.updateAvatar(user, avatar)
-	}
-	if s.doNotPanic {
-		return entities.Profile{}, s.returnedError
-	}
-	panic("UpdateAvatar method shouldn't have been called")
-}
 
 var dummyProfileService = &StubProfileService{}
 
@@ -108,26 +73,21 @@ func baseTestServerErrorHandling(t *testing.T, createRequestWithAuth func() *htt
 }
 
 func TestHTTPServer_GET_Me(t *testing.T) {
-	user := auth.User{
-		Id:       "42",
-		Username: "Sam",
-	}
+	authUser := RandomAuthUser()
+	user := core_entities.UserFromAuth(authUser)
 	createRequest := func() *http.Request {
 		return httptest.NewRequest(http.MethodGet, "/profiles/me", nil)
 	}
 	createRequestWithAuth := func() *http.Request {
 		r := createRequest()
-		return addAuthDataToRequest(r, user)
+		return addAuthDataToRequest(r, authUser)
 	}
 
 	baseTest401(t, createRequest)
 	t.Run("should return 200 and a profile if authentication details are provided via context", func(t *testing.T) {
-		wantedProfile := entities.Profile{
-			Id:       RandomString(),
-			Username: RandomString(),
-		}
+		wantedProfile := RandomDetailedProfile()
 		service := &StubProfileService{
-			getOrCreate: func(u auth.User) (entities.Profile, error) {
+			getOrCreateDetailed: func(u core_entities.User) (entities.DetailedProfile, error) {
 				if u == user {
 					return wantedProfile, nil
 				}
@@ -146,31 +106,34 @@ func TestHTTPServer_GET_Me(t *testing.T) {
 	baseTestServerErrorHandling(t, createRequestWithAuth)
 }
 
+func TestHTTPServer_Me_IncorrectMethod(t *testing.T) {
+	srv := server.NewHTTPServer(dummyProfileService)
+	response := httptest.NewRecorder()
+	srv.ServeHTTP(response, httptest.NewRequest(http.MethodPost, "/profiles/me", nil))
+
+	AssertStatusCode(t, response, http.StatusMethodNotAllowed)
+}
+
 func TestHTTPServer_POST_Me(t *testing.T) {
-	user := auth.User{
-		Id:       RandomString(),
-		Username: RandomString(),
-	}
+	authUser := RandomAuthUser()
+	user := core_entities.UserFromAuth(authUser)
 	profileUpdate := values.ProfileUpdateData{
 		About: RandomString(),
 	}
 	createRequest := func() *http.Request {
 		body := bytes.NewBuffer(nil)
 		json.NewEncoder(body).Encode(profileUpdate)
-		return httptest.NewRequest(http.MethodPost, "/profiles/me", body)
+		return httptest.NewRequest(http.MethodPut, "/profiles/me", body)
 	}
 	createRequestWithAuth := func() *http.Request {
 		r := createRequest()
-		return addAuthDataToRequest(r, user)
+		return addAuthDataToRequest(r, authUser)
 	}
 	baseTest401(t, createRequest)
 	t.Run("should update profile about if about field is provided", func(t *testing.T) {
-		updatedProfile := entities.Profile{
-			Id:       RandomString(),
-			Username: RandomString(),
-		}
+		updatedProfile := RandomDetailedProfile()
 		service := &StubProfileService{
-			update: func(u auth.User, pud values.ProfileUpdateData) (entities.Profile, error) {
+			update: func(u core_entities.User, pud values.ProfileUpdateData) (entities.DetailedProfile, error) {
 				if u == user && pud == profileUpdate {
 					return updatedProfile, nil
 				}
@@ -188,11 +151,9 @@ func TestHTTPServer_POST_Me(t *testing.T) {
 	baseTestServerErrorHandling(t, createRequestWithAuth)
 }
 
-func TestHTTPServer_Post_Me_Avatar(t *testing.T) {
-	user := auth.User{
-		Id:       RandomString(),
-		Username: RandomString(),
-	}
+func TestHTTPServer_Put_Me_Avatar(t *testing.T) {
+	authUser := RandomAuthUser()
+	user := core_entities.UserFromAuth(authUser)
 	goodAvatarPath := "testdata/test_avatar.png"
 	bigAvatarPath := "testdata/test_big_avatar.png"
 
@@ -210,28 +171,24 @@ func TestHTTPServer_Post_Me_Avatar(t *testing.T) {
 		}
 		writer.Close()
 
-		req := httptest.NewRequest(http.MethodPost, "/profiles/me/avatar", body)
+		req := httptest.NewRequest(http.MethodPut, "/profiles/me/avatar", body)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
 
 		return req
 	}
 	createRequestWithAuth := func(avatarFilePath, fileName string) *http.Request {
 		r := createRequest(avatarFilePath, fileName)
-		return addAuthDataToRequest(r, user)
+		return addAuthDataToRequest(r, authUser)
 	}
 
 	baseTest401(t, func() *http.Request { return createRequest(goodAvatarPath, RandomString()) })
 
 	t.Run("should update avatar using service", func(t *testing.T) {
 		t.Run("happy case", func(t *testing.T) {
-			updatedProfile := entities.Profile{
-				Id:       RandomString(),
-				Username: RandomString(),
-				About:    RandomString(),
-			}
+			updatedProfile := RandomDetailedProfile()
 			fileName := RandomString()
 			service := &StubProfileService{
-				updateAvatar: func(u auth.User, avatar server.AvatarData) (entities.Profile, error) {
+				updateAvatar: func(u core_entities.User, avatar server.AvatarData) (entities.DetailedProfile, error) {
 					if u == user && avatar.FileName == fileName {
 						return updatedProfile, nil
 					}
@@ -274,7 +231,7 @@ func TestHTTPServer_Post_Me_Avatar(t *testing.T) {
 			dataJson, _ := json.Marshal(someRandomData)
 			body := bytes.NewBuffer(dataJson)
 			response := httptest.NewRecorder()
-			request := addAuthDataToRequest(httptest.NewRequest(http.MethodPost, "/profiles/me/avatar", body), user)
+			request := addAuthDataToRequest(httptest.NewRequest(http.MethodPut, "/profiles/me/avatar", body), authUser)
 
 			srv.ServeHTTP(response, request)
 
@@ -282,4 +239,40 @@ func TestHTTPServer_Post_Me_Avatar(t *testing.T) {
 		})
 	})
 	baseTestServerErrorHandling(t, func() *http.Request { return createRequestWithAuth(goodAvatarPath, RandomString()) })
+}
+
+type StubProfileService struct {
+	getOrCreateDetailed func(core_entities.User) (entities.DetailedProfile, error)
+	update              func(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
+	updateAvatar        func(user core_entities.User, avatar server.AvatarData) (entities.DetailedProfile, error)
+	returnedError       error
+	doNotPanic          bool
+}
+
+func (s *StubProfileService) GetOrCreateDetailed(user core_entities.User) (entities.DetailedProfile, error) {
+	if s.getOrCreateDetailed != nil {
+		return s.getOrCreateDetailed(user)
+	}
+	if s.doNotPanic {
+		return entities.DetailedProfile{}, s.returnedError
+	}
+	panic("getOrCreate method shouldn't have been called")
+}
+func (s *StubProfileService) Update(user core_entities.User, updateData values.ProfileUpdateData) (entities.DetailedProfile, error) {
+	if s.update != nil {
+		return s.update(user, updateData)
+	}
+	if s.doNotPanic {
+		return entities.DetailedProfile{}, s.returnedError
+	}
+	panic("Update method shouldn't have been called")
+}
+func (s *StubProfileService) UpdateAvatar(user core_entities.User, avatar server.AvatarData) (entities.DetailedProfile, error) {
+	if s.updateAvatar != nil {
+		return s.updateAvatar(user, avatar)
+	}
+	if s.doNotPanic {
+		return entities.DetailedProfile{}, s.returnedError
+	}
+	panic("UpdateAvatar method shouldn't have been called")
 }
