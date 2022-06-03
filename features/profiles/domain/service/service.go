@@ -35,13 +35,15 @@ func (p *ProfileService) GetOrCreateDetailed(user core_entities.User) (entities.
 }
 
 const DefaultAbout = ""
+const DefaultAvatarPath = ""
 
 func (p *ProfileService) createAndReturn(user core_entities.User) (entities.DetailedProfile, error) {
 	newProfile := entities.DetailedProfile{
 		Profile: entities.Profile{
-			Id:       user.Id,
-			Username: user.Username,
-			About:    DefaultAbout,
+			Id:         user.Id,
+			Username:   user.Username,
+			About:      DefaultAbout,
+			AvatarPath: DefaultAvatarPath,
 		},
 	}
 	err := p.store.StoreNew(newProfile)

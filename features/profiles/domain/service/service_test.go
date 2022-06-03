@@ -47,9 +47,10 @@ func TestService_GetOrCreateDetailed(t *testing.T) {
 		t.Run("happy case", func(t *testing.T) {
 			wantProfile := entities.DetailedProfile{
 				Profile: entities.Profile{
-					Id:       user.Id,
-					Username: user.Username,
-					About:    service.DefaultAbout,
+					Id:         user.Id,
+					Username:   user.Username,
+					About:      service.DefaultAbout,
+					AvatarPath: service.DefaultAvatarPath,
 				},
 			}
 			store := &MockProfileStore{

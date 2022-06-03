@@ -59,7 +59,6 @@ func TestHTTPServer_Put_Me_Avatar(t *testing.T) {
 	authUser := RandomAuthUser()
 	user := core_entities.UserFromAuth(authUser)
 	goodAvatarPath := "testdata/test_avatar.png"
-	bigAvatarPath := "testdata/test_big_avatar.png"
 
 	createRequest := func(avatarFilePath string, fileName string) *http.Request {
 		body := bytes.NewBuffer(nil)
@@ -116,16 +115,6 @@ func TestHTTPServer_Put_Me_Avatar(t *testing.T) {
 			srv.ServeHTTP(response, req)
 
 			AssertHTTPError(t, response, client_errors.AvatarNotProvidedError, http.StatusBadRequest)
-		})
-		t.Run("error case - avatar is too big", func(t *testing.T) {
-			service := &StubProfileService{}
-			srv := server.NewHTTPServer(service)
-
-			response := httptest.NewRecorder()
-			req := createRequestWithAuth(bigAvatarPath, RandomString())
-			srv.ServeHTTP(response, req)
-
-			AssertHTTPError(t, response, client_errors.AvatarTooBigError, http.StatusBadRequest)
 		})
 		t.Run("error case - post body is not multipart form", func(t *testing.T) {
 			service := &StubProfileService{}

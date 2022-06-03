@@ -37,7 +37,7 @@ func (srv *HTTPServer) profilesMeUpdate(w http.ResponseWriter, r *http.Request) 
 	json.NewEncoder(w).Encode(updatedProfile)
 }
 
-const MaxFileSize = 2.5 * 1000 * 1000
+const MaxFileSize = 3 << 20 // 3 MB
 
 func (srv *HTTPServer) profilesMeUpdateAvatar(w http.ResponseWriter, r *http.Request) {
 	user, ok := getUserOrAddUnauthorized(w, r)
@@ -69,9 +69,6 @@ func _parseAvatar(r *http.Request) (AvatarData, client_errors.ClientError) {
 	file, fileHeader, err := r.FormFile("avatar")
 	if err != nil {
 		return AvatarData{}, client_errors.AvatarNotProvidedError
-	}
-	if fileHeader.Size > MaxFileSize {
-		return AvatarData{}, client_errors.AvatarTooBigError
 	}
 	return AvatarData{file, fileHeader.Filename}, client_errors.NoError
 }
