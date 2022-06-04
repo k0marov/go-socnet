@@ -47,3 +47,21 @@ var ProfileNotFound = ClientError{
 	ReadableDetail: "The requested profile was not found",
 	HTTPCode:       http.StatusNotFound,
 }
+
+var AboutTooLong = ClientError{
+	DetailCode:     "about-long",
+	ReadableDetail: "The about field is too long",
+	HTTPCode:       http.StatusBadRequest,
+}
+
+var NonImageAvatar = ClientError{
+	DetailCode:     "avatar-non-image",
+	ReadableDetail: "The provided avatar is not in one of supported image codecs.",
+	HTTPCode:       http.StatusBadRequest,
+}
+
+var NonSquareAvatar = ClientError{
+	DetailCode:     "avatar-non-square",
+	ReadableDetail: "The provided avatar is a valid image, but it is not square.",
+	HTTPCode:       http.StatusBadRequest,
+}

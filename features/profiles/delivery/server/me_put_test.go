@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"profiles/delivery/server"
 	"profiles/domain/entities"
 	"profiles/domain/values"
@@ -58,7 +59,7 @@ func TestHTTPServer_PUT_Me(t *testing.T) {
 func TestHTTPServer_Put_Me_Avatar(t *testing.T) {
 	authUser := RandomAuthUser()
 	user := core_entities.UserFromAuth(authUser)
-	goodAvatarPath := "testdata/test_avatar.png"
+	goodAvatarPath := filepath.Join("testdata", "test_avatar.png")
 
 	createRequest := func(avatarFilePath string, fileName string) *http.Request {
 		body := bytes.NewBuffer(nil)
@@ -91,7 +92,7 @@ func TestHTTPServer_Put_Me_Avatar(t *testing.T) {
 			updatedProfile := RandomDetailedProfile()
 			fileName := RandomString()
 			service := &StubProfileService{
-				updateAvatar: func(u core_entities.User, avatar server.AvatarData) (entities.DetailedProfile, error) {
+				updateAvatar: func(u core_entities.User, avatar values.AvatarData) (entities.DetailedProfile, error) {
 					if u == user && avatar.FileName == fileName {
 						return updatedProfile, nil
 					}

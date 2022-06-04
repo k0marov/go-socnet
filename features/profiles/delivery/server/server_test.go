@@ -78,7 +78,7 @@ func TestHTTPServer_Me_IncorrectMethod(t *testing.T) {
 type StubProfileService struct {
 	getDetailed   func(core_entities.User) (entities.DetailedProfile, error)
 	update        func(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
-	updateAvatar  func(user core_entities.User, avatar server.AvatarData) (entities.DetailedProfile, error)
+	updateAvatar  func(user core_entities.User, avatar values.AvatarData) (entities.DetailedProfile, error)
 	returnedError error
 	doNotPanic    bool
 }
@@ -101,7 +101,7 @@ func (s *StubProfileService) Update(user core_entities.User, updateData values.P
 	}
 	panic("Update method shouldn't have been called")
 }
-func (s *StubProfileService) UpdateAvatar(user core_entities.User, avatar server.AvatarData) (entities.DetailedProfile, error) {
+func (s *StubProfileService) UpdateAvatar(user core_entities.User, avatar values.AvatarData) (entities.DetailedProfile, error) {
 	if s.updateAvatar != nil {
 		return s.updateAvatar(user, avatar)
 	}

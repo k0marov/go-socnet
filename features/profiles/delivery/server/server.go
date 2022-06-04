@@ -4,7 +4,6 @@ import (
 	"core/client_errors"
 	core_entities "core/entities"
 	"encoding/json"
-	"io"
 	"net/http"
 	"profiles/domain/entities"
 	"profiles/domain/values"
@@ -12,15 +11,10 @@ import (
 	auth "github.com/k0marov/golang-auth"
 )
 
-type AvatarData struct {
-	Reader   io.Reader
-	FileName string
-}
-
 type ProfileService interface {
 	GetDetailed(core_entities.User) (entities.DetailedProfile, error)
 	Update(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
-	UpdateAvatar(core_entities.User, AvatarData) (entities.DetailedProfile, error)
+	UpdateAvatar(core_entities.User, values.AvatarData) (entities.DetailedProfile, error)
 }
 
 type HTTPServer struct {

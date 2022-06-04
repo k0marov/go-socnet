@@ -3,6 +3,7 @@ package server
 import (
 	"core/client_errors"
 	"encoding/json"
+	"io"
 	"net/http"
 	"profiles/domain/values"
 	"strings"
@@ -61,14 +62,16 @@ func (srv *HTTPServer) profilesMeUpdateAvatar(w http.ResponseWriter, r *http.Req
 	json.NewEncoder(w).Encode(profile)
 }
 
-func _parseAvatar(r *http.Request) (AvatarData, client_errors.ClientError) {
+func _parseAvatar(r *http.Request) (values.AvatarData, client_errors.ClientError) {
 	err := r.ParseMultipartForm(MaxFileSize)
 	if err != nil {
-		return AvatarData{}, client_errors.BodyIsNotMultipartForm
+		return values.AvatarData{}, client_errors.BodyIsNotMultipartForm
 	}
 	file, fileHeader, err := r.FormFile("avatar")
 	if err != nil {
-		return AvatarData{}, client_errors.AvatarNotProvidedError
+		return values.AvatarData{}, client_errors.AvatarNotProvidedError
 	}
-	return AvatarData{file, fileHeader.Filename}, client_errors.NoError
+	avatarData, _ := io.ReadAll(file) // ignore error here, because later empty avatarData will throw NonImageAvatar
+	file.Close()
+	return values.AvatarData{Data: &avatarData, FileName: fileHeader.Filename}, client_errors.NoError
 }
