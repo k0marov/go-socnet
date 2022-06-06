@@ -84,7 +84,7 @@ func AssertNotNil[T comparable](t testing.TB, got T, description string) {
 	}
 }
 
-func AssertHTTPError(t testing.TB, response *httptest.ResponseRecorder, err client_errors.ClientError) {
+func AssertClientError(t testing.TB, response *httptest.ResponseRecorder, err client_errors.ClientError) {
 	t.Helper()
 	var got client_errors.ClientError
 	json.NewDecoder(response.Body).Decode(&got)
@@ -155,6 +155,14 @@ func RandomProfile() entities.Profile {
 	return entities.Profile{
 		Id:       RandomString(),
 		Username: RandomString(),
+	}
+}
+
+func RandomClientError() client_errors.ClientError {
+	return client_errors.ClientError{
+		DetailCode:     RandomString(),
+		ReadableDetail: RandomString(),
+		HTTPCode:       RandomInt() + 400,
 	}
 }
 

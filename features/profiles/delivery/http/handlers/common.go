@@ -1,40 +1,13 @@
-package server
+package handlers
 
 import (
 	"core/client_errors"
 	core_entities "core/entities"
 	"encoding/json"
 	"net/http"
-	"profiles/domain/entities"
-	"profiles/domain/values"
 
 	auth "github.com/k0marov/golang-auth"
 )
-
-type ProfileService interface {
-	GetDetailed(core_entities.User) (entities.DetailedProfile, error)
-	Update(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
-	UpdateAvatar(core_entities.User, values.AvatarData) (entities.DetailedProfile, error)
-}
-
-type HTTPServer struct {
-	profileService ProfileService
-}
-
-func NewHTTPServer(service ProfileService) *HTTPServer {
-	return &HTTPServer{profileService: service}
-}
-
-func (srv *HTTPServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		srv.profilesMeGet(w, r)
-	} else if r.Method == http.MethodPut {
-		srv.profilesMePut(w, r)
-	} else {
-		http.Error(w, "", http.StatusMethodNotAllowed)
-		return
-	}
-}
 
 func setJsonHeader(w http.ResponseWriter) {
 	w.Header().Add("contentType", "application/json")

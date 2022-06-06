@@ -15,14 +15,10 @@ type Image struct {
 	Height int
 }
 
-type ImageDecoder interface {
-	Decode(*[]byte) (Image, error)
-}
+type ImageDecoder = func(fileData *[]byte) (Image, error)
 
-type ImageDecoderImpl struct{}
-
-func (i ImageDecoderImpl) Decode(data *[]byte) (Image, error) {
-	imageConfig, _, err := image.DecodeConfig(bytes.NewReader(*data))
+func ImageDecoderImpl(fileData *[]byte) (Image, error) {
+	imageConfig, _, err := image.DecodeConfig(bytes.NewReader(*fileData)) // TODO: maybe remove dereferencing for performance?
 	if err != nil {
 		return Image{}, fmt.Errorf("error while decoding image: %w", err)
 	}
