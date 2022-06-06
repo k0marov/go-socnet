@@ -3,13 +3,11 @@ package service_test
 import (
 	"core/client_errors"
 	"core/core_errors"
-	"core/image_decoder"
 	. "core/test_helpers"
 	"fmt"
 	"profiles/domain/entities"
 	"profiles/domain/service"
 	"profiles/domain/values"
-	"strings"
 	"testing"
 )
 
@@ -85,143 +83,94 @@ func TestProfileCreator(t *testing.T) {
 
 func TestProfileUpdater(t *testing.T) {
 	user := RandomUser()
-	goodUpdateData := values.ProfileUpdateData{
+	testUpdateData := values.ProfileUpdateData{
 		About: RandomString(),
 	}
-	t.Run("field validation", func(t *testing.T) {
-		goodStoreUpdater := func(string, values.ProfileUpdateData) (entities.DetailedProfile, error) {
-			return RandomDetailedProfile(), nil
-		}
-		cases := []struct {
-			updateData    values.ProfileUpdateData
-			expectedError error
-		}{
-			{goodUpdateData, nil},
-			{values.ProfileUpdateData{About: strings.Repeat("long", 100)}, client_errors.AboutTooLong},
-		}
-		for _, c := range cases {
-			var storeUpdater service.StoreProfileUpdater
-			if c.expectedError == nil {
-				storeUpdater = goodStoreUpdater
+	silentValidator := func(values.ProfileUpdateData) (client_errors.ClientError, bool) {
+		return client_errors.ClientError{}, true
+	}
+	t.Run("happy case", func(t *testing.T) {
+		wantUpdatedProfile := RandomDetailedProfile()
+		storeUpdater := func(id string, updData values.ProfileUpdateData) (entities.DetailedProfile, error) {
+			if id == user.Id && updData == testUpdateData {
+				return wantUpdatedProfile, nil
 			}
-			sut := service.NewProfileUpdater(storeUpdater) // if error != nil, updater shouldn't be called, so it's nil
-			_, err := sut(user, c.updateData)
-			Assert(t, err, c.expectedError, "returned error")
+			panic(fmt.Sprintf("update called with unexpected arguments: id: %v and updateData: %v", id, updData))
 		}
-	})
-	t.Run("should update the profile with proper arguments using store if all checks have passed", func(t *testing.T) {
-		t.Run("happy case", func(t *testing.T) {
-			wantUpdatedProfile := RandomDetailedProfile()
-			storeUpdater := func(id string, updateData values.ProfileUpdateData) (entities.DetailedProfile, error) {
-				if id == user.Id && updateData == goodUpdateData {
-					return wantUpdatedProfile, nil
-				}
-				panic(fmt.Sprintf("update called with unexpected arguments: id: %v and updateData: %v", id, updateData))
-			}
-			sut := service.NewProfileUpdater(storeUpdater)
+		sut := service.NewProfileUpdater(silentValidator, storeUpdater)
 
-			gotUpdatedProfile, err := sut(user, goodUpdateData)
-			AssertNoError(t, err)
-			Assert(t, gotUpdatedProfile, wantUpdatedProfile, "the returned profile")
-		})
-		t.Run("error case - store throws an error", func(t *testing.T) {
-			t.Run("it is a not found error", func(t *testing.T) {
-				storeUpdater := func(string, values.ProfileUpdateData) (entities.DetailedProfile, error) {
-					return entities.DetailedProfile{}, core_errors.ErrNotFound
-				}
-				sut := service.NewProfileUpdater(storeUpdater)
-				_, err := sut(user, goodUpdateData)
-				AssertError(t, err, client_errors.ProfileNotFound)
-			})
-			t.Run("it is some other error", func(t *testing.T) {
-				storeUpdater := func(string, values.ProfileUpdateData) (entities.DetailedProfile, error) {
-					return entities.DetailedProfile{}, RandomError()
-				}
-				sut := service.NewProfileUpdater(storeUpdater)
-				_, err := sut(user, goodUpdateData)
-				AssertSomeError(t, err)
-			})
-		})
+		gotUpdatedProfile, err := sut(user, testUpdateData)
+		AssertNoError(t, err)
+		Assert(t, gotUpdatedProfile, wantUpdatedProfile, "the returned profile")
+	})
+	t.Run("error case - validator throws", func(t *testing.T) {
+		clientError := RandomClientError()
+		validator := func(updData values.ProfileUpdateData) (client_errors.ClientError, bool) {
+			if updData == testUpdateData {
+				return clientError, false
+			}
+			panic(fmt.Sprintf("validator called with unexpected args, updData=%v", updData))
+		}
+		sut := service.NewProfileUpdater(validator, nil) // store is nil, since it shouldn't be accessed
+		_, gotErr := sut(user, testUpdateData)
+		AssertError(t, gotErr, clientError)
+	})
+	t.Run("error case - store throws an error", func(t *testing.T) {
+		storeUpdater := func(string, values.ProfileUpdateData) (entities.DetailedProfile, error) {
+			return entities.DetailedProfile{}, RandomError()
+		}
+		sut := service.NewProfileUpdater(silentValidator, storeUpdater)
+		_, err := sut(user, testUpdateData)
+		AssertSomeError(t, err)
 	})
 }
 
 func TestAvatarUpdater(t *testing.T) {
 	user := RandomUser()
-	goodAvatar := []byte(RandomString())
-	jsAvatar := []byte(RandomString())
-	nonSquareAvatar := []byte(RandomString())
-
-	stubImageDecoder := func(avatar *[]byte) (image_decoder.Image, error) {
-		if avatar == &goodAvatar {
-			return image_decoder.Image{Width: 10, Height: 10}, nil
-		} else if avatar == &nonSquareAvatar {
-			return image_decoder.Image{Width: 42, Height: 24}, nil
-		} else if avatar == &jsAvatar {
-			return image_decoder.Image{}, RandomError()
-		}
-		panic(fmt.Sprintf("image decoder called with unexpected avatar=%v", avatar))
+	data := []byte(RandomString())
+	testAvatarData := values.AvatarData{
+		Data:     &data,
+		FileName: RandomString(),
 	}
 
-	t.Run("avatar file validation", func(t *testing.T) {
-		stubStoreAvatar := func(s string, ad values.AvatarData) (values.AvatarURL, error) {
-			return values.AvatarURL{}, nil
-		}
-		// stubImageDecoder := func()
-		cases := []struct {
-			name          string
-			avatarBytes   *[]byte
-			expectedError error
-		}{
-			{"Happy case", &goodAvatar, nil},
-			{"Avatar not really an image", &jsAvatar, client_errors.NonImageAvatar},
-			{"Avatar not square", &nonSquareAvatar, client_errors.NonSquareAvatar},
-		}
-		for _, c := range cases {
-			t.Run(c.name, func(t *testing.T) {
-				avatarData := values.AvatarData{Data: c.avatarBytes, FileName: RandomString()}
-				var storeAvatar service.StoreAvatarUpdater
-				if c.expectedError == nil {
-					storeAvatar = stubStoreAvatar
-				} // else storeAvatar shouldn't be called, so let it be nil
+	silentValidator := func(values.AvatarData) (client_errors.ClientError, bool) {
+		return client_errors.ClientError{}, true
+	}
 
-				sut := service.NewAvatarUpdater(storeAvatar, stubImageDecoder)
-
-				_, err := sut(user, avatarData)
-				Assert(t, err, c.expectedError, "returned error")
-			})
+	t.Run("happy case", func(t *testing.T) {
+		wantURL := values.AvatarURL{Url: RandomString()}
+		storeAvatar := func(userId string, avatarData values.AvatarData) (values.AvatarURL, error) {
+			if userId == user.Id && avatarData == testAvatarData {
+				return wantURL, nil
+			}
+			panic(fmt.Sprintf("StoreAvatar called with unexpected arguments: userId=%v and avatarData=%v", userId, avatarData))
 		}
+		sut := service.NewAvatarUpdater(silentValidator, storeAvatar)
+
+		gotURL, err := sut(user, testAvatarData)
+		AssertNoError(t, err)
+		Assert(t, gotURL, wantURL, "returned profile")
 	})
-	t.Run("if validation has passed, should call store with proper arguments", func(t *testing.T) {
-		data := []byte(RandomString())
-		goodAvatarData := values.AvatarData{
-			Data:     &data,
-			FileName: RandomString(),
-		}
-		silentImageDecoder := func(*[]byte) (image_decoder.Image, error) {
-			return image_decoder.Image{Width: 10, Height: 10}, nil
-		}
-		t.Run("happy case", func(t *testing.T) {
-			wantURL := values.AvatarURL{Url: RandomString()}
-			storeAvatar := func(userId string, avatarData values.AvatarData) (values.AvatarURL, error) {
-				if userId == user.Id && avatarData == goodAvatarData {
-					return wantURL, nil
-				}
-				panic(fmt.Sprintf("StoreAvatar called with unexpected arguments: userId=%v and avatarData=%v", userId, avatarData))
+	t.Run("validator throws", func(t *testing.T) {
+		clientError := RandomClientError()
+		validator := func(avatar values.AvatarData) (client_errors.ClientError, bool) {
+			if avatar == testAvatarData {
+				return clientError, false
 			}
-			sut := service.NewAvatarUpdater(storeAvatar, silentImageDecoder)
+			panic(fmt.Sprintf("validator called with unexpected args, avatar=%v", avatar))
+		}
+		sut := service.NewAvatarUpdater(validator, nil) // storeAvatar is nil, since it shouldn't be called
 
-			gotURL, err := sut(user, goodAvatarData)
-			AssertNoError(t, err)
-			Assert(t, gotURL, wantURL, "returned profile")
-		})
-		t.Run("store throws an error", func(t *testing.T) {
-			storeAvatar := func(string, values.AvatarData) (values.AvatarURL, error) {
-				return values.AvatarURL{}, RandomError()
-			}
-			sut := service.NewAvatarUpdater(storeAvatar, silentImageDecoder)
+		_, err := sut(user, testAvatarData)
+		AssertError(t, err, clientError)
+	})
+	t.Run("store throws an error", func(t *testing.T) {
+		storeAvatar := func(string, values.AvatarData) (values.AvatarURL, error) {
+			return values.AvatarURL{}, RandomError()
+		}
+		sut := service.NewAvatarUpdater(silentValidator, storeAvatar)
 
-			_, err := sut(user, goodAvatarData)
-			AssertSomeError(t, err)
-		})
+		_, err := sut(user, testAvatarData)
+		AssertSomeError(t, err)
 	})
 }

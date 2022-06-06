@@ -4,21 +4,20 @@ import (
 	"core/client_errors"
 	"core/core_errors"
 	core_entities "core/entities"
-	"core/image_decoder"
 	"fmt"
 	"profiles/domain/entities"
 	contracts "profiles/domain/service_contracts"
+	"profiles/domain/validators"
 	"profiles/domain/values"
 )
 
 type StoreProfileUpdater = func(id string, upd values.ProfileUpdateData) (entities.DetailedProfile, error)
 
-const MaxAboutLength = 255
+func NewProfileUpdater(validator validators.ProfileUpdateValidator, storeProfileUpdater StoreProfileUpdater) contracts.ProfileUpdater {
 
-func NewProfileUpdater(storeProfileUpdater StoreProfileUpdater) contracts.ProfileUpdater {
 	return func(user core_entities.User, updateData values.ProfileUpdateData) (entities.DetailedProfile, error) {
-		if len(updateData.About) > MaxAboutLength {
-			return entities.DetailedProfile{}, client_errors.AboutTooLong
+		if clientError, ok := validator(updateData); !ok {
+			return entities.DetailedProfile{}, clientError
 		}
 		updatedProfile, err := storeProfileUpdater(user.Id, updateData)
 		if err != nil {
@@ -73,14 +72,10 @@ func NewProfileCreator(storeProfileCreator StoreProfileCreator) contracts.Profil
 
 type StoreAvatarUpdater = func(userId string, avatar values.AvatarData) (values.AvatarURL, error)
 
-func NewAvatarUpdater(storeAvatarUpdater StoreAvatarUpdater, imageDecoder image_decoder.ImageDecoder) contracts.AvatarUpdater {
+func NewAvatarUpdater(validator validators.AvatarValidator, storeAvatarUpdater StoreAvatarUpdater) contracts.AvatarUpdater {
 	return func(user core_entities.User, avatar values.AvatarData) (values.AvatarURL, error) {
-		imageDimensions, err := imageDecoder(avatar.Data)
-		if err != nil {
-			return values.AvatarURL{}, client_errors.NonImageAvatar
-		}
-		if imageDimensions.Height != imageDimensions.Width {
-			return values.AvatarURL{}, client_errors.NonSquareAvatar
+		if clientError, ok := validator(avatar); !ok {
+			return values.AvatarURL{}, clientError
 		}
 
 		avatarURL, err := storeAvatarUpdater(user.Id, avatar)
