@@ -8,18 +8,7 @@ import (
 	"testing"
 )
 
-type MockFileStorage struct {
-	storeFile func(*[]byte, string, string) (string, error)
-}
-
-func (m *MockFileStorage) StoreFile(file *[]byte, dir string, fileName string) (string, error) {
-	if m.storeFile != nil {
-		return m.storeFile(file, dir, fileName)
-	}
-	panic("StoreFile should not be called here")
-}
-
-func TestStore_StoreAvatar(t *testing.T) {
+func TestStoreAvatarUpdater(t *testing.T) {
 	t.Run("should store avatar using file storage", func(t *testing.T) {
 		randomFile := []byte(RandomString())
 		avatar := values.AvatarData{
@@ -29,30 +18,46 @@ func TestStore_StoreAvatar(t *testing.T) {
 		userId := RandomString()
 		t.Run("happy case", func(t *testing.T) {
 			wantPath := RandomString()
-			storage := &MockFileStorage{
-				storeFile: func(file *[]byte, dir, fileName string) (string, error) {
-					if file == &randomFile && dir == store.AvatarsDir && fileName == userId {
-						return wantPath, nil
+			storeFile := func(file *[]byte, dir, fileName string) (string, error) {
+				if file == &randomFile && dir == store.AvatarsDir && fileName == userId {
+					return wantPath, nil
+				}
+				panic(fmt.Sprintf("StoreFile called with unexpected arguments, file=%v, dir=%v, fileName=%v", file, dir, fileName))
+			}
+
+			t.Run("should store avatarPath in DB", func(t *testing.T) {
+				t.Run("happy case", func(t *testing.T) {
+					wantAvatarURL := values.AvatarURL{Url: wantPath}
+					storeDBAvatar := func(string, values.AvatarURL) error {
+						return nil
 					}
-					panic(fmt.Sprintf("StoreFile called with unexpected arguments, file=%v, dir=%v, fileName=%v", file, dir, fileName))
-				},
-			}
+					sut := store.NewStoreAvatarUpdater(storeFile, storeDBAvatar)
+					gotAvatarUrl, err := sut(userId, avatar)
+					AssertNoError(t, err)
+					Assert(t, gotAvatarUrl, wantAvatarURL, "returned avatar url")
+				})
+				t.Run("error case - db returns an error", func(t *testing.T) {
+					storeDBAvatar := func(gotUserId string, avatar values.AvatarURL) error {
+						if gotUserId == userId && avatar.Url == wantPath {
+							return RandomError()
+						}
+						panic(fmt.Sprintf("called with unexpected arguments, gotUserId=%v, avatar=%v", gotUserId, avatar))
+					}
+					sut := store.NewStoreAvatarUpdater(storeFile, storeDBAvatar)
 
-			sut := store.NewProfileStoreImpl(storage, nil)
+					_, err := sut(userId, avatar)
+					AssertSomeError(t, err)
+				})
+			})
 
-			gotPath, err := sut.StoreAvatar(userId, avatar)
-			AssertNoError(t, err)
-			Assert(t, gotPath, values.AvatarURL{Url: wantPath}, "the returned path")
 		})
-		t.Run("error case - store returns an error", func(t *testing.T) {
-			storage := &MockFileStorage{
-				storeFile: func(b *[]byte, s1, s2 string) (string, error) {
-					return "", RandomError()
-				},
+		t.Run("error case - fileStore returns an error", func(t *testing.T) {
+			storeFile := func(b *[]byte, s1, s2 string) (string, error) {
+				return "", RandomError()
 			}
-			sut := store.NewProfileStoreImpl(storage, nil)
+			sut := store.NewStoreAvatarUpdater(storeFile, nil) // nil, because db shouldn't be called
 
-			_, err := sut.StoreAvatar(userId, avatar)
+			_, err := sut(userId, avatar)
 			AssertSomeError(t, err)
 		})
 	})
