@@ -6,15 +6,17 @@ import (
 	core_entities "core/entities"
 	"fmt"
 	"profiles/domain/entities"
-	contracts "profiles/domain/service_contracts"
+	store "profiles/domain/store_contracts"
 	"profiles/domain/validators"
 	"profiles/domain/values"
 )
 
-type StoreProfileUpdater = func(id string, upd values.ProfileUpdateData) (entities.DetailedProfile, error)
+type DetailedProfileGetter = func(core_entities.User) (entities.DetailedProfile, error)
+type ProfileUpdater = func(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
+type AvatarUpdater = func(core_entities.User, values.AvatarData) (values.AvatarURL, error)
+type ProfileCreator = func(core_entities.User) (entities.DetailedProfile, error)
 
-func NewProfileUpdater(validator validators.ProfileUpdateValidator, storeProfileUpdater StoreProfileUpdater) contracts.ProfileUpdater {
-
+func NewProfileUpdater(validator validators.ProfileUpdateValidator, storeProfileUpdater store.StoreProfileUpdater) ProfileUpdater {
 	return func(user core_entities.User, updateData values.ProfileUpdateData) (entities.DetailedProfile, error) {
 		if clientError, ok := validator(updateData); !ok {
 			return entities.DetailedProfile{}, clientError
@@ -30,9 +32,7 @@ func NewProfileUpdater(validator validators.ProfileUpdateValidator, storeProfile
 	}
 }
 
-type StoreDetailedProfileGetter = func(id string) (entities.DetailedProfile, error)
-
-func NewDetailedProfileGetter(storeDetailedGetter StoreDetailedProfileGetter) contracts.DetailedProfileGetter {
+func NewDetailedProfileGetter(storeDetailedGetter store.StoreDetailedProfileGetter) DetailedProfileGetter {
 	return func(user core_entities.User) (entities.DetailedProfile, error) {
 		profile, err := storeDetailedGetter(user.Id)
 		if err != nil {
@@ -46,13 +46,11 @@ func NewDetailedProfileGetter(storeDetailedGetter StoreDetailedProfileGetter) co
 	}
 }
 
-type StoreProfileCreator = func(entities.DetailedProfile) error
-
 const DefaultAbout = ""
 const DefaultAvatarPath = ""
 
 // this should be invoked when a new user is registered
-func NewProfileCreator(storeProfileCreator StoreProfileCreator) contracts.ProfileCreator {
+func NewProfileCreator(storeProfileCreator store.StoreProfileCreator) ProfileCreator {
 	return func(user core_entities.User) (entities.DetailedProfile, error) {
 		newProfile := entities.DetailedProfile{
 			Profile: entities.Profile{
@@ -70,15 +68,13 @@ func NewProfileCreator(storeProfileCreator StoreProfileCreator) contracts.Profil
 	}
 }
 
-type StoreAvatarUpdater = func(userId string, avatar values.AvatarData) (values.AvatarURL, error)
-
-func NewAvatarUpdater(validator validators.AvatarValidator, storeAvatarUpdater StoreAvatarUpdater) contracts.AvatarUpdater {
+func NewAvatarUpdater(validator validators.AvatarValidator, storeAvatar store.StoreAvatarUpdater) AvatarUpdater {
 	return func(user core_entities.User, avatar values.AvatarData) (values.AvatarURL, error) {
 		if clientError, ok := validator(avatar); !ok {
 			return values.AvatarURL{}, clientError
 		}
 
-		avatarURL, err := storeAvatarUpdater(user.Id, avatar)
+		avatarURL, err := storeAvatar(user.Id, avatar)
 		if err != nil {
 			return values.AvatarURL{}, fmt.Errorf("got an error while storing updated avatar: %w", err)
 		}

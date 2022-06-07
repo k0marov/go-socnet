@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"profiles/domain/service_contracts"
+	"profiles/domain/service"
 	"profiles/domain/values"
 )
 
-func NewUpdateMeHandler(profileUpdater service_contracts.ProfileUpdater) http.HandlerFunc {
+func NewUpdateMeHandler(profileUpdater service.ProfileUpdater) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user, ok := getUserOrAddUnauthorized(w, r)
 		if !ok {
@@ -35,7 +35,7 @@ func NewUpdateMeHandler(profileUpdater service_contracts.ProfileUpdater) http.Ha
 	})
 }
 
-func NewUpdateAvatarHandler(avatarUpdater service_contracts.AvatarUpdater) http.HandlerFunc {
+func NewUpdateAvatarHandler(avatarUpdater service.AvatarUpdater) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user, ok := getUserOrAddUnauthorized(w, r)
 		if !ok {
