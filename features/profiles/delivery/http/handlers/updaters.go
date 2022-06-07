@@ -61,7 +61,7 @@ func NewUpdateAvatarHandler(avatarUpdater service.AvatarUpdater) http.HandlerFun
 
 const MaxFileSize = 3 << 20 // 3 MB
 func _parseAvatar(r *http.Request) (values.AvatarData, bool) {
-	file, fileHeader, err := r.FormFile("avatar")
+	file, _, err := r.FormFile("avatar")
 	if err != nil {
 		return values.AvatarData{}, false
 	}
@@ -70,5 +70,5 @@ func _parseAvatar(r *http.Request) (values.AvatarData, bool) {
 	if err != nil {
 		return values.AvatarData{}, false
 	}
-	return values.AvatarData{Data: &avatarData, FileName: fileHeader.Filename}, true
+	return values.AvatarData{Data: &avatarData}, true
 }

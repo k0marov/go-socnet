@@ -7,17 +7,15 @@ import (
 	"profiles/domain/values"
 )
 
-const AvatarsDir = "avatars"
-
-type FileCreator = func(data []byte, dir, filename string) (string, error)
+type AvatarFileCreator = func(data []byte, belongsToUser string) (string, error)
 type DBAvatarUpdater = func(userId string, avatarPath values.AvatarURL) error
 
-func NewStoreAvatarUpdater(createFile FileCreator, updateDBAvatar DBAvatarUpdater) store_contracts.StoreAvatarUpdater {
+func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBAvatar DBAvatarUpdater) store_contracts.StoreAvatarUpdater {
 	return func(userId string, avatar values.AvatarData) (values.AvatarURL, error) {
 		if avatar.Data == nil {
 			return values.AvatarURL{}, fmt.Errorf("provided avatar data was nil")
 		}
-		path, err := createFile(*avatar.Data, AvatarsDir, userId)
+		path, err := createFile(*avatar.Data, userId)
 		if err != nil {
 			return values.AvatarURL{}, fmt.Errorf("error while storing avatar file: %w", err)
 		}

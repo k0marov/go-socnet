@@ -11,11 +11,10 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
-	"os"
-	"path/filepath"
 	"profiles/delivery/http/handlers"
 	"profiles/domain/entities"
 	"profiles/domain/values"
+	"reflect"
 	"testing"
 )
 
@@ -64,24 +63,18 @@ func TestUpdateMeHandler(t *testing.T) {
 func TestUpdateAvatarHandler(t *testing.T) {
 	authUser := RandomAuthUser()
 	user := core_entities.UserFromAuth(authUser)
-	goodAvatarPath := filepath.Join("testdata", "test_avatar.jpg")
+	tAvatar := []byte(RandomString())
 
-	getMultipartBody := func(filePath, fileName string) (io.Reader, string) {
+	getMultipartBody := func(data []byte) (io.Reader, string) {
 		body := bytes.NewBuffer(nil)
 		writer := multipart.NewWriter(body)
 		defer writer.Close()
-		if filePath != "" {
-			fw, _ := writer.CreateFormFile("avatar", fileName)
-			file, err := os.Open(filePath)
-			if err != nil {
-				t.Fatalf("Error while opening fixture file: %v", err)
-			}
-			io.Copy(fw, file)
-		}
+		fw, _ := writer.CreateFormFile("avatar", RandomString())
+		fw.Write(data)
 		return body, writer.FormDataContentType()
 	}
-	createRequestWithAuth := func(avatarFilePath, fileName string) *http.Request {
-		body, contentType := getMultipartBody(avatarFilePath, fileName)
+	createRequestWithAuth := func() *http.Request {
+		body, contentType := getMultipartBody(tAvatar)
 		req := addAuthDataToRequest(createRequest(body), authUser)
 		req.Header.Set("Content-Type", contentType)
 		return addAuthDataToRequest(req, authUser)
@@ -89,17 +82,16 @@ func TestUpdateAvatarHandler(t *testing.T) {
 	baseTest401(t, handlers.NewUpdateAvatarHandler(nil))
 	t.Run("should update avatar using service", func(t *testing.T) {
 		t.Run("happy case", func(t *testing.T) {
-			fileName := RandomString()
 			avatarURL := values.AvatarURL{Url: RandomString()}
 			updateAvatar := func(u core_entities.User, avatar values.AvatarData) (values.AvatarURL, error) {
-				if u == user && avatar.FileName == fileName {
+				if u == user && reflect.DeepEqual(*avatar.Data, tAvatar) {
 					return avatarURL, nil
 				}
 				panic("updateAvatar called with improper arguments")
 			}
 
 			response := httptest.NewRecorder()
-			handlers.NewUpdateAvatarHandler(updateAvatar).ServeHTTP(response, createRequestWithAuth(goodAvatarPath, fileName))
+			handlers.NewUpdateAvatarHandler(updateAvatar).ServeHTTP(response, createRequestWithAuth())
 
 			AssertStatusCode(t, response, http.StatusOK)
 			AssertJSONData(t, response, avatarURL)
@@ -117,6 +109,6 @@ func TestUpdateAvatarHandler(t *testing.T) {
 		updateAvatar := func(core_entities.User, values.AvatarData) (values.AvatarURL, error) {
 			return values.AvatarURL{}, err
 		}
-		handlers.NewUpdateAvatarHandler(updateAvatar).ServeHTTP(w, createRequestWithAuth(goodAvatarPath, RandomString()))
+		handlers.NewUpdateAvatarHandler(updateAvatar).ServeHTTP(w, createRequestWithAuth())
 	})
 }

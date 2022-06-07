@@ -5,8 +5,7 @@ type ProfileUpdateData struct {
 }
 
 type AvatarData struct {
-	Data     *[]byte
-	FileName string
+	Data *[]byte
 }
 
 type AvatarURL struct {

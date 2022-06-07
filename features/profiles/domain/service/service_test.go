@@ -129,8 +129,7 @@ func TestAvatarUpdater(t *testing.T) {
 	user := RandomUser()
 	data := []byte(RandomString())
 	testAvatarData := values.AvatarData{
-		Data:     &data,
-		FileName: RandomString(),
+		Data: &data,
 	}
 
 	silentValidator := func(values.AvatarData) (client_errors.ClientError, bool) {
