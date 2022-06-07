@@ -34,7 +34,7 @@ func TestImageDecoderImpl(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.fixtureName, func(t *testing.T) {
 			fileData := readFixture(c.fixtureName)
-			img, err := image_decoder.ImageDecoderImpl(&fileData)
+			img, err := image_decoder.ImageDecoderImpl(fileData)
 			Assert(t, img, c.wantImg, "returned image")
 			if c.shouldErr {
 				AssertSomeError(t, err)

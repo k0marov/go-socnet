@@ -4,9 +4,110 @@ import (
 	. "core/test_helpers"
 	"fmt"
 	"profiles/data/store"
+	"profiles/domain/entities"
 	"profiles/domain/values"
+	"reflect"
 	"testing"
 )
+
+func TestStoreProfileCreator(t *testing.T) {
+	testProfile := RandomDetailedProfile()
+	t.Run("should forward the call to db", func(t *testing.T) {
+		wantErr := RandomError()
+		dbCreator := func(gotProfile entities.DetailedProfile) error {
+			if gotProfile == testProfile {
+				return wantErr
+			}
+			panic(fmt.Sprintf("called with unexpected args, gotProfile=%v", gotProfile))
+		}
+		sut := store.NewStoreProfileCreator(dbCreator)
+
+		err := sut(testProfile)
+		AssertError(t, err, wantErr)
+
+	})
+}
+
+func TestStoreDetailedProfileGetter(t *testing.T) { // TODO adding follows in this layer
+	t.Run("happy case", func(t *testing.T) {
+		wantProfile := RandomProfile()
+		wantDetailedProfile := entities.DetailedProfile{Profile: wantProfile}
+		dbProfileGetter := func(gotId string) (entities.Profile, error) {
+			if gotId == wantProfile.Id {
+				return wantProfile, nil
+			}
+			panic(fmt.Sprintf("called with unexpected args, gotId=%v", wantProfile.Id))
+		}
+		sut := store.NewStoreDetailedProfileGetter(dbProfileGetter)
+
+		gotDetailedProfile, err := sut(wantProfile.Id)
+		AssertNoError(t, err)
+		Assert(t, gotDetailedProfile, wantDetailedProfile, "returned detailed profile")
+	})
+	t.Run("error case - getting profile from db throws", func(t *testing.T) {
+		dbProfileGetter := func(string) (entities.Profile, error) {
+			return entities.Profile{}, RandomError()
+		}
+		sut := store.NewStoreDetailedProfileGetter(dbProfileGetter)
+		_, err := sut(RandomString())
+		AssertSomeError(t, err)
+	})
+}
+
+func TestStoreProfileUpdater(t *testing.T) {
+	testDetailedProfile := RandomDetailedProfile()
+	testUpdData := values.ProfileUpdateData{About: RandomString()}
+	wantUpdatedProfile := entities.DetailedProfile{
+		Profile: entities.Profile{
+			Id:         testDetailedProfile.Id,
+			Username:   testDetailedProfile.Username,
+			AvatarPath: testDetailedProfile.AvatarPath,
+			About:      testUpdData.About,
+		},
+	}
+	t.Run("happy case", func(t *testing.T) {
+		updaterCalled := false
+		dbUpdater := func(id string, updData values.ProfileUpdateData) error {
+			if id == testDetailedProfile.Id && updData == testUpdData {
+				updaterCalled = true
+				return nil
+			}
+			panic(fmt.Sprintf("called with unexpected arguments, id=%v, updData=%v", id, updData))
+		}
+		profileGetter := func(id string) (entities.DetailedProfile, error) {
+			if id == testDetailedProfile.Id {
+				return wantUpdatedProfile, nil
+			}
+			panic(fmt.Sprintf("called with unexpected arguments, id=%v", id))
+		}
+		sut := store.NewStoreProfileUpdater(dbUpdater, profileGetter)
+
+		gotProfile, err := sut(testDetailedProfile.Id, testUpdData)
+		AssertNoError(t, err)
+		Assert(t, updaterCalled, true, "db updater called")
+		Assert(t, gotProfile, wantUpdatedProfile, "returned updated profile")
+	})
+	t.Run("error case - updater returns an error", func(t *testing.T) {
+		dbUpdater := func(string, values.ProfileUpdateData) error {
+			return RandomError()
+		}
+		sut := store.NewStoreProfileUpdater(dbUpdater, nil) // getter is nil, since it shouldn't be called
+		_, err := sut(testDetailedProfile.Id, testUpdData)
+		AssertSomeError(t, err)
+	})
+	t.Run("error case - getter returns an error", func(t *testing.T) {
+		tErr := RandomError()
+		dbUpdater := func(string, values.ProfileUpdateData) error {
+			return nil
+		}
+		profileGetter := func(string) (entities.DetailedProfile, error) {
+			return entities.DetailedProfile{}, tErr
+		}
+		sut := store.NewStoreProfileUpdater(dbUpdater, profileGetter)
+		_, err := sut(testDetailedProfile.Id, testUpdData)
+		AssertError(t, err, tErr)
+	})
+}
 
 func TestStoreAvatarUpdater(t *testing.T) {
 	t.Run("should store avatar using file storage", func(t *testing.T) {
@@ -18,8 +119,8 @@ func TestStoreAvatarUpdater(t *testing.T) {
 		userId := RandomString()
 		t.Run("happy case", func(t *testing.T) {
 			wantPath := RandomString()
-			storeFile := func(file *[]byte, dir, fileName string) (string, error) {
-				if file == &randomFile && dir == store.AvatarsDir && fileName == userId {
+			storeFile := func(file []byte, dir, fileName string) (string, error) {
+				if reflect.DeepEqual(file, randomFile) && dir == store.AvatarsDir && fileName == userId {
 					return wantPath, nil
 				}
 				panic(fmt.Sprintf("StoreFile called with unexpected arguments, file=%v, dir=%v, fileName=%v", file, dir, fileName))
@@ -52,12 +153,17 @@ func TestStoreAvatarUpdater(t *testing.T) {
 
 		})
 		t.Run("error case - fileStore returns an error", func(t *testing.T) {
-			storeFile := func(b *[]byte, s1, s2 string) (string, error) {
+			storeFile := func(b []byte, s1, s2 string) (string, error) {
 				return "", RandomError()
 			}
 			sut := store.NewStoreAvatarUpdater(storeFile, nil) // nil, because db shouldn't be called
 
 			_, err := sut(userId, avatar)
+			AssertSomeError(t, err)
+		})
+		t.Run("error case - avatar data is nil", func(t *testing.T) {
+			sut := store.NewStoreAvatarUpdater(nil, nil) // neither should be called
+			_, err := sut(userId, values.AvatarData{Data: nil})
 			AssertSomeError(t, err)
 		})
 	})

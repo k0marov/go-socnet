@@ -22,7 +22,10 @@ func NewProfileUpdateValidator() ProfileUpdateValidator {
 
 func NewAvatarValidator(imageDecoder image_decoder.ImageDecoder) AvatarValidator {
 	return func(avatar values.AvatarData) (client_errors.ClientError, bool) {
-		imageDimensions, err := imageDecoder(avatar.Data)
+		if avatar.Data == nil {
+			return client_errors.AvatarNotProvidedError, false
+		}
+		imageDimensions, err := imageDecoder(*avatar.Data)
 		if err != nil {
 			return client_errors.NonImageAvatar, false
 		}

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"profiles/domain/validators"
 	"profiles/domain/values"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -36,15 +37,15 @@ func TestAvatarValidator(t *testing.T) {
 	nonSquareAvatar := []byte(RandomString())
 	jsInjectionAvatar := []byte(RandomString())
 
-	imageDecoder := func(fileContents *[]byte) (image_decoder.Image, error) {
-		if fileContents == &goodAvatar {
+	imageDecoder := func(fileContents []byte) (image_decoder.Image, error) {
+		if reflect.DeepEqual(fileContents, goodAvatar) {
 			return image_decoder.Image{Width: 10, Height: 10}, nil
-		} else if fileContents == &nonSquareAvatar {
+		} else if reflect.DeepEqual(fileContents, nonSquareAvatar) {
 			return image_decoder.Image{Width: 10, Height: 20}, nil
-		} else if fileContents == &jsInjectionAvatar {
+		} else if reflect.DeepEqual(fileContents, jsInjectionAvatar) {
 			return image_decoder.Image{}, RandomError()
 		}
-		panic(fmt.Sprintf("called with incorrect arguments, fileContents=%v", fileContents))
+		panic(fmt.Sprintf("called with unexpected arguments, fileContents=%v", fileContents))
 	}
 	sut := validators.NewAvatarValidator(imageDecoder)
 
@@ -53,9 +54,10 @@ func TestAvatarValidator(t *testing.T) {
 		ok     bool
 		err    client_errors.ClientError
 	}{
-		{values.AvatarData{Data: &goodAvatar, FileName: RandomString()}, true, client_errors.ClientError{}},
-		{values.AvatarData{Data: &jsInjectionAvatar, FileName: RandomString()}, false, client_errors.NonImageAvatar},
-		{values.AvatarData{Data: &nonSquareAvatar, FileName: RandomString()}, false, client_errors.NonSquareAvatar},
+		{values.AvatarData{Data: &goodAvatar}, true, client_errors.ClientError{}},
+		{values.AvatarData{Data: &nonSquareAvatar}, false, client_errors.NonSquareAvatar},
+		{values.AvatarData{Data: &jsInjectionAvatar}, false, client_errors.NonImageAvatar},
+		{values.AvatarData{Data: nil}, false, client_errors.AvatarNotProvidedError},
 	}
 
 	for _, c := range cases {
