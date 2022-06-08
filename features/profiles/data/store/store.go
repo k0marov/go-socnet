@@ -1,18 +1,19 @@
 package store
 
 import (
+	"core/ref"
 	"fmt"
 	"profiles/domain/entities"
 	"profiles/domain/store_contracts"
 	"profiles/domain/values"
 )
 
-type AvatarFileCreator = func(data []byte, belongsToUser string) (string, error)
+type AvatarFileCreator = func(data ref.Ref[[]byte], belongsToUser string) (string, error)
 type DBAvatarUpdater = func(userId string, avatarPath values.AvatarURL) error
 
 func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBAvatar DBAvatarUpdater) store_contracts.StoreAvatarUpdater {
 	return func(userId string, avatar values.AvatarData) (values.AvatarURL, error) {
-		path, err := createFile(avatar.Data.Value(), userId)
+		path, err := createFile(avatar.Data, userId)
 		if err != nil {
 			return values.AvatarURL{}, fmt.Errorf("error while storing avatar file: %w", err)
 		}

@@ -1,14 +1,16 @@
 package file_storage
 
 import (
-	"io/fs"
+	"core/ref"
+	"core/static_file_creator"
 	"profiles/data/store"
 )
 
-type StaticFileCreator = func(data []byte, dir, filename string)
+const UserPrefix = "user_"
+const AvatarFileName = "avatar"
 
-func NewAvatarFileCreator(fs fs.FS) store.AvatarFileCreator {
-	return func(data []byte, belongsToUser string) (string, error) {
-		panic("unimplemented")
+func NewAvatarFileCreator(createFile static_file_creator.StaticFileCreator) store.AvatarFileCreator {
+	return func(data ref.Ref[[]byte], belongsToUser string) (string, error) {
+		return createFile(data, UserPrefix+belongsToUser, AvatarFileName)
 	}
 }

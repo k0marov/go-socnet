@@ -120,8 +120,8 @@ func TestStoreAvatarUpdater(t *testing.T) {
 		userId := RandomString()
 		t.Run("happy case", func(t *testing.T) {
 			wantPath := RandomString()
-			storeFile := func(file []byte, belongsToUser string) (string, error) {
-				if reflect.DeepEqual(file, randomFile) && belongsToUser == userId {
+			storeFile := func(file ref.Ref[[]byte], belongsToUser string) (string, error) {
+				if reflect.DeepEqual(file, randomFileRef) && belongsToUser == userId {
 					return wantPath, nil
 				}
 				panic(fmt.Sprintf("StoreFile called with unexpected arguments, file=%v, belongsToUser=%v", file, belongsToUser))
@@ -154,7 +154,7 @@ func TestStoreAvatarUpdater(t *testing.T) {
 
 		})
 		t.Run("error case - fileStore returns an error", func(t *testing.T) {
-			storeFile := func([]byte, string) (string, error) {
+			storeFile := func(ref.Ref[[]byte], string) (string, error) {
 				return "", RandomError()
 			}
 			sut := store.NewStoreAvatarUpdater(storeFile, nil) // nil, because db shouldn't be called
