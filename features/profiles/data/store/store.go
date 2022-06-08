@@ -12,10 +12,7 @@ type DBAvatarUpdater = func(userId string, avatarPath values.AvatarURL) error
 
 func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBAvatar DBAvatarUpdater) store_contracts.StoreAvatarUpdater {
 	return func(userId string, avatar values.AvatarData) (values.AvatarURL, error) {
-		if avatar.Data == nil {
-			return values.AvatarURL{}, fmt.Errorf("provided avatar data was nil")
-		}
-		path, err := createFile(*avatar.Data, userId)
+		path, err := createFile(avatar.Data.Value(), userId)
 		if err != nil {
 			return values.AvatarURL{}, fmt.Errorf("error while storing avatar file: %w", err)
 		}

@@ -1,6 +1,7 @@
 package store_test
 
 import (
+	"core/ref"
 	. "core/test_helpers"
 	"fmt"
 	"profiles/data/store"
@@ -112,8 +113,9 @@ func TestStoreProfileUpdater(t *testing.T) {
 func TestStoreAvatarUpdater(t *testing.T) {
 	t.Run("should store avatar using file storage", func(t *testing.T) {
 		randomFile := []byte(RandomString())
+		randomFileRef, _ := ref.NewRef(&randomFile)
 		avatar := values.AvatarData{
-			Data: &randomFile,
+			Data: randomFileRef,
 		}
 		userId := RandomString()
 		t.Run("happy case", func(t *testing.T) {
@@ -158,11 +160,6 @@ func TestStoreAvatarUpdater(t *testing.T) {
 			sut := store.NewStoreAvatarUpdater(storeFile, nil) // nil, because db shouldn't be called
 
 			_, err := sut(userId, avatar)
-			AssertSomeError(t, err)
-		})
-		t.Run("error case - avatar data is nil", func(t *testing.T) {
-			sut := store.NewStoreAvatarUpdater(nil, nil) // neither should be called
-			_, err := sut(userId, values.AvatarData{Data: nil})
 			AssertSomeError(t, err)
 		})
 	})

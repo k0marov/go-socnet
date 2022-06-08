@@ -3,6 +3,7 @@ package validators_test
 import (
 	"core/client_errors"
 	"core/image_decoder"
+	"core/ref"
 	. "core/test_helpers"
 	"fmt"
 	"profiles/domain/validators"
@@ -32,6 +33,14 @@ func TestProfileUpdateValidator(t *testing.T) {
 	}
 }
 
+func makeRefWithoutCheck(data *[]byte) ref.Ref[[]byte] {
+	ref, err := ref.NewRef(data)
+	if err != nil {
+		panic("ref data was nil")
+	}
+	return ref
+}
+
 func TestAvatarValidator(t *testing.T) {
 	goodAvatar := []byte(RandomString())
 	nonSquareAvatar := []byte(RandomString())
@@ -54,10 +63,9 @@ func TestAvatarValidator(t *testing.T) {
 		ok     bool
 		err    client_errors.ClientError
 	}{
-		{values.AvatarData{Data: &goodAvatar}, true, client_errors.ClientError{}},
-		{values.AvatarData{Data: &nonSquareAvatar}, false, client_errors.NonSquareAvatar},
-		{values.AvatarData{Data: &jsInjectionAvatar}, false, client_errors.NonImageAvatar},
-		{values.AvatarData{Data: nil}, false, client_errors.AvatarNotProvidedError},
+		{values.AvatarData{Data: makeRefWithoutCheck(&goodAvatar)}, true, client_errors.ClientError{}},
+		{values.AvatarData{Data: makeRefWithoutCheck(&nonSquareAvatar)}, false, client_errors.NonSquareAvatar},
+		{values.AvatarData{Data: makeRefWithoutCheck(&jsInjectionAvatar)}, false, client_errors.NonImageAvatar},
 	}
 
 	for _, c := range cases {

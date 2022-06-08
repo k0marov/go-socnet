@@ -3,6 +3,7 @@ package service_test
 import (
 	"core/client_errors"
 	"core/core_errors"
+	"core/ref"
 	. "core/test_helpers"
 	"fmt"
 	"profiles/domain/entities"
@@ -128,8 +129,9 @@ func TestProfileUpdater(t *testing.T) {
 func TestAvatarUpdater(t *testing.T) {
 	user := RandomUser()
 	data := []byte(RandomString())
+	dataRef, _ := ref.NewRef(&data)
 	testAvatarData := values.AvatarData{
-		Data: &data,
+		Data: dataRef,
 	}
 
 	silentValidator := func(values.AvatarData) (client_errors.ClientError, bool) {

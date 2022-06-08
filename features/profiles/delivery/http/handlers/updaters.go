@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"core/client_errors"
+	"core/ref"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -70,5 +71,9 @@ func _parseAvatar(r *http.Request) (values.AvatarData, bool) {
 	if err != nil {
 		return values.AvatarData{}, false
 	}
-	return values.AvatarData{Data: &avatarData}, true
+	dataRef, err := ref.NewRef(&avatarData)
+	if err != nil {
+		return values.AvatarData{}, false
+	}
+	return values.AvatarData{Data: dataRef}, true
 }

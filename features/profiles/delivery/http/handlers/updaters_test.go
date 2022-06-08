@@ -84,7 +84,7 @@ func TestUpdateAvatarHandler(t *testing.T) {
 		t.Run("happy case", func(t *testing.T) {
 			avatarURL := values.AvatarURL{Url: RandomString()}
 			updateAvatar := func(u core_entities.User, avatar values.AvatarData) (values.AvatarURL, error) {
-				if u == user && reflect.DeepEqual(*avatar.Data, tAvatar) {
+				if u == user && reflect.DeepEqual(avatar.Data.Value(), tAvatar) {
 					return avatarURL, nil
 				}
 				panic("updateAvatar called with improper arguments")
