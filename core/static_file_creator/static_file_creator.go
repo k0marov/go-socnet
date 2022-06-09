@@ -33,3 +33,7 @@ func NewStaticFileCreator(mkdirAll RecursiveDirCreator, writeFile FileCreator) S
 		return path, nil
 	}
 }
+
+func NewStaticFileCreatorImpl() StaticFileCreator {
+	return NewStaticFileCreator(os.MkdirAll, os.WriteFile)
+}

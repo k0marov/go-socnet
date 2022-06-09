@@ -4,9 +4,9 @@ import (
 	"core/core_errors"
 	"database/sql"
 	"fmt"
-	"profiles/data/store"
 	"profiles/domain/entities"
 	"profiles/domain/values"
+	"profiles/store"
 )
 
 type SqlDB struct {

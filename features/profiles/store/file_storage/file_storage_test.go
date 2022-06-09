@@ -3,7 +3,7 @@ package file_storage_test
 import (
 	"core/ref"
 	. "core/test_helpers"
-	"profiles/data/store/file_storage"
+	"profiles/store/file_storage"
 	"testing"
 )
 

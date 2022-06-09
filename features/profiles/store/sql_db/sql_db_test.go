@@ -4,10 +4,10 @@ import (
 	"core/core_errors"
 	. "core/test_helpers"
 	"database/sql"
-	"profiles/data/store"
-	"profiles/data/store/sql_db"
 	"profiles/domain/entities"
 	"profiles/domain/values"
+	"profiles/store"
+	"profiles/store/sql_db"
 	"strconv"
 	"testing"
 

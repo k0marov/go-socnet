@@ -3,7 +3,7 @@ package file_storage
 import (
 	"core/ref"
 	"core/static_file_creator"
-	"profiles/data/store"
+	"profiles/store"
 )
 
 const UserPrefix = "user_"

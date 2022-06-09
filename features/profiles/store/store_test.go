@@ -5,9 +5,9 @@ import (
 	"core/ref"
 	. "core/test_helpers"
 	"fmt"
-	"profiles/data/store"
 	"profiles/domain/entities"
 	"profiles/domain/values"
+	"profiles/store"
 	"reflect"
 	"testing"
 )
