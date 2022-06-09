@@ -13,7 +13,7 @@ import (
 
 type DetailedProfileGetter = func(core_entities.User) (entities.DetailedProfile, error)
 type ProfileUpdater = func(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
-type AvatarUpdater = func(core_entities.User, values.AvatarData) (values.AvatarURL, error)
+type AvatarUpdater = func(core_entities.User, values.AvatarData) (values.AvatarPath, error)
 type ProfileCreator = func(core_entities.User) (entities.DetailedProfile, error)
 
 func NewProfileUpdater(validator validators.ProfileUpdateValidator, storeProfileUpdater store.StoreProfileUpdater) ProfileUpdater {
@@ -72,14 +72,14 @@ func NewProfileCreator(storeProfileCreator store.StoreProfileCreator) ProfileCre
 }
 
 func NewAvatarUpdater(validator validators.AvatarValidator, storeAvatar store.StoreAvatarUpdater) AvatarUpdater {
-	return func(user core_entities.User, avatar values.AvatarData) (values.AvatarURL, error) {
+	return func(user core_entities.User, avatar values.AvatarData) (values.AvatarPath, error) {
 		if clientError, ok := validator(avatar); !ok {
-			return values.AvatarURL{}, clientError
+			return values.AvatarPath{}, clientError
 		}
 
 		avatarURL, err := storeAvatar(user.Id, avatar)
 		if err != nil {
-			return values.AvatarURL{}, fmt.Errorf("got an error while storing updated avatar: %w", err)
+			return values.AvatarPath{}, fmt.Errorf("got an error while storing updated avatar: %w", err)
 		}
 
 		return avatarURL, nil

@@ -153,8 +153,10 @@ func RandomDetailedProfile() entities.DetailedProfile {
 
 func RandomProfile() entities.Profile {
 	return entities.Profile{
-		Id:       RandomString(),
-		Username: RandomString(),
+		Id:         RandomString(),
+		Username:   RandomString(),
+		About:      RandomString(),
+		AvatarPath: RandomString(),
 	}
 }
 

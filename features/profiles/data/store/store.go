@@ -1,6 +1,7 @@
 package store
 
 import (
+	"core/core_errors"
 	"core/ref"
 	"fmt"
 	"profiles/domain/entities"
@@ -8,21 +9,29 @@ import (
 	"profiles/domain/values"
 )
 
-type AvatarFileCreator = func(data ref.Ref[[]byte], belongsToUser string) (string, error)
-type DBAvatarUpdater = func(userId string, avatarPath values.AvatarURL) error
+type DBUpdateData struct {
+	About      string
+	AvatarPath string
+}
 
-func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBAvatar DBAvatarUpdater) store_contracts.StoreAvatarUpdater {
-	return func(userId string, avatar values.AvatarData) (values.AvatarURL, error) {
+type AvatarFileCreator = func(data ref.Ref[[]byte], belongsToUser string) (string, error)
+type DBProfileUpdater = func(id string, updData DBUpdateData) error
+
+func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBProfile DBProfileUpdater) store_contracts.StoreAvatarUpdater {
+	return func(userId string, avatar values.AvatarData) (values.AvatarPath, error) {
 		path, err := createFile(avatar.Data, userId)
 		if err != nil {
-			return values.AvatarURL{}, fmt.Errorf("error while storing avatar file: %w", err)
+			return values.AvatarPath{}, fmt.Errorf("error while storing avatar file: %w", err)
 		}
-		avatarUrl := values.AvatarURL{Url: path}
-		err = updateDBAvatar(userId, avatarUrl)
+		avatarPath := values.AvatarPath{Path: path}
+		updateData := DBUpdateData{
+			AvatarPath: avatarPath.Path,
+		}
+		err = updateDBProfile(userId, updateData)
 		if err != nil {
-			return values.AvatarURL{}, fmt.Errorf("error while updating avatar path in DB: %w", err)
+			return values.AvatarPath{}, fmt.Errorf("error while updating avatar path in DB: %w", err)
 		}
-		return avatarUrl, nil
+		return avatarPath, nil
 	}
 }
 
@@ -40,6 +49,9 @@ func NewStoreDetailedProfileGetter(getDBProfile DBProfileGetter) store_contracts
 	return func(id string) (entities.DetailedProfile, error) {
 		profile, err := getDBProfile(id)
 		if err != nil {
+			if err == core_errors.ErrNotFound {
+				return entities.DetailedProfile{}, core_errors.ErrNotFound
+			}
 			return entities.DetailedProfile{}, fmt.Errorf("error while getting a profile from db: %w", err)
 		}
 		detailedProfile := entities.DetailedProfile{Profile: profile}
@@ -47,11 +59,9 @@ func NewStoreDetailedProfileGetter(getDBProfile DBProfileGetter) store_contracts
 	}
 }
 
-type DBProfileUpdater = func(id string, updData values.ProfileUpdateData) error
-
 func NewStoreProfileUpdater(updateDBProfile DBProfileUpdater, getProfile store_contracts.StoreDetailedProfileGetter) store_contracts.StoreProfileUpdater {
 	return func(id string, upd values.ProfileUpdateData) (entities.DetailedProfile, error) {
-		err := updateDBProfile(id, upd)
+		err := updateDBProfile(id, DBUpdateData{About: upd.About})
 		if err != nil {
 			return entities.DetailedProfile{}, fmt.Errorf("error while updating profile in db: %w", err)
 		}

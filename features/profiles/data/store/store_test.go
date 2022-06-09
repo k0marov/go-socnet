@@ -1,6 +1,7 @@
 package store_test
 
 import (
+	"core/core_errors"
 	"core/ref"
 	. "core/test_helpers"
 	"fmt"
@@ -45,7 +46,15 @@ func TestStoreDetailedProfileGetter(t *testing.T) { // TODO adding follows in th
 		AssertNoError(t, err)
 		Assert(t, gotDetailedProfile, wantDetailedProfile, "returned detailed profile")
 	})
-	t.Run("error case - getting profile from db throws", func(t *testing.T) {
+	t.Run("error case - not found error", func(t *testing.T) {
+		dbProfileGetter := func(string) (entities.Profile, error) {
+			return entities.Profile{}, core_errors.ErrNotFound
+		}
+		sut := store.NewStoreDetailedProfileGetter(dbProfileGetter)
+		_, err := sut(RandomString())
+		AssertError(t, err, core_errors.ErrNotFound)
+	})
+	t.Run("error case - getting profile from db throws oether error", func(t *testing.T) {
 		dbProfileGetter := func(string) (entities.Profile, error) {
 			return entities.Profile{}, RandomError()
 		}
@@ -58,6 +67,7 @@ func TestStoreDetailedProfileGetter(t *testing.T) { // TODO adding follows in th
 func TestStoreProfileUpdater(t *testing.T) {
 	testDetailedProfile := RandomDetailedProfile()
 	testUpdData := values.ProfileUpdateData{About: RandomString()}
+	testDBUpdData := store.DBUpdateData{About: testUpdData.About}
 	wantUpdatedProfile := entities.DetailedProfile{
 		Profile: entities.Profile{
 			Id:         testDetailedProfile.Id,
@@ -68,8 +78,8 @@ func TestStoreProfileUpdater(t *testing.T) {
 	}
 	t.Run("happy case", func(t *testing.T) {
 		updaterCalled := false
-		dbUpdater := func(id string, updData values.ProfileUpdateData) error {
-			if id == testDetailedProfile.Id && updData == testUpdData {
+		dbUpdater := func(id string, updData store.DBUpdateData) error {
+			if id == testDetailedProfile.Id && updData == testDBUpdData {
 				updaterCalled = true
 				return nil
 			}
@@ -89,7 +99,7 @@ func TestStoreProfileUpdater(t *testing.T) {
 		Assert(t, gotProfile, wantUpdatedProfile, "returned updated profile")
 	})
 	t.Run("error case - updater returns an error", func(t *testing.T) {
-		dbUpdater := func(string, values.ProfileUpdateData) error {
+		dbUpdater := func(string, store.DBUpdateData) error {
 			return RandomError()
 		}
 		sut := store.NewStoreProfileUpdater(dbUpdater, nil) // getter is nil, since it shouldn't be called
@@ -98,7 +108,7 @@ func TestStoreProfileUpdater(t *testing.T) {
 	})
 	t.Run("error case - getter returns an error", func(t *testing.T) {
 		tErr := RandomError()
-		dbUpdater := func(string, values.ProfileUpdateData) error {
+		dbUpdater := func(string, store.DBUpdateData) error {
 			return nil
 		}
 		profileGetter := func(string) (entities.DetailedProfile, error) {
@@ -129,23 +139,24 @@ func TestStoreAvatarUpdater(t *testing.T) {
 
 			t.Run("should store avatarPath in DB", func(t *testing.T) {
 				t.Run("happy case", func(t *testing.T) {
-					wantAvatarURL := values.AvatarURL{Url: wantPath}
-					storeDBAvatar := func(string, values.AvatarURL) error {
+					wantAvatarURL := values.AvatarPath{Path: wantPath}
+					updateProfile := func(string, store.DBUpdateData) error {
 						return nil
 					}
-					sut := store.NewStoreAvatarUpdater(storeFile, storeDBAvatar)
+					sut := store.NewStoreAvatarUpdater(storeFile, updateProfile)
 					gotAvatarUrl, err := sut(userId, avatar)
 					AssertNoError(t, err)
 					Assert(t, gotAvatarUrl, wantAvatarURL, "returned avatar url")
 				})
 				t.Run("error case - db returns an error", func(t *testing.T) {
-					storeDBAvatar := func(gotUserId string, avatar values.AvatarURL) error {
-						if gotUserId == userId && avatar.Url == wantPath {
+					wantUpdData := store.DBUpdateData{AvatarPath: wantPath}
+					updateProfile := func(gotUserId string, data store.DBUpdateData) error {
+						if gotUserId == userId && data == wantUpdData {
 							return RandomError()
 						}
 						panic(fmt.Sprintf("called with unexpected arguments, gotUserId=%v, avatar=%v", gotUserId, avatar))
 					}
-					sut := store.NewStoreAvatarUpdater(storeFile, storeDBAvatar)
+					sut := store.NewStoreAvatarUpdater(storeFile, updateProfile)
 
 					_, err := sut(userId, avatar)
 					AssertSomeError(t, err)
