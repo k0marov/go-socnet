@@ -1,6 +1,7 @@
 package profiles
 
 import (
+	"core/entities"
 	"core/image_decoder"
 	"core/static_file_creator"
 	"database/sql"
@@ -14,7 +15,23 @@ import (
 	"profiles/store/sql_db"
 
 	"github.com/go-chi/chi/v5"
+	auth "github.com/k0marov/golang-auth"
 )
+
+func NewRegisterCallback(db *sql.DB) func(auth.User) {
+	// db
+	sqlDB, err := sql_db.NewSqlDB(db)
+	if err != nil {
+		log.Fatalf("Error while opening sql db as a db for profiles: %v", err)
+	}
+	// store
+	storeProfileCreator := store.NewStoreProfileCreator(sqlDB.CreateProfile)
+	// domain
+	createProfile := service.NewProfileCreator(storeProfileCreator)
+	return func(u auth.User) {
+		createProfile(entities.UserFromAuth(u))
+	}
+}
 
 func NewProfilesRouterImpl(db *sql.DB) func(chi.Router) {
 	// db
