@@ -50,16 +50,16 @@ func TestDetailedProfileGetter(t *testing.T) {
 func TestProfileCreator(t *testing.T) {
 	user := RandomUser()
 	t.Run("happy case", func(t *testing.T) {
-		wantProfile := entities.DetailedProfile{
-			Profile: entities.Profile{
-				Id:         user.Id,
-				Username:   user.Username,
-				About:      service.DefaultAbout,
-				AvatarPath: service.DefaultAvatarPath,
-			},
+		wantProfile := entities.Profile{
+			Id:         user.Id,
+			Username:   user.Username,
+			About:      service.DefaultAbout,
+			AvatarPath: service.DefaultAvatarPath,
 		}
-		storeNew := func(profile entities.DetailedProfile) error {
-			if profile == wantProfile {
+		wantNewProfile := values.NewProfile{Profile: wantProfile}
+		wantCreatedProfile := entities.DetailedProfile{Profile: wantProfile}
+		storeNew := func(profile values.NewProfile) error {
+			if profile == wantNewProfile {
 				return nil
 			}
 			panic(fmt.Sprintf("StoreNew called with unexpected profile: %v", profile))
@@ -68,10 +68,10 @@ func TestProfileCreator(t *testing.T) {
 
 		gotProfile, err := sut(user)
 		AssertNoError(t, err)
-		Assert(t, gotProfile, wantProfile, "created profile")
+		Assert(t, gotProfile, wantCreatedProfile, "created profile")
 	})
 	t.Run("error case - store throws, it is NOT a client error", func(t *testing.T) {
-		storeNew := func(entities.DetailedProfile) error {
+		storeNew := func(values.NewProfile) error {
 			return RandomError()
 		}
 		sut := service.NewProfileCreator(storeNew)
