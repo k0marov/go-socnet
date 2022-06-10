@@ -4,6 +4,7 @@ import (
 	"core/client_errors"
 	core_entities "core/entities"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	auth "github.com/k0marov/golang-auth"
@@ -27,6 +28,7 @@ func handleServiceError(w http.ResponseWriter, err error) {
 	if isClientError {
 		throwClientError(w, clientError)
 	} else {
+		log.Printf("Error while serving request: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 	}
 }

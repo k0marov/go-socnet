@@ -5,7 +5,6 @@ import (
 	"core/static_file_creator"
 	. "core/test_helpers"
 	"io/fs"
-	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -21,7 +20,7 @@ func TestStaticFileCreator(t *testing.T) {
 
 	t.Run("should create directory", func(t *testing.T) {
 		recursiveDirCreator := func(path string, perm fs.FileMode) error {
-			if path == wantDir && perm == os.ModeDir {
+			if path == wantDir && perm == 0777 {
 				return nil
 			}
 			panic("called with unexpected arguments")
@@ -29,7 +28,7 @@ func TestStaticFileCreator(t *testing.T) {
 		t.Run("happy case, should write to the file", func(t *testing.T) {
 			t.Run("happy case", func(t *testing.T) {
 				writeFile := func(path string, data []byte, perm fs.FileMode) error {
-					if path == wantPath && reflect.DeepEqual(data, tData) && perm == 0666 {
+					if path == wantPath && reflect.DeepEqual(data, tData) && perm == 0777 {
 						return nil
 					}
 					panic("called with unexpected arguments")

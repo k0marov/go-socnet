@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"math/rand"
+	"net/http"
 	"net/http/httptest"
 	"os"
 	"profiles/domain/entities"
@@ -101,6 +102,7 @@ func AssertJSON(t testing.TB, response *httptest.ResponseRecorder) {
 
 func AssertJSONData[T any](t testing.TB, response *httptest.ResponseRecorder, wantData T) {
 	t.Helper()
+	AssertStatusCode(t, response, http.StatusOK)
 	AssertJSON(t, response)
 	var gotData T
 	json.NewDecoder(response.Body).Decode(&gotData)
