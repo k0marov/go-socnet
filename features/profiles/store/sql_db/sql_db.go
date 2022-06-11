@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"fmt"
 	"profiles/domain/entities"
-	"profiles/domain/values"
 	"profiles/store"
 )
 
@@ -34,7 +33,7 @@ func createTables(sql *sql.DB) error {
 	return nil
 }
 
-func (db *SqlDB) CreateProfile(newProfile values.NewProfile) error {
+func (db *SqlDB) CreateProfile(newProfile entities.Profile) error {
 	_, err := db.sql.Exec(`INSERT INTO Profile(id, username, about, avatarPath) values(
 		?, ?, ?, ?
 	)`, newProfile.Id, newProfile.Username, newProfile.About, newProfile.AvatarPath)

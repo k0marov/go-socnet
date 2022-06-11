@@ -13,10 +13,10 @@ import (
 )
 
 func TestStoreProfileCreator(t *testing.T) {
-	testProfile := values.NewProfile{Profile: RandomProfile()}
+	testProfile := RandomProfile()
 	t.Run("should forward the call to db", func(t *testing.T) {
 		wantErr := RandomError()
-		dbCreator := func(gotProfile values.NewProfile) error {
+		dbCreator := func(gotProfile entities.Profile) error {
 			if gotProfile == testProfile {
 				return wantErr
 			}

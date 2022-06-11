@@ -5,7 +5,6 @@ import (
 	. "core/test_helpers"
 	"database/sql"
 	"profiles/domain/entities"
-	"profiles/domain/values"
 	"profiles/store"
 	"profiles/store/sql_db"
 	"strconv"
@@ -23,7 +22,7 @@ func TestSqlDB_ErrorHandling(t *testing.T) {
 		AssertSomeError(t, err)
 	})
 	t.Run("CreateProfile", func(t *testing.T) {
-		err := sut.CreateProfile(values.NewProfile{Profile: RandomProfile()})
+		err := sut.CreateProfile(RandomProfile())
 		AssertSomeError(t, err)
 	})
 	t.Run("UpdateProfile", func(t *testing.T) {
@@ -47,7 +46,7 @@ func TestSqlDB(t *testing.T) {
 
 		// add them to db
 		for _, profile := range profiles {
-			db.CreateProfile(values.NewProfile{Profile: profile})
+			db.CreateProfile(profile)
 		}
 
 		// assert they can be found in the database
@@ -69,8 +68,8 @@ func TestSqlDB(t *testing.T) {
 		AssertNoError(t, err)
 
 		// insert both profiles into database
-		db.CreateProfile(values.NewProfile{Profile: profile1})
-		db.CreateProfile(values.NewProfile{Profile: profile2})
+		db.CreateProfile(profile1)
+		db.CreateProfile(profile2)
 
 		// update first profile
 		newAvatar := RandomString()

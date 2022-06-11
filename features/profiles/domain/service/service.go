@@ -11,6 +11,7 @@ import (
 	"profiles/domain/values"
 )
 
+type ProfileGetter = func(values.UserId) (entities.Profile, error)
 type DetailedProfileGetter = func(core_entities.User) (entities.DetailedProfile, error)
 type ProfileUpdater = func(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
 type AvatarUpdater = func(core_entities.User, values.AvatarData) (values.AvatarPath, error)
@@ -52,20 +53,18 @@ const DefaultAvatarPath = ""
 // this should be invoked when a new user is registered
 func NewProfileCreator(storeProfileCreator store.StoreProfileCreator) ProfileCreator {
 	return func(user core_entities.User) (entities.DetailedProfile, error) {
-		newProfile := values.NewProfile{
-			Profile: entities.Profile{
-				Id:         user.Id,
-				Username:   user.Username,
-				About:      DefaultAbout,
-				AvatarPath: DefaultAvatarPath,
-			},
+		newProfile := entities.Profile{
+			Id:         user.Id,
+			Username:   user.Username,
+			About:      DefaultAbout,
+			AvatarPath: DefaultAvatarPath,
 		}
 		err := storeProfileCreator(newProfile)
 		if err != nil {
 			return entities.DetailedProfile{}, fmt.Errorf("got an error while creating a profile in a service: %w", err)
 		}
 		createdProfile := entities.DetailedProfile{
-			Profile: newProfile.Profile,
+			Profile: newProfile,
 		}
 		return createdProfile, nil
 	}

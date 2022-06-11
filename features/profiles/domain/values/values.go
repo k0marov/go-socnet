@@ -2,8 +2,9 @@ package values
 
 import (
 	"core/ref"
-	"profiles/domain/entities"
 )
+
+type UserId = string
 
 type ProfileUpdateData struct {
 	About string
@@ -15,8 +16,4 @@ type AvatarData struct {
 
 type AvatarPath struct {
 	Path string
-}
-
-type NewProfile struct {
-	entities.Profile
 }

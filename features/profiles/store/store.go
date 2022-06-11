@@ -35,10 +35,10 @@ func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBProfile DBProfi
 	}
 }
 
-type DBProfileCreator = func(values.NewProfile) error
+type DBProfileCreator = func(entities.Profile) error
 
 func NewStoreProfileCreator(createDBProfile DBProfileCreator) store_contracts.StoreProfileCreator {
-	return func(newProfile values.NewProfile) error {
+	return func(newProfile entities.Profile) error {
 		return createDBProfile(newProfile)
 	}
 }

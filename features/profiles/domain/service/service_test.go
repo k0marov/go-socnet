@@ -56,10 +56,9 @@ func TestProfileCreator(t *testing.T) {
 			About:      service.DefaultAbout,
 			AvatarPath: service.DefaultAvatarPath,
 		}
-		wantNewProfile := values.NewProfile{Profile: wantProfile}
 		wantCreatedProfile := entities.DetailedProfile{Profile: wantProfile}
-		storeNew := func(profile values.NewProfile) error {
-			if profile == wantNewProfile {
+		storeNew := func(profile entities.Profile) error {
+			if profile == wantProfile {
 				return nil
 			}
 			panic(fmt.Sprintf("StoreNew called with unexpected profile: %v", profile))
@@ -71,7 +70,7 @@ func TestProfileCreator(t *testing.T) {
 		Assert(t, gotProfile, wantCreatedProfile, "created profile")
 	})
 	t.Run("error case - store throws, it is NOT a client error", func(t *testing.T) {
-		storeNew := func(values.NewProfile) error {
+		storeNew := func(entities.Profile) error {
 			return RandomError()
 		}
 		sut := service.NewProfileCreator(storeNew)

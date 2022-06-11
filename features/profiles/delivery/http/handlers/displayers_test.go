@@ -1,6 +1,8 @@
 package handlers_test
 
 import (
+	"context"
+	"core/client_errors"
 	core_entities "core/entities"
 	. "core/test_helpers"
 	"fmt"
@@ -8,7 +10,10 @@ import (
 	"net/http/httptest"
 	"profiles/delivery/http/handlers"
 	"profiles/domain/entities"
+	"profiles/domain/values"
 	"testing"
+
+	"github.com/go-chi/chi/v5"
 )
 
 func TestGetMeHandler(t *testing.T) {
@@ -30,7 +35,6 @@ func TestGetMeHandler(t *testing.T) {
 		response := httptest.NewRecorder()
 		handlers.NewGetMeHandler(getter).ServeHTTP(response, createRequestWithAuth())
 
-		AssertStatusCode(t, response, http.StatusOK)
 		AssertJSONData(t, response, wantedProfile)
 	})
 	baseTestServiceErrorHandling(t, func(wantErr error, response *httptest.ResponseRecorder) {
@@ -38,5 +42,42 @@ func TestGetMeHandler(t *testing.T) {
 			return entities.DetailedProfile{}, wantErr
 		}
 		handlers.NewGetMeHandler(getter).ServeHTTP(response, createRequestWithAuth())
+	})
+}
+
+func TestGetByIdHandler(t *testing.T) {
+	createRequestWithId := func(userId string) *http.Request {
+		request := createRequest(nil)
+		ctx := chi.NewRouteContext()
+		ctx.URLParams.Add("id", userId)
+		request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, ctx))
+		return request
+	}
+	t.Run("should return 200 if profile with given id exists", func(t *testing.T) {
+		randomId := RandomString()
+		randomProfile := RandomProfile()
+		profileGetter := func(userId values.UserId) (entities.Profile, error) {
+			if userId == randomId {
+				return randomProfile, nil
+			}
+			panic("called with unexpected arguments")
+		}
+
+		request := createRequestWithId(randomId)
+		response := httptest.NewRecorder()
+
+		handlers.NewGetByIdHandler(profileGetter).ServeHTTP(response, request)
+		AssertJSONData(t, response, randomProfile)
+	})
+	t.Run("error case - id is not provided", func(t *testing.T) {
+		response := httptest.NewRecorder()
+		handlers.NewGetByIdHandler(nil).ServeHTTP(response, createRequest(nil)) // getter is nil, since it shouldn't be called
+		AssertClientError(t, response, client_errors.IdNotProvided)
+	})
+	baseTestServiceErrorHandling(t, func(err error, rr *httptest.ResponseRecorder) {
+		getter := func(userId values.UserId) (entities.Profile, error) {
+			return entities.Profile{}, err
+		}
+		handlers.NewGetByIdHandler(getter).ServeHTTP(rr, createRequestWithId("42"))
 	})
 }

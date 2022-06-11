@@ -59,3 +59,9 @@ var NonSquareAvatar = ClientError{
 	ReadableDetail: "The provided avatar is a valid image, but it is not square.",
 	HTTPCode:       http.StatusBadRequest,
 }
+
+var IdNotProvided = ClientError{
+	DetailCode:     "no-id",
+	ReadableDetail: "The request url was expected to have an 'id' query parameter, but there was none.",
+	HTTPCode:       http.StatusBadRequest,
+}
