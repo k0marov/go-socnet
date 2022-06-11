@@ -31,7 +31,7 @@ func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBProfile DBProfi
 	}
 }
 
-func NewStoreDetailedProfileGetter(getDBProfile DBProfileGetter) store_contracts.StoreDetailedProfileGetter {
+func NewStoreDetailedProfileGetter(getDBProfile DBProfileGetter, getDBFollows DBFollowsGetter) store_contracts.StoreDetailedProfileGetter {
 	return func(id values.UserId) (entities.DetailedProfile, error) {
 		profile, err := getDBProfile(id)
 		if err != nil {
@@ -40,7 +40,11 @@ func NewStoreDetailedProfileGetter(getDBProfile DBProfileGetter) store_contracts
 			}
 			return entities.DetailedProfile{}, fmt.Errorf("error while getting a profile from db: %w", err)
 		}
-		detailedProfile := entities.DetailedProfile{Profile: profile}
+		follows, err := getDBFollows(id)
+		if err != nil {
+			return entities.DetailedProfile{}, fmt.Errorf("while getting follows from db: %w", err)
+		}
+		detailedProfile := entities.DetailedProfile{Profile: profile, FollowsProfiles: follows}
 		return detailedProfile, nil
 	}
 }

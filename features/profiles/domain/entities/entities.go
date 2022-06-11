@@ -11,4 +11,5 @@ type Profile struct {
 
 type DetailedProfile struct {
 	Profile
+	FollowsProfiles []Profile
 }

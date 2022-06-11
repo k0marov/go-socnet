@@ -12,35 +12,53 @@ import (
 	"testing"
 )
 
-func TestStoreDetailedProfileGetter(t *testing.T) { // TODO adding follows in this layer
+func TestStoreDetailedProfileGetter(t *testing.T) {
 	t.Run("happy case", func(t *testing.T) {
 		wantProfile := RandomProfile()
-		wantDetailedProfile := entities.DetailedProfile{Profile: wantProfile}
-		dbProfileGetter := func(gotId string) (entities.Profile, error) {
+		wantFollows := []entities.Profile{RandomProfile(), RandomProfile(), RandomProfile()}
+		wantDetailedProfile := entities.DetailedProfile{Profile: wantProfile, FollowsProfiles: wantFollows}
+		dbProfileGetter := func(gotId values.UserId) (entities.Profile, error) {
 			if gotId == wantProfile.Id {
 				return wantProfile, nil
 			}
 			panic(fmt.Sprintf("called with unexpected args, gotId=%v", wantProfile.Id))
 		}
-		sut := store.NewStoreDetailedProfileGetter(dbProfileGetter)
+		dbFollowsGetter := func(gotId values.UserId) ([]entities.Profile, error) {
+			if gotId == wantProfile.Id {
+				return wantFollows, nil
+			}
+			panic("unexpected args")
+		}
+		sut := store.NewStoreDetailedProfileGetter(dbProfileGetter, dbFollowsGetter)
 
 		gotDetailedProfile, err := sut(wantProfile.Id)
 		AssertNoError(t, err)
 		Assert(t, gotDetailedProfile, wantDetailedProfile, "returned detailed profile")
 	})
 	t.Run("error case - not found error", func(t *testing.T) {
-		dbProfileGetter := func(string) (entities.Profile, error) {
+		dbProfileGetter := func(values.UserId) (entities.Profile, error) {
 			return entities.Profile{}, core_errors.ErrNotFound
 		}
-		sut := store.NewStoreDetailedProfileGetter(dbProfileGetter)
+		sut := store.NewStoreDetailedProfileGetter(dbProfileGetter, nil)
 		_, err := sut(RandomString())
 		AssertError(t, err, core_errors.ErrNotFound)
 	})
-	t.Run("error case - getting profile from db throws oether error", func(t *testing.T) {
-		dbProfileGetter := func(string) (entities.Profile, error) {
+	t.Run("error case - getting profile from db throws other error", func(t *testing.T) {
+		dbProfileGetter := func(values.UserId) (entities.Profile, error) {
 			return entities.Profile{}, RandomError()
 		}
-		sut := store.NewStoreDetailedProfileGetter(dbProfileGetter)
+		sut := store.NewStoreDetailedProfileGetter(dbProfileGetter, nil)
+		_, err := sut(RandomString())
+		AssertSomeError(t, err)
+	})
+	t.Run("error case - getting profiles throws", func(t *testing.T) {
+		dbProfileGetter := func(values.UserId) (entities.Profile, error) {
+			return entities.Profile{}, nil
+		}
+		dbFollowsGetter := func(values.UserId) ([]entities.Profile, error) {
+			return []entities.Profile{}, RandomError()
+		}
+		sut := store.NewStoreDetailedProfileGetter(dbProfileGetter, dbFollowsGetter)
 		_, err := sut(RandomString())
 		AssertSomeError(t, err)
 	})
