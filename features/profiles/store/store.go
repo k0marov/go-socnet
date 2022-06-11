@@ -14,11 +14,11 @@ type DBUpdateData struct {
 	AvatarPath string
 }
 
-type AvatarFileCreator = func(data ref.Ref[[]byte], belongsToUser string) (string, error)
-type DBProfileUpdater = func(id string, updData DBUpdateData) error
+type AvatarFileCreator = func(data ref.Ref[[]byte], belongsToUser values.UserId) (string, error)
+type DBProfileUpdater = func(id values.UserId, updData DBUpdateData) error
 
 func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBProfile DBProfileUpdater) store_contracts.StoreAvatarUpdater {
-	return func(userId string, avatar values.AvatarData) (values.AvatarPath, error) {
+	return func(userId values.UserId, avatar values.AvatarData) (values.AvatarPath, error) {
 		path, err := createFile(avatar.Data, userId)
 		if err != nil {
 			return values.AvatarPath{}, fmt.Errorf("error while storing avatar file: %w", err)
@@ -43,10 +43,10 @@ func NewStoreProfileCreator(createDBProfile DBProfileCreator) store_contracts.St
 	}
 }
 
-type DBProfileGetter = func(id string) (entities.Profile, error)
+type DBProfileGetter = func(id values.UserId) (entities.Profile, error)
 
 func NewStoreDetailedProfileGetter(getDBProfile DBProfileGetter) store_contracts.StoreDetailedProfileGetter {
-	return func(id string) (entities.DetailedProfile, error) {
+	return func(id values.UserId) (entities.DetailedProfile, error) {
 		profile, err := getDBProfile(id)
 		if err != nil {
 			if err == core_errors.ErrNotFound {
@@ -60,7 +60,7 @@ func NewStoreDetailedProfileGetter(getDBProfile DBProfileGetter) store_contracts
 }
 
 func NewStoreProfileUpdater(updateDBProfile DBProfileUpdater, getProfile store_contracts.StoreDetailedProfileGetter) store_contracts.StoreProfileUpdater {
-	return func(id string, upd values.ProfileUpdateData) (entities.DetailedProfile, error) {
+	return func(id values.UserId, upd values.ProfileUpdateData) (entities.DetailedProfile, error) {
 		err := updateDBProfile(id, DBUpdateData{About: upd.About})
 		if err != nil {
 			return entities.DetailedProfile{}, fmt.Errorf("error while updating profile in db: %w", err)

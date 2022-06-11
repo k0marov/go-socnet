@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"profiles/domain/entities"
+	"profiles/domain/values"
 	"profiles/store"
 )
 
@@ -43,7 +44,7 @@ func (db *SqlDB) CreateProfile(newProfile entities.Profile) error {
 	return nil
 }
 
-func (db *SqlDB) GetProfile(profileId string) (entities.Profile, error) {
+func (db *SqlDB) GetProfile(profileId values.UserId) (entities.Profile, error) {
 	row := db.sql.QueryRow(`SELECT id, username, about, avatarPath from Profile where id = ?`, profileId)
 	profile := entities.Profile{}
 	err := row.Scan(&profile.Id, &profile.Username, &profile.About, &profile.AvatarPath)
@@ -56,7 +57,7 @@ func (db *SqlDB) GetProfile(profileId string) (entities.Profile, error) {
 	return profile, nil
 }
 
-func (db *SqlDB) UpdateProfile(userId string, upd store.DBUpdateData) error {
+func (db *SqlDB) UpdateProfile(userId values.UserId, upd store.DBUpdateData) error {
 	_, err := db.sql.Exec(`
 	UPDATE Profile SET 
 		avatarPath = CASE WHEN ?1 = "" THEN avatarPath ELSE ?1 END,

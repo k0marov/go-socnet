@@ -5,7 +5,7 @@ import (
 	"profiles/domain/values"
 )
 
-type StoreProfileUpdater = func(id string, upd values.ProfileUpdateData) (entities.DetailedProfile, error)
-type StoreDetailedProfileGetter = func(id string) (entities.DetailedProfile, error)
+type StoreProfileUpdater = func(id values.UserId, upd values.ProfileUpdateData) (entities.DetailedProfile, error)
+type StoreDetailedProfileGetter = func(id values.UserId) (entities.DetailedProfile, error)
 type StoreProfileCreator = func(entities.Profile) error
-type StoreAvatarUpdater = func(userId string, avatar values.AvatarData) (values.AvatarPath, error)
+type StoreAvatarUpdater = func(userId values.UserId, avatar values.AvatarData) (values.AvatarPath, error)
