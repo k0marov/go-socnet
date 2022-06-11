@@ -5,6 +5,8 @@ import (
 	"profiles/domain/values"
 )
 
+type StoreFollower = func(target, follower values.UserId) error
+type StoreUnfollower = func(target, unfollower values.UserId) error
 type StoreFollowsGetter = func(values.UserId) ([]entities.Profile, error)
 type StoreProfileGetter = func(id values.UserId) (entities.Profile, error)
 type StoreProfileUpdater = func(id values.UserId, upd values.ProfileUpdateData) (entities.DetailedProfile, error)

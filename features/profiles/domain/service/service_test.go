@@ -81,6 +81,36 @@ func TestFollowsGetter(t *testing.T) {
 	})
 }
 
+func TestFollowToggler(t *testing.T) {
+	t.Run("should check if target is already followed", func(t *testing.T) {
+		t.Run("happy case", func(t *testing.T) {
+
+		})
+		t.Run("error case - target does not exist", func(t *testing.T) {
+
+		})
+		t.Run("error case - store throws some other error", func(t *testing.T) {
+
+		})
+	})
+	t.Run("target is already followed - unfollow it", func(t *testing.T) {
+		t.Run("happy case", func(t *testing.T) {
+
+		})
+		t.Run("error case - store throws", func(t *testing.T) {
+
+		})
+	})
+	t.Run("target is not already followed - follow it", func(t *testing.T) {
+		t.Run("happy case", func(t *testing.T) {
+
+		})
+		t.Run("error case - store throws", func(t *testing.T) {
+
+		})
+	})
+}
+
 func TestProfileGetter(t *testing.T) {
 	userId := RandomString()
 	t.Run("happy case", func(t *testing.T) {
