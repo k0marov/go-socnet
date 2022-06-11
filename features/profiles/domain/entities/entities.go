@@ -7,6 +7,8 @@ type Profile struct {
 	Username   string
 	About      string
 	AvatarPath string
+	Follows    int
+	Followers  int
 }
 
 type DetailedProfile struct {

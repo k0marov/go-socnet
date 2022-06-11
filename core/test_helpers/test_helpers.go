@@ -149,7 +149,8 @@ func RandomAuthUser() auth.User {
 
 func RandomDetailedProfile() entities.DetailedProfile {
 	return entities.DetailedProfile{
-		Profile: RandomProfile(),
+		Profile:         RandomProfile(),
+		FollowsProfiles: []entities.Profile{RandomProfile(), RandomProfile(), RandomProfile()},
 	}
 }
 
@@ -159,6 +160,8 @@ func RandomProfile() entities.Profile {
 		Username:   RandomString(),
 		About:      RandomString(),
 		AvatarPath: RandomString(),
+		Follows:    RandomInt(),
+		Followers:  RandomInt(),
 	}
 }
 

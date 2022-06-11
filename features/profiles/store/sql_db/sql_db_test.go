@@ -16,7 +16,8 @@ import (
 
 func TestSqlDB_ErrorHandling(t *testing.T) {
 	sql := OpenSqliteDB(t)
-	sut, _ := sql_db.NewSqlDB(sql)
+	sut, err := sql_db.NewSqlDB(sql)
+	AssertNoError(t, err)
 	sql.Close() // this will force all calls to throw errors
 	t.Run("GetProfile", func(t *testing.T) {
 		_, err := sut.GetProfile(RandomString())
@@ -100,6 +101,8 @@ func TestSqlDB(t *testing.T) {
 			Username:   profile1.Username,
 			About:      newAbout,
 			AvatarPath: newAvatar,
+			Follows:    profile1.Follows,
+			Followers:  profile1.Followers,
 		}
 		updatedProfile1, err := db.GetProfile(profile1.Id)
 		AssertNoError(t, err)
@@ -111,7 +114,7 @@ func TestSqlDB(t *testing.T) {
 		Assert(t, gotProfile2, profile2, "the unaffected profile")
 	})
 
-	t.Run("following profiles", func(t *testing.T) {
+	t.Run("IsFollowing(), Follow(), Unfollow()", func(t *testing.T) {
 		db, err := sql_db.NewSqlDB(OpenSqliteDB(t))
 		AssertNoError(t, err)
 
@@ -147,6 +150,10 @@ func TestSqlDB(t *testing.T) {
 		// now profile1 shouldn't follow profile2
 		assertFollows(profile1.Id, profile2.Id, false)
 		assertFollows(profile2.Id, profile1.Id, false)
+
+	})
+	t.Run("following many profiles: Follows(), GetProfile()", func(t *testing.T) {
+		// followingProfile := RandomProfile()
 
 	})
 }

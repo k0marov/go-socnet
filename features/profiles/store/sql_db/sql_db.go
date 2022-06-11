@@ -26,7 +26,9 @@ func createTables(sql *sql.DB) error {
 		id INTEGER PRIMARYKEY,
 		username VARCHAR(255),
 		about TEXT,
-		avatarPath VARCHAR(255)
+		avatarPath VARCHAR(255),
+		follows INTEGER,
+		followers INTEGER
 	);`)
 	if err != nil {
 		return fmt.Errorf("while creating Profile table: %w", err)
@@ -44,9 +46,9 @@ func createTables(sql *sql.DB) error {
 }
 
 func (db *SqlDB) CreateProfile(newProfile entities.Profile) error {
-	_, err := db.sql.Exec(`INSERT INTO Profile(id, username, about, avatarPath) values(
-		?, ?, ?, ?
-	)`, newProfile.Id, newProfile.Username, newProfile.About, newProfile.AvatarPath)
+	_, err := db.sql.Exec(`INSERT INTO Profile(id, username, about, avatarPath, follows, followers) values(
+		?, ?, ?, ?, ?, ?
+	)`, newProfile.Id, newProfile.Username, newProfile.About, newProfile.AvatarPath, newProfile.Follows, newProfile.Followers)
 	if err != nil {
 		return fmt.Errorf("while inserting into Profile table: %v", err)
 	}
@@ -54,9 +56,9 @@ func (db *SqlDB) CreateProfile(newProfile entities.Profile) error {
 }
 
 func (db *SqlDB) GetProfile(profileId values.UserId) (entities.Profile, error) {
-	row := db.sql.QueryRow(`SELECT id, username, about, avatarPath from Profile where id = ?`, profileId)
+	row := db.sql.QueryRow(`SELECT id, username, about, avatarPath, follows, followers from Profile where id = ?`, profileId)
 	profile := entities.Profile{}
-	err := row.Scan(&profile.Id, &profile.Username, &profile.About, &profile.AvatarPath)
+	err := row.Scan(&profile.Id, &profile.Username, &profile.About, &profile.AvatarPath, &profile.Follows, &profile.Followers)
 	if err == sql.ErrNoRows {
 		return entities.Profile{}, core_errors.ErrNotFound
 	}
@@ -76,6 +78,10 @@ func (db *SqlDB) UpdateProfile(userId values.UserId, upd store.DBUpdateData) err
 		return fmt.Errorf("while updating avatarPath in db: %w", err)
 	}
 	return nil
+}
+
+func (db *SqlDB) Follows(userId values.UserId) ([]entities.Profile, error) {
+	panic("unimplemented")
 }
 
 func (db *SqlDB) IsFollowing(target, follower values.UserId) (bool, error) {
