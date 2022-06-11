@@ -44,16 +44,16 @@ func TestGetMeHandler(t *testing.T) {
 		handlers.NewGetMeHandler(getter).ServeHTTP(response, createRequestWithAuth())
 	})
 }
+func createRequestWithId(userId string) *http.Request {
+	request := createRequest(nil)
+	ctx := chi.NewRouteContext()
+	ctx.URLParams.Add("id", userId)
+	request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, ctx))
+	return request
+}
 
 func TestGetByIdHandler(t *testing.T) {
-	createRequestWithId := func(userId string) *http.Request {
-		request := createRequest(nil)
-		ctx := chi.NewRouteContext()
-		ctx.URLParams.Add("id", userId)
-		request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, ctx))
-		return request
-	}
-	t.Run("should return 200 if profile with given id exists", func(t *testing.T) {
+	t.Run("should return 200 and a profile if profile with given id exists", func(t *testing.T) {
 		randomId := RandomString()
 		randomProfile := RandomProfile()
 		profileGetter := func(userId values.UserId) (entities.Profile, error) {
@@ -79,5 +79,37 @@ func TestGetByIdHandler(t *testing.T) {
 			return entities.Profile{}, err
 		}
 		handlers.NewGetByIdHandler(getter).ServeHTTP(rr, createRequestWithId("42"))
+	})
+}
+
+func TestFollowsHandler(t *testing.T) {
+	t.Run("should return 200 and a list of profiles if profile with given id exists", func(t *testing.T) {
+		randomId := RandomString()
+		randomProfiles := []entities.Profile{RandomProfile(), RandomProfile()}
+		followsGetter := func(userId values.UserId) ([]entities.Profile, error) {
+			if userId == randomId {
+				return randomProfiles, nil
+			}
+			panic("called with unexpected arguments")
+		}
+
+		request := createRequestWithId(randomId)
+		response := httptest.NewRecorder()
+
+		handlers.NewGetFollowsHandler(followsGetter).ServeHTTP(response, request)
+
+		randomProfilesResp := handlers.FollowsResponse{Profiles: randomProfiles}
+		AssertJSONData(t, response, randomProfilesResp)
+	})
+	t.Run("error case - id is not provided", func(t *testing.T) {
+		response := httptest.NewRecorder()
+		handlers.NewGetFollowsHandler(nil).ServeHTTP(response, createRequest(nil)) // getter is nil, since it shouldn't be called
+		AssertClientError(t, response, client_errors.IdNotProvided)
+	})
+	baseTestServiceErrorHandling(t, func(err error, rr *httptest.ResponseRecorder) {
+		getter := func(userId values.UserId) ([]entities.Profile, error) {
+			return nil, err
+		}
+		handlers.NewGetFollowsHandler(getter).ServeHTTP(rr, createRequestWithId("42"))
 	})
 }

@@ -12,6 +12,7 @@ import (
 )
 
 type ProfileGetter = func(values.UserId) (entities.Profile, error)
+type FollowsGetter = func(values.UserId) ([]entities.Profile, error)
 type DetailedProfileGetter = func(core_entities.User) (entities.DetailedProfile, error)
 type ProfileUpdater = func(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
 type AvatarUpdater = func(core_entities.User, values.AvatarData) (values.AvatarPath, error)
