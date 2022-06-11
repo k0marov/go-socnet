@@ -12,24 +12,6 @@ import (
 	"testing"
 )
 
-func TestStoreProfileCreator(t *testing.T) {
-	testProfile := RandomProfile()
-	t.Run("should forward the call to db", func(t *testing.T) {
-		wantErr := RandomError()
-		dbCreator := func(gotProfile entities.Profile) error {
-			if gotProfile == testProfile {
-				return wantErr
-			}
-			panic(fmt.Sprintf("called with unexpected args, gotProfile=%v", gotProfile))
-		}
-		sut := store.NewStoreProfileCreator(dbCreator)
-
-		err := sut(testProfile)
-		AssertError(t, err, wantErr)
-
-	})
-}
-
 func TestStoreDetailedProfileGetter(t *testing.T) { // TODO adding follows in this layer
 	t.Run("happy case", func(t *testing.T) {
 		wantProfile := RandomProfile()
