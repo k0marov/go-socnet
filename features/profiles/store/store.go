@@ -59,6 +59,12 @@ func NewStoreDetailedProfileGetter(getDBProfile DBProfileGetter) store_contracts
 	}
 }
 
+func NewStoreProfileGetter(getDBProfile DBProfileGetter) store_contracts.StoreProfileGetter {
+	return func(id values.UserId) (entities.Profile, error) {
+		return getDBProfile(id)
+	}
+}
+
 func NewStoreProfileUpdater(updateDBProfile DBProfileUpdater, getProfile store_contracts.StoreDetailedProfileGetter) store_contracts.StoreProfileUpdater {
 	return func(id values.UserId, upd values.ProfileUpdateData) (entities.DetailedProfile, error) {
 		err := updateDBProfile(id, DBUpdateData{About: upd.About})
@@ -66,5 +72,13 @@ func NewStoreProfileUpdater(updateDBProfile DBProfileUpdater, getProfile store_c
 			return entities.DetailedProfile{}, fmt.Errorf("error while updating profile in db: %w", err)
 		}
 		return getProfile(id)
+	}
+}
+
+type DBFollowsGetter = func(id values.UserId) ([]entities.Profile, error)
+
+func NewStoreFollowsGetter(dbFollowsGetter DBFollowsGetter) store_contracts.StoreFollowsGetter {
+	return func(userId values.UserId) ([]entities.Profile, error) {
+		panic("unimplemented")
 	}
 }
