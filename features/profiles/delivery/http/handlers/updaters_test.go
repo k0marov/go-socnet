@@ -66,7 +66,7 @@ func TestToggleFollowHandler(t *testing.T) {
 		targetId := RandomString()
 		followerAuth := RandomAuthUser()
 		called := false
-		followToggler := func(follower, target values.UserId) error {
+		followToggler := func(target, follower values.UserId) error {
 			if follower == followerAuth.Id && target == targetId {
 				called = true
 				return nil
@@ -87,7 +87,7 @@ func TestToggleFollowHandler(t *testing.T) {
 		AssertClientError(t, response, client_errors.IdNotProvided)
 	})
 	baseTestServiceErrorHandling(t, func(err error, w *httptest.ResponseRecorder) {
-		followToggler := func(follower, target values.UserId) error {
+		followToggler := func(target, follower values.UserId) error {
 			return err
 		}
 		handlers.NewToggleFollowHandler(followToggler).ServeHTTP(w, addAuthDataToRequest(createRequestWithId("42"), RandomAuthUser()))

@@ -51,7 +51,7 @@ func NewToggleFollowHandler(followToggler service.FollowToggler) http.HandlerFun
 			return
 		}
 
-		err := followToggler(follower.Id, targetId)
+		err := followToggler(targetId, follower.Id)
 		if err != nil {
 			handleServiceError(w, err)
 			return

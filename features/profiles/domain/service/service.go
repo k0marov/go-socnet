@@ -14,7 +14,7 @@ import (
 type (
 	ProfileGetter         = func(values.UserId) (entities.Profile, error)
 	FollowsGetter         = func(values.UserId) ([]entities.Profile, error)
-	FollowToggler         = func(follower, target values.UserId) error
+	FollowToggler         = func(target, follower values.UserId) error
 	DetailedProfileGetter = func(core_entities.User) (entities.DetailedProfile, error)
 	ProfileUpdater        = func(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
 	AvatarUpdater         = func(core_entities.User, values.AvatarData) (values.AvatarPath, error)
@@ -47,9 +47,27 @@ func NewFollowsGetter(storeFollowsGetter store.StoreFollowsGetter) FollowsGetter
 	}
 }
 
-func NewFollowToggler(storeFollower store.StoreFollower, storeUnfollower store.StoreUnfollower) FollowToggler {
-	return func(follower, target values.UserId) error {
-		panic("unimplemented")
+func NewFollowToggler(storeFollowChecker store.StoreFollowChecker, storeFollower store.StoreFollower, storeUnfollower store.StoreUnfollower) FollowToggler {
+	return func(target, follower values.UserId) error {
+		isFollowed, err := storeFollowChecker(target, follower)
+		if err != nil {
+			if err == core_errors.ErrNotFound {
+				return client_errors.ProfileNotFound
+			}
+			return fmt.Errorf("while checking if target is already followed: %w", err)
+		}
+		if isFollowed {
+			err = storeFollower(target, follower)
+			if err != nil {
+				return fmt.Errorf("while following target: %w", err)
+			}
+		} else {
+			err = storeUnfollower(target, follower)
+			if err != nil {
+				return fmt.Errorf("while unfollowing target: %w", err)
+			}
+		}
+		return nil
 	}
 }
 
