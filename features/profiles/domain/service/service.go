@@ -34,6 +34,12 @@ func NewProfileGetter(storeProfileGetter store.StoreProfileGetter) ProfileGetter
 	}
 }
 
+func NewFollowsGetter(storeFollowsGetter store.StoreFollowsGetter) FollowsGetter {
+	return func(userId values.UserId) ([]entities.Profile, error) {
+		panic("unimplemented")
+	}
+}
+
 func NewProfileUpdater(validator validators.ProfileUpdateValidator, storeProfileUpdater store.StoreProfileUpdater) ProfileUpdater {
 	return func(user core_entities.User, updateData values.ProfileUpdateData) (entities.DetailedProfile, error) {
 		if clientError, ok := validator(updateData); !ok {

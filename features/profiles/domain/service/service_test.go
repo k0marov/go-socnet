@@ -47,6 +47,18 @@ func TestDetailedProfileGetter(t *testing.T) {
 	})
 }
 
+func TestFollowsGetter(t *testing.T) {
+	t.Run("happy case", func(t *testing.T) {
+
+	})
+	t.Run("error case - store returns not found", func(t *testing.T) {
+
+	})
+	t.Run("error case - store returns some other error", func(t *testing.T) {
+
+	})
+}
+
 func TestProfileGetter(t *testing.T) {
 	userId := RandomString()
 	t.Run("happy case", func(t *testing.T) {
