@@ -26,9 +26,7 @@ func createTables(sql *sql.DB) error {
 		id INTEGER PRIMARYKEY,
 		username VARCHAR(255),
 		about TEXT,
-		avatarPath VARCHAR(255),
-		follows INTEGER,
-		followers INTEGER
+		avatarPath VARCHAR(255)
 	);`)
 	if err != nil {
 		return fmt.Errorf("while creating Profile table: %w", err)
@@ -47,8 +45,8 @@ func createTables(sql *sql.DB) error {
 
 func (db *SqlDB) CreateProfile(newProfile entities.Profile) error {
 	_, err := db.sql.Exec(`INSERT INTO Profile(id, username, about, avatarPath, follows, followers) values(
-		?, ?, ?, ?, ?, ?
-	)`, newProfile.Id, newProfile.Username, newProfile.About, newProfile.AvatarPath, newProfile.Follows, newProfile.Followers)
+		?, ?, ?, ?
+	)`, newProfile.Id, newProfile.Username, newProfile.About, newProfile.AvatarPath)
 	if err != nil {
 		return fmt.Errorf("while inserting into Profile table: %v", err)
 	}
@@ -56,15 +54,18 @@ func (db *SqlDB) CreateProfile(newProfile entities.Profile) error {
 }
 
 func (db *SqlDB) GetProfile(profileId values.UserId) (entities.Profile, error) {
-	row := db.sql.QueryRow(`SELECT id, username, about, avatarPath, follows, followers from Profile where id = ?`, profileId)
+	row := db.sql.QueryRow(`SELECT id, username, about, avatarPath from Profile where id = ?`, profileId)
 	profile := entities.Profile{}
-	err := row.Scan(&profile.Id, &profile.Username, &profile.About, &profile.AvatarPath, &profile.Follows, &profile.Followers)
+	err := row.Scan(&profile.Id, &profile.Username, &profile.About, &profile.AvatarPath)
 	if err == sql.ErrNoRows {
 		return entities.Profile{}, core_errors.ErrNotFound
 	}
 	if err != nil {
 		return entities.Profile{}, fmt.Errorf("while getting a profile from profile table: %w", err)
 	}
+
+	// TODO: adding the follows and followers fields
+
 	return profile, nil
 }
 
