@@ -170,6 +170,10 @@ func RandomClientError() client_errors.ClientError {
 	}
 }
 
+func RandomBool() bool {
+	return rand.Float32() > 0.5
+}
+
 func RandomInt() int {
 	return rand.Intn(100)
 }

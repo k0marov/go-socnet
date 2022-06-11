@@ -35,14 +35,6 @@ func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBProfile DBProfi
 	}
 }
 
-type DBProfileCreator = func(entities.Profile) error
-
-func NewStoreProfileCreator(createDBProfile DBProfileCreator) store_contracts.StoreProfileCreator {
-	return func(newProfile entities.Profile) error {
-		return createDBProfile(newProfile)
-	}
-}
-
 type DBProfileGetter = func(id values.UserId) (entities.Profile, error)
 
 func NewStoreDetailedProfileGetter(getDBProfile DBProfileGetter) store_contracts.StoreDetailedProfileGetter {
@@ -59,12 +51,6 @@ func NewStoreDetailedProfileGetter(getDBProfile DBProfileGetter) store_contracts
 	}
 }
 
-func NewStoreProfileGetter(getDBProfile DBProfileGetter) store_contracts.StoreProfileGetter {
-	return func(id values.UserId) (entities.Profile, error) {
-		return getDBProfile(id)
-	}
-}
-
 func NewStoreProfileUpdater(updateDBProfile DBProfileUpdater, getProfile store_contracts.StoreDetailedProfileGetter) store_contracts.StoreProfileUpdater {
 	return func(id values.UserId, upd values.ProfileUpdateData) (entities.DetailedProfile, error) {
 		err := updateDBProfile(id, DBUpdateData{About: upd.About})
@@ -75,10 +61,36 @@ func NewStoreProfileUpdater(updateDBProfile DBProfileUpdater, getProfile store_c
 	}
 }
 
+type DBProfileCreator = func(entities.Profile) error
+
+func NewStoreProfileCreator(createDBProfile DBProfileCreator) store_contracts.StoreProfileCreator {
+	return createDBProfile
+}
+
+func NewStoreProfileGetter(getDBProfile DBProfileGetter) store_contracts.StoreProfileGetter {
+	return getDBProfile
+}
+
 type DBFollowsGetter = func(id values.UserId) ([]entities.Profile, error)
 
 func NewStoreFollowsGetter(dbFollowsGetter DBFollowsGetter) store_contracts.StoreFollowsGetter {
-	return func(userId values.UserId) ([]entities.Profile, error) {
-		return dbFollowsGetter(userId)
-	}
+	return dbFollowsGetter
+}
+
+type DBFollowChecker = func(target, follower values.UserId) (bool, error)
+
+func NewStoreFollowChecker(dbFollowChecker DBFollowChecker) store_contracts.StoreFollowChecker {
+	return dbFollowChecker
+}
+
+type DBFollower = func(target, follower values.UserId) error
+
+func NewStoreFollower(dbFollower DBFollower) store_contracts.StoreFollower {
+	return dbFollower
+}
+
+type DBUnfollower = func(target, unfollower values.UserId) error
+
+func NewStoreUnfollower(dbUnfollower DBUnfollower) store_contracts.StoreUnfollower {
+	return dbUnfollower
 }
