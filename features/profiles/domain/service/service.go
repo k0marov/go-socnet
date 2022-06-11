@@ -36,7 +36,14 @@ func NewProfileGetter(storeProfileGetter store.StoreProfileGetter) ProfileGetter
 
 func NewFollowsGetter(storeFollowsGetter store.StoreFollowsGetter) FollowsGetter {
 	return func(userId values.UserId) ([]entities.Profile, error) {
-		panic("unimplemented")
+		follows, err := storeFollowsGetter(userId)
+		if err != nil {
+			if err == core_errors.ErrNotFound {
+				return []entities.Profile{}, client_errors.ProfileNotFound
+			}
+			return []entities.Profile{}, fmt.Errorf("while getting follows in service: %w", err)
+		}
+		return follows, nil
 	}
 }
 

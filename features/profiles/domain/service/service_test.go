@@ -48,14 +48,36 @@ func TestDetailedProfileGetter(t *testing.T) {
 }
 
 func TestFollowsGetter(t *testing.T) {
+	userId := RandomString()
 	t.Run("happy case", func(t *testing.T) {
+		randomFollows := []entities.Profile{RandomProfile(), RandomProfile()}
+		storeFollowsGetter := func(gotUserId values.UserId) ([]entities.Profile, error) {
+			if gotUserId == userId {
+				return randomFollows, nil
+			}
+			panic("called with unexpected args")
+		}
+		sut := service.NewFollowsGetter(storeFollowsGetter)
 
+		gotFollows, err := sut(userId)
+		AssertNoError(t, err)
+		Assert(t, gotFollows, randomFollows, "returned follows")
 	})
 	t.Run("error case - store returns not found", func(t *testing.T) {
-
+		storeFollowsGetter := func(values.UserId) ([]entities.Profile, error) {
+			return nil, core_errors.ErrNotFound
+		}
+		sut := service.NewFollowsGetter(storeFollowsGetter)
+		_, err := sut(userId)
+		AssertError(t, err, client_errors.ProfileNotFound)
 	})
 	t.Run("error case - store returns some other error", func(t *testing.T) {
-
+		storeFollowsGetter := func(values.UserId) ([]entities.Profile, error) {
+			return nil, RandomError()
+		}
+		sut := service.NewFollowsGetter(storeFollowsGetter)
+		_, err := sut(userId)
+		AssertSomeError(t, err)
 	})
 }
 
