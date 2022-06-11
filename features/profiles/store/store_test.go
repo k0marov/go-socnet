@@ -82,6 +82,24 @@ func TestStoreProfileGetter(t *testing.T) {
 	})
 }
 
+func TestStoreFollowsGetter(t *testing.T) {
+	t.Run("should forward the call to db", func(t *testing.T) {
+		randomId := RandomString()
+		randomProfiles := []entities.Profile{RandomProfile(), RandomProfile(), RandomProfile()}
+		randomError := RandomError()
+		dbFollowsGetter := func(id values.UserId) ([]entities.Profile, error) {
+			if id == randomId {
+				return randomProfiles, randomError
+			}
+			panic("called with unexpected args")
+		}
+		sut := store.NewStoreFollowsGetter(dbFollowsGetter)
+		gotProfiles, gotErr := sut(randomId)
+		Assert(t, gotProfiles, randomProfiles, "returned profiles")
+		AssertError(t, gotErr, randomError)
+	})
+}
+
 func TestStoreProfileUpdater(t *testing.T) {
 	testDetailedProfile := RandomDetailedProfile()
 	testUpdData := values.ProfileUpdateData{About: RandomString()}

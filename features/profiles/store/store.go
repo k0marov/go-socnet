@@ -79,6 +79,6 @@ type DBFollowsGetter = func(id values.UserId) ([]entities.Profile, error)
 
 func NewStoreFollowsGetter(dbFollowsGetter DBFollowsGetter) store_contracts.StoreFollowsGetter {
 	return func(userId values.UserId) ([]entities.Profile, error) {
-		panic("unimplemented")
+		return dbFollowsGetter(userId)
 	}
 }
