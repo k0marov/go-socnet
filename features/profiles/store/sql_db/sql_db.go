@@ -29,7 +29,16 @@ func createTables(sql *sql.DB) error {
 		avatarPath VARCHAR(255)
 	);`)
 	if err != nil {
-		return fmt.Errorf("while creating profile table: %w", err)
+		return fmt.Errorf("while creating Profile table: %w", err)
+	}
+	_, err = sql.Exec(`CREATE TABLE IF NOT EXISTS Follow(
+		target_id   INT UNIQUE,
+		follower_id INT UNIQUE,
+		FOREIGN KEY(target_id) REFERENCES Profile(id) ON DELETE CASCADE,
+		FOREIGN KEY(follower_id) REFERENCES Profile(id) ON DELETE CASCADE
+	);`)
+	if err != nil {
+		return fmt.Errorf("while creating Follow table: %w", err)
 	}
 	return nil
 }
