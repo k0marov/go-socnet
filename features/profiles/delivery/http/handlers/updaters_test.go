@@ -60,6 +60,41 @@ func TestUpdateMeHandler(t *testing.T) {
 	})
 }
 
+func TestToggleFollowHandler(t *testing.T) {
+	baseTest401(t, handlers.NewToggleFollowHandler(nil))
+	t.Run("should toggle follow using service", func(t *testing.T) {
+		targetId := RandomString()
+		followerAuth := RandomAuthUser()
+		called := false
+		followToggler := func(follower, target values.UserId) error {
+			if follower == followerAuth.Id && target == targetId {
+				called = true
+				return nil
+			}
+			panic("called with unexpected args")
+		}
+
+		request := addAuthDataToRequest(createRequestWithId(targetId), followerAuth)
+		response := httptest.NewRecorder()
+		handlers.NewToggleFollowHandler(followToggler).ServeHTTP(response, request)
+
+		AssertStatusCode(t, response, http.StatusOK)
+		Assert(t, called, true, "toggle called")
+	})
+	t.Run("error case - id is not provided", func(t *testing.T) {
+		response := httptest.NewRecorder()
+		handlers.NewToggleFollowHandler(nil).ServeHTTP(response, addAuthDataToRequest(createRequest(nil), RandomAuthUser())) // toggler is nil, since it shouldn't be called
+		AssertClientError(t, response, client_errors.IdNotProvided)
+	})
+	baseTestServiceErrorHandling(t, func(err error, w *httptest.ResponseRecorder) {
+		followToggler := func(follower, target values.UserId) error {
+			return err
+		}
+		handlers.NewToggleFollowHandler(followToggler).ServeHTTP(w, addAuthDataToRequest(createRequestWithId("42"), RandomAuthUser()))
+
+	})
+}
+
 func TestUpdateAvatarHandler(t *testing.T) {
 	authUser := RandomAuthUser()
 	user := core_entities.UserFromAuth(authUser)

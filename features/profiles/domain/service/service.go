@@ -11,12 +11,15 @@ import (
 	"profiles/domain/values"
 )
 
-type ProfileGetter = func(values.UserId) (entities.Profile, error)
-type FollowsGetter = func(values.UserId) ([]entities.Profile, error)
-type DetailedProfileGetter = func(core_entities.User) (entities.DetailedProfile, error)
-type ProfileUpdater = func(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
-type AvatarUpdater = func(core_entities.User, values.AvatarData) (values.AvatarPath, error)
-type ProfileCreator = func(core_entities.User) (entities.DetailedProfile, error)
+type (
+	ProfileGetter         = func(values.UserId) (entities.Profile, error)
+	FollowsGetter         = func(values.UserId) ([]entities.Profile, error)
+	FollowToggler         = func(follower, target values.UserId) error
+	DetailedProfileGetter = func(core_entities.User) (entities.DetailedProfile, error)
+	ProfileUpdater        = func(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
+	AvatarUpdater         = func(core_entities.User, values.AvatarData) (values.AvatarPath, error)
+	ProfileCreator        = func(core_entities.User) (entities.DetailedProfile, error)
+)
 
 func NewProfileUpdater(validator validators.ProfileUpdateValidator, storeProfileUpdater store.StoreProfileUpdater) ProfileUpdater {
 	return func(user core_entities.User, updateData values.ProfileUpdateData) (entities.DetailedProfile, error) {

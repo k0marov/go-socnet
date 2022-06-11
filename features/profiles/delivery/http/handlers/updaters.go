@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"profiles/domain/service"
 	"profiles/domain/values"
+
+	"github.com/go-chi/chi/v5"
 )
 
 func NewUpdateMeHandler(profileUpdater service.ProfileUpdater) http.HandlerFunc {
@@ -33,6 +35,27 @@ func NewUpdateMeHandler(profileUpdater service.ProfileUpdater) http.HandlerFunc 
 		}
 
 		json.NewEncoder(w).Encode(updatedProfile)
+	})
+}
+
+func NewToggleFollowHandler(followToggler service.FollowToggler) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		follower, ok := getUserOrAddUnauthorized(w, r)
+		if !ok {
+			return
+		}
+
+		targetId := chi.URLParam(r, "id")
+		if targetId == "" {
+			throwClientError(w, client_errors.IdNotProvided)
+			return
+		}
+
+		err := followToggler(follower.Id, targetId)
+		if err != nil {
+			handleServiceError(w, err)
+			return
+		}
 	})
 }
 
