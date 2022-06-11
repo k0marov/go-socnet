@@ -5,13 +5,14 @@ import (
 	"profiles/domain/values"
 )
 
-type StoreFollowChecker = func(target, follower values.UserId) (bool, error)
-type StoreFollower = func(target, follower values.UserId) error
-type StoreUnfollower = func(target, unfollower values.UserId) error
-
-type StoreFollowsGetter = func(values.UserId) ([]entities.Profile, error)
-type StoreProfileGetter = func(id values.UserId) (entities.Profile, error)
-type StoreProfileUpdater = func(id values.UserId, upd values.ProfileUpdateData) (entities.DetailedProfile, error)
-type StoreDetailedProfileGetter = func(id values.UserId) (entities.DetailedProfile, error)
-type StoreProfileCreator = func(entities.Profile) error
-type StoreAvatarUpdater = func(userId values.UserId, avatar values.AvatarData) (values.AvatarPath, error)
+type (
+	StoreFollowChecker         = func(target, follower values.UserId) (bool, error)
+	StoreFollower              = func(target, follower values.UserId) error
+	StoreUnfollower            = func(target, unfollower values.UserId) error
+	StoreFollowsGetter         = func(values.UserId) ([]entities.Profile, error)
+	StoreProfileGetter         = func(id values.UserId) (entities.Profile, error)
+	StoreProfileUpdater        = func(id values.UserId, upd values.ProfileUpdateData) (entities.DetailedProfile, error)
+	StoreDetailedProfileGetter = func(id values.UserId) (entities.DetailedProfile, error)
+	StoreProfileCreator        = func(entities.Profile) error
+	StoreAvatarUpdater         = func(userId values.UserId, avatar values.AvatarData) (values.AvatarPath, error)
+)

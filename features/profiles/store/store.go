@@ -2,7 +2,6 @@ package store
 
 import (
 	"core/core_errors"
-	"core/ref"
 	"fmt"
 	"profiles/domain/entities"
 	"profiles/domain/store_contracts"
@@ -13,9 +12,6 @@ type DBUpdateData struct {
 	About      string
 	AvatarPath string
 }
-
-type AvatarFileCreator = func(data ref.Ref[[]byte], belongsToUser values.UserId) (string, error)
-type DBProfileUpdater = func(id values.UserId, updData DBUpdateData) error
 
 func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBProfile DBProfileUpdater) store_contracts.StoreAvatarUpdater {
 	return func(userId values.UserId, avatar values.AvatarData) (values.AvatarPath, error) {
@@ -34,8 +30,6 @@ func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBProfile DBProfi
 		return avatarPath, nil
 	}
 }
-
-type DBProfileGetter = func(id values.UserId) (entities.Profile, error)
 
 func NewStoreDetailedProfileGetter(getDBProfile DBProfileGetter) store_contracts.StoreDetailedProfileGetter {
 	return func(id values.UserId) (entities.DetailedProfile, error) {
@@ -61,8 +55,6 @@ func NewStoreProfileUpdater(updateDBProfile DBProfileUpdater, getProfile store_c
 	}
 }
 
-type DBProfileCreator = func(entities.Profile) error
-
 func NewStoreProfileCreator(createDBProfile DBProfileCreator) store_contracts.StoreProfileCreator {
 	return createDBProfile
 }
@@ -71,25 +63,17 @@ func NewStoreProfileGetter(getDBProfile DBProfileGetter) store_contracts.StorePr
 	return getDBProfile
 }
 
-type DBFollowsGetter = func(id values.UserId) ([]entities.Profile, error)
-
 func NewStoreFollowsGetter(dbFollowsGetter DBFollowsGetter) store_contracts.StoreFollowsGetter {
 	return dbFollowsGetter
 }
-
-type DBFollowChecker = func(target, follower values.UserId) (bool, error)
 
 func NewStoreFollowChecker(dbFollowChecker DBFollowChecker) store_contracts.StoreFollowChecker {
 	return dbFollowChecker
 }
 
-type DBFollower = func(target, follower values.UserId) error
-
 func NewStoreFollower(dbFollower DBFollower) store_contracts.StoreFollower {
 	return dbFollower
 }
-
-type DBUnfollower = func(target, unfollower values.UserId) error
 
 func NewStoreUnfollower(dbUnfollower DBUnfollower) store_contracts.StoreUnfollower {
 	return dbUnfollower
