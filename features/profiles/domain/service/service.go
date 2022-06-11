@@ -21,6 +21,19 @@ type (
 	ProfileCreator        = func(core_entities.User) (entities.DetailedProfile, error)
 )
 
+func NewProfileGetter(storeProfileGetter store.StoreProfileGetter) ProfileGetter {
+	return func(id values.UserId) (entities.Profile, error) {
+		profile, err := storeProfileGetter(id)
+		if err != nil {
+			if err == core_errors.ErrNotFound {
+				return entities.Profile{}, client_errors.ProfileNotFound
+			}
+			return entities.Profile{}, fmt.Errorf("while getting profile in a service: %w", err)
+		}
+		return profile, nil
+	}
+}
+
 func NewProfileUpdater(validator validators.ProfileUpdateValidator, storeProfileUpdater store.StoreProfileUpdater) ProfileUpdater {
 	return func(user core_entities.User, updateData values.ProfileUpdateData) (entities.DetailedProfile, error) {
 		if clientError, ok := validator(updateData); !ok {

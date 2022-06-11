@@ -47,6 +47,40 @@ func TestDetailedProfileGetter(t *testing.T) {
 	})
 }
 
+func TestProfileGetter(t *testing.T) {
+	userId := RandomString()
+	t.Run("happy case", func(t *testing.T) {
+		randomProfile := RandomProfile()
+		storeProfileGetter := func(gotUserId values.UserId) (entities.Profile, error) {
+			if gotUserId == userId {
+				return randomProfile, nil
+			}
+			panic("called with unexpected arguments")
+		}
+		sut := service.NewProfileGetter(storeProfileGetter)
+
+		gotProfile, err := sut(userId)
+		AssertNoError(t, err)
+		Assert(t, gotProfile, randomProfile, "returned profile")
+	})
+	t.Run("error case - store returns NotFoundErr", func(t *testing.T) {
+		storeProfileGetter := func(values.UserId) (entities.Profile, error) {
+			return entities.Profile{}, core_errors.ErrNotFound
+		}
+		sut := service.NewProfileGetter(storeProfileGetter)
+		_, err := sut(userId)
+		AssertError(t, err, client_errors.ProfileNotFound)
+	})
+	t.Run("error case - store returns some other error", func(t *testing.T) {
+		storeProfileGetter := func(values.UserId) (entities.Profile, error) {
+			return entities.Profile{}, RandomError()
+		}
+		sut := service.NewProfileGetter(storeProfileGetter)
+		_, err := sut(userId)
+		AssertSomeError(t, err)
+	})
+}
+
 func TestProfileCreator(t *testing.T) {
 	user := RandomUser()
 	t.Run("happy case", func(t *testing.T) {
