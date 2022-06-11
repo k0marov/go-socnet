@@ -5,6 +5,7 @@ import (
 	. "core/test_helpers"
 	"database/sql"
 	"profiles/domain/entities"
+	"profiles/domain/values"
 	"profiles/store"
 	"profiles/store/sql_db"
 	"strconv"
@@ -27,6 +28,18 @@ func TestSqlDB_ErrorHandling(t *testing.T) {
 	})
 	t.Run("UpdateProfile", func(t *testing.T) {
 		err := sut.UpdateProfile(RandomString(), store.DBUpdateData{About: RandomString(), AvatarPath: RandomString()})
+		AssertSomeError(t, err)
+	})
+	t.Run("IsFollowing", func(t *testing.T) {
+		_, err := sut.IsFollowing("42", "33")
+		AssertSomeError(t, err)
+	})
+	t.Run("Follow", func(t *testing.T) {
+		err := sut.Follow("42", "33")
+		AssertSomeError(t, err)
+	})
+	t.Run("Unfollow", func(t *testing.T) {
+		err := sut.Unfollow("42", "33")
 		AssertSomeError(t, err)
 	})
 }
@@ -96,6 +109,45 @@ func TestSqlDB(t *testing.T) {
 		gotProfile2, err := db.GetProfile(profile2.Id)
 		AssertNoError(t, err)
 		Assert(t, gotProfile2, profile2, "the unaffected profile")
+	})
+
+	t.Run("following profiles", func(t *testing.T) {
+		db, err := sql_db.NewSqlDB(OpenSqliteDB(t))
+		AssertNoError(t, err)
+
+		profile1 := RandomProfile()
+		profile2 := RandomProfile()
+
+		// create 2 profiles
+		db.CreateProfile(profile1)
+		db.CreateProfile(profile2)
+
+		// they are not following each other
+		assertFollows := func(target, follower values.UserId, value bool) {
+			follows, err := db.IsFollowing(target, follower)
+			AssertNoError(t, err)
+			Assert(t, follows, value, "returned value")
+		}
+		assertFollows(profile1.Id, profile2.Id, false)
+		assertFollows(profile2.Id, profile1.Id, false)
+
+		// make 1-st profile follow the 2-nd profile
+		err = db.Follow(profile2.Id, profile1.Id)
+		AssertNoError(t, err)
+
+		// now 1-st profile should follow the 2-nd profile
+		assertFollows(profile2.Id, profile1.Id, true)
+		// and 2-nd profile should still not follow the 1-st profile
+		assertFollows(profile1.Id, profile2.Id, false)
+
+		// now call unfollow
+		err = db.Unfollow(profile2.Id, profile1.Id)
+		AssertNoError(t, err)
+
+		// now profile1 shouldn't follow profile2
+		assertFollows(profile1.Id, profile2.Id, false)
+		assertFollows(profile2.Id, profile1.Id, false)
+
 	})
 }
 

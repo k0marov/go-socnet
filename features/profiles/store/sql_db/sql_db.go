@@ -77,3 +77,38 @@ func (db *SqlDB) UpdateProfile(userId values.UserId, upd store.DBUpdateData) err
 	}
 	return nil
 }
+
+func (db *SqlDB) IsFollowing(target, follower values.UserId) (bool, error) {
+	row := db.sql.QueryRow(`
+	SELECT (target_id) FROM Follow WHERE target_id = ? AND follower_id = ? LIMIT 1
+	`, target, follower)
+	dummyTargetId := ""
+	err := row.Scan(&dummyTargetId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, fmt.Errorf("while querying for a Follow: %w", err)
+	}
+	return true, nil
+}
+
+func (db *SqlDB) Follow(target, follower values.UserId) error {
+	_, err := db.sql.Exec(`
+	INSERT INTO Follow(target_id, follower_id) values (?, ?)
+	`, target, follower)
+	if err != nil {
+		return fmt.Errorf("while inserting a new Follow: %w", err)
+	}
+	return nil
+}
+
+func (db *SqlDB) Unfollow(target, unfollower values.UserId) error {
+	_, err := db.sql.Exec(`
+	DELETE FROM Follow where target_id = ? AND follower_id = ?
+	`, target, unfollower)
+	if err != nil {
+		return fmt.Errorf("while deleting a Follow: %w", err)
+	}
+	return nil
+}
