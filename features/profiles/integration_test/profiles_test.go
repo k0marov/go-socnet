@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"profiles"
+	"profiles/delivery/http/handlers"
 	"profiles/domain/entities"
 	"profiles/domain/values"
 	"testing"
@@ -54,98 +55,168 @@ func TestProfiles(t *testing.T) {
 		ctx = context.WithValue(ctx, auth.UserContextKey, auth.User{Id: user.Id, Username: user.Username})
 		return req.WithContext(ctx)
 	}
-
-	// register a couple users
-	user1 := RandomUser()
-	user2 := RandomUser()
-	fakeRegisterRequest(user1)
-	fakeRegisterRequest(user2)
-
-	// assert that users are now accessible from GET handler
-	profile1 := entities.DetailedProfile{
-		Profile: entities.Profile{
-			Id:         user1.Id,
-			Username:   user1.Username,
-			About:      "",
-			AvatarPath: "",
-			Follows:    0,
-			Followers:  0,
-		},
-		FollowsProfiles: []entities.Profile{},
-	}
-	profile2 := entities.DetailedProfile{
-		Profile: entities.Profile{
-			Id:         user2.Id,
-			Username:   user2.Username,
-			About:      "",
-			AvatarPath: "",
-			Follows:    0,
-			Followers:  0,
-		},
-		FollowsProfiles: []entities.Profile{},
-	}
-	checkGetMeRequestForUser := func(fromUser core_entities.User, wantProfile entities.DetailedProfile) {
-		request := addAuthToReq(httptest.NewRequest(http.MethodGet, "/profiles/me", nil), fromUser)
+	checkProfileFromServer := func(t testing.TB, wantProfile entities.DetailedProfile) {
+		t.Helper()
+		request := addAuthToReq(httptest.NewRequest(http.MethodGet, "/profiles/"+wantProfile.Id, nil), RandomUser())
 		response := httptest.NewRecorder()
+		r.ServeHTTP(response, request)
+		AssertJSONData(t, response, wantProfile.Profile)
+
+		request = addAuthToReq(httptest.NewRequest(http.MethodGet, "/profiles/me", nil), core_entities.User{Id: wantProfile.Id, Username: wantProfile.Username})
+		response = httptest.NewRecorder()
 		r.ServeHTTP(response, request)
 		AssertJSONData(t, response, wantProfile)
 	}
-	checkGetMeRequestForUser(user1, profile1)
-	checkGetMeRequestForUser(user2, profile2)
+	t.Run("creating, reading and updating", func(t *testing.T) {
+		// register a couple users
+		user1 := RandomUser()
+		user2 := RandomUser()
+		fakeRegisterRequest(user1)
+		fakeRegisterRequest(user2)
 
-	// update avatar for first user
-	wantAvatarPathStr := filepath.Join("static", "user_"+user1.Id, "avatar")
-	wantAvatarPath := values.AvatarPath{Path: wantAvatarPathStr}
-	avatar := readFixture(t, "test_avatar.jpg")
+		// assert that users are now accessible from GET handler
+		profile1 := entities.DetailedProfile{
+			Profile: entities.Profile{
+				Id:         user1.Id,
+				Username:   user1.Username,
+				About:      "",
+				AvatarPath: "",
+				Follows:    0,
+				Followers:  0,
+			},
+			FollowsProfiles: []entities.Profile{},
+		}
+		profile2 := entities.DetailedProfile{
+			Profile: entities.Profile{
+				Id:         user2.Id,
+				Username:   user2.Username,
+				About:      "",
+				AvatarPath: "",
+				Follows:    0,
+				Followers:  0,
+			},
+			FollowsProfiles: []entities.Profile{},
+		}
+		checkProfileFromServer(t, profile1)
+		checkProfileFromServer(t, profile2)
 
-	body, contentType := createMultipartBody(avatar)
-	request := addAuthToReq(httptest.NewRequest(http.MethodPut, "/profiles/me/avatar", body), user1)
-	request.Header.Add("Content-Type", contentType)
-	response := httptest.NewRecorder()
+		// update avatar for first user
+		wantAvatarPathStr := filepath.Join("static", "user_"+user1.Id, "avatar")
+		wantAvatarPath := values.AvatarPath{Path: wantAvatarPathStr}
+		avatar := readFixture(t, "test_avatar.jpg")
 
-	r.ServeHTTP(response, request)
-	AssertJSONData(t, response, wantAvatarPath)
+		body, contentType := createMultipartBody(avatar)
+		request := addAuthToReq(httptest.NewRequest(http.MethodPut, "/profiles/me/avatar", body), user1)
+		request.Header.Add("Content-Type", contentType)
+		response := httptest.NewRecorder()
 
-	// assert that it was updated
-	wantUpdatedProfile1 := entities.DetailedProfile{
-		Profile: entities.Profile{
-			Id:         user1.Id,
-			Username:   user1.Username,
-			About:      "",
-			AvatarPath: wantAvatarPathStr,
-			Follows:    0,
-			Followers:  0,
-		},
-		FollowsProfiles: []entities.Profile{},
-	}
-	checkGetMeRequestForUser(user1, wantUpdatedProfile1)
+		r.ServeHTTP(response, request)
+		AssertJSONData(t, response, wantAvatarPath)
 
-	// assert avatar was stored
-	Assert(t, readFile(t, wantAvatarPathStr), avatar, "the stored avatar file")
+		// assert that it was updated
+		wantUpdatedProfile1 := entities.DetailedProfile{
+			Profile: entities.Profile{
+				Id:         user1.Id,
+				Username:   user1.Username,
+				About:      "",
+				AvatarPath: wantAvatarPathStr,
+				Follows:    0,
+				Followers:  0,
+			},
+			FollowsProfiles: []entities.Profile{},
+		}
+		checkProfileFromServer(t, wantUpdatedProfile1)
 
-	// update profile for second user
-	upd := values.ProfileUpdateData{About: RandomString()}
-	reqBody := bytes.NewBuffer(nil)
-	json.NewEncoder(reqBody).Encode(upd)
-	request = addAuthToReq(httptest.NewRequest(http.MethodPut, "/profiles/me", reqBody), user2)
-	response = httptest.NewRecorder()
+		// assert avatar was stored
+		Assert(t, readFile(t, wantAvatarPathStr), avatar, "the stored avatar file")
 
-	r.ServeHTTP(response, request)
-	wantUpdatedProfile2 := entities.DetailedProfile{
-		Profile: entities.Profile{
-			Id:         user2.Id,
-			Username:   user2.Username,
-			About:      upd.About,
-			AvatarPath: "",
-			Follows:    0,
-			Followers:  0,
-		},
-		FollowsProfiles: []entities.Profile{},
-	}
-	AssertJSONData(t, response, wantUpdatedProfile2)
+		// update profile for second user
+		upd := values.ProfileUpdateData{About: RandomString()}
+		reqBody := bytes.NewBuffer(nil)
+		json.NewEncoder(reqBody).Encode(upd)
+		request = addAuthToReq(httptest.NewRequest(http.MethodPut, "/profiles/me", reqBody), user2)
+		response = httptest.NewRecorder()
 
-	// check it was stored
-	checkGetMeRequestForUser(user2, wantUpdatedProfile2)
+		r.ServeHTTP(response, request)
+		wantUpdatedProfile2 := entities.DetailedProfile{
+			Profile: entities.Profile{
+				Id:         user2.Id,
+				Username:   user2.Username,
+				About:      upd.About,
+				AvatarPath: "",
+				Follows:    0,
+				Followers:  0,
+			},
+			FollowsProfiles: []entities.Profile{},
+		}
+		AssertJSONData(t, response, wantUpdatedProfile2)
+
+		// check it was stored
+		checkProfileFromServer(t, wantUpdatedProfile2)
+
+	})
+	t.Run("following", func(t *testing.T) {
+		checkFollows := func(t testing.TB, id values.UserId, wantFollows []entities.Profile) {
+			t.Helper()
+			request := addAuthToReq(httptest.NewRequest(http.MethodGet, "/profiles/"+id+"/follows", nil), RandomUser())
+			response := httptest.NewRecorder()
+			r.ServeHTTP(response, request)
+			AssertJSONData(t, response, handlers.FollowsResponse{Profiles: wantFollows})
+		}
+
+		// create 2 users
+		user1 := RandomUser()
+		user2 := RandomUser()
+		fakeRegisterRequest(user1)
+		fakeRegisterRequest(user2)
+
+		// follow profile1 from profile2
+		request := addAuthToReq(httptest.NewRequest(http.MethodPost, "/profiles/"+user1.Id+"/toggle-follow", nil), user2)
+		response := httptest.NewRecorder()
+		r.ServeHTTP(response, request)
+		AssertStatusCode(t, response, http.StatusOK)
+
+		// assert it was followed
+		wantProfile1 := entities.DetailedProfile{
+			Profile: entities.Profile{
+				Id:        user1.Id,
+				Username:  user1.Username,
+				Follows:   0,
+				Followers: 1,
+			},
+			FollowsProfiles: []entities.Profile{},
+		}
+		checkProfileFromServer(t, wantProfile1)
+
+		wantFollows := []entities.Profile{wantProfile1.Profile}
+		checkFollows(t, user2.Id, wantFollows)
+		wantProfile2 := entities.DetailedProfile{
+			Profile: entities.Profile{
+				Id:        user2.Id,
+				Username:  user2.Username,
+				Follows:   1,
+				Followers: 0,
+			},
+			FollowsProfiles: wantFollows,
+		}
+		checkProfileFromServer(t, wantProfile2)
+
+		// unfollow profile1 from profile2
+		request = addAuthToReq(httptest.NewRequest(http.MethodPost, "/profiles/"+user1.Id+"/toggle-follow", nil), user2)
+		response = httptest.NewRecorder()
+		r.ServeHTTP(response, request)
+		AssertStatusCode(t, response, http.StatusOK)
+
+		// assert it is now not followed
+		wantProfile1.Profile.Followers = 0
+		checkProfileFromServer(t, wantProfile1)
+		wantFollows = []entities.Profile{}
+		checkFollows(t, user2.Id, wantFollows)
+		wantProfile2.Profile.Follows = 0
+		wantProfile2.FollowsProfiles = wantFollows
+		checkProfileFromServer(t, wantProfile2)
+	})
+
 }
 
 func readFixture(t testing.TB, filename string) []byte {

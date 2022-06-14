@@ -65,3 +65,9 @@ var IdNotProvided = ClientError{
 	ReadableDetail: "The request url was expected to have an 'id' query parameter, but there was none.",
 	HTTPCode:       http.StatusBadRequest,
 }
+
+var FollowingYourself = ClientError{
+	DetailCode:     "following-yourself",
+	ReadableDetail: "You cannot follow yourself.",
+	HTTPCode:       http.StatusBadRequest,
+}

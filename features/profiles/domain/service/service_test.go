@@ -84,6 +84,11 @@ func TestFollowsGetter(t *testing.T) {
 func TestFollowToggler(t *testing.T) {
 	testTarget := RandomString()
 	testFollower := RandomString()
+	t.Run("should return client error if trying to follow yourself", func(t *testing.T) {
+		sut := service.NewFollowToggler(nil, nil, nil)
+		err := sut("42", "42")
+		AssertError(t, err, client_errors.FollowingYourself)
+	})
 	t.Run("checking if target is already followed", func(t *testing.T) {
 		t.Run("target does not exist", func(t *testing.T) {
 			followChecker := func(target, follower values.UserId) (bool, error) {
@@ -110,18 +115,18 @@ func TestFollowToggler(t *testing.T) {
 			return true, nil
 		}
 		t.Run("happy case", func(t *testing.T) {
-			storeFollower := func(target, follower values.UserId) error {
+			storeUnfollower := func(target, follower values.UserId) error {
 				return nil
 			}
-			sut := service.NewFollowToggler(followChecker, storeFollower, nil)
+			sut := service.NewFollowToggler(followChecker, nil, storeUnfollower)
 			err := sut(testTarget, testFollower)
 			AssertNoError(t, err)
 		})
 		t.Run("error case - store throws", func(t *testing.T) {
-			storeFollower := func(target, follower values.UserId) error {
+			storeUnfollower := func(target, follower values.UserId) error {
 				return RandomError()
 			}
-			sut := service.NewFollowToggler(followChecker, storeFollower, nil)
+			sut := service.NewFollowToggler(followChecker, nil, storeUnfollower)
 			err := sut(testTarget, testFollower)
 			AssertSomeError(t, err)
 		})
@@ -131,18 +136,18 @@ func TestFollowToggler(t *testing.T) {
 			return false, nil
 		}
 		t.Run("happy case", func(t *testing.T) {
-			storeUnfollower := func(target, follower values.UserId) error {
+			storeFollower := func(target, follower values.UserId) error {
 				return nil
 			}
-			sut := service.NewFollowToggler(followChecker, nil, storeUnfollower)
+			sut := service.NewFollowToggler(followChecker, storeFollower, nil)
 			err := sut(testTarget, testFollower)
 			AssertNoError(t, err)
 		})
 		t.Run("error case - store throws", func(t *testing.T) {
-			storeUnfollower := func(target, follower values.UserId) error {
+			storeFollower := func(target, follower values.UserId) error {
 				return RandomError()
 			}
-			sut := service.NewFollowToggler(followChecker, nil, storeUnfollower)
+			sut := service.NewFollowToggler(followChecker, storeFollower, nil)
 			err := sut(testTarget, testFollower)
 			AssertSomeError(t, err)
 		})

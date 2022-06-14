@@ -49,6 +49,9 @@ func NewFollowsGetter(storeFollowsGetter store.StoreFollowsGetter) FollowsGetter
 
 func NewFollowToggler(storeFollowChecker store.StoreFollowChecker, storeFollower store.StoreFollower, storeUnfollower store.StoreUnfollower) FollowToggler {
 	return func(target, follower values.UserId) error {
+		if target == follower {
+			return client_errors.FollowingYourself
+		}
 		isFollowed, err := storeFollowChecker(target, follower)
 		if err != nil {
 			if err == core_errors.ErrNotFound {
@@ -57,14 +60,14 @@ func NewFollowToggler(storeFollowChecker store.StoreFollowChecker, storeFollower
 			return fmt.Errorf("while checking if target is already followed: %w", err)
 		}
 		if isFollowed {
-			err = storeFollower(target, follower)
-			if err != nil {
-				return fmt.Errorf("while following target: %w", err)
-			}
-		} else {
 			err = storeUnfollower(target, follower)
 			if err != nil {
 				return fmt.Errorf("while unfollowing target: %w", err)
+			}
+		} else {
+			err = storeFollower(target, follower)
+			if err != nil {
+				return fmt.Errorf("while following target: %w", err)
 			}
 		}
 		return nil

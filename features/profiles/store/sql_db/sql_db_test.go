@@ -239,6 +239,8 @@ func TestSqlDB(t *testing.T) {
 			db.Follow(otherProfile.Id, mainProfileNew.Id)
 			currentMainProfile, _ := db.GetProfile(mainProfileNew.Id)
 			Assert(t, currentMainProfile.Follows, i+1, "number of profiles that main follows")
+			isFollowing, _ := db.IsFollowing(otherProfile.Id, mainProfileNew.Id)
+			Assert(t, isFollowing, true, "other profile is followed")
 		}
 
 		// make them followers of the main profile
@@ -246,6 +248,8 @@ func TestSqlDB(t *testing.T) {
 			db.Follow(mainProfileNew.Id, otherProfile.Id)
 			currentMainProfile, _ := db.GetProfile(mainProfileNew.Id)
 			Assert(t, currentMainProfile.Followers, i+1, "number of followers of the main profile")
+			isFollowing, _ := db.IsFollowing(mainProfileNew.Id, otherProfile.Id)
+			Assert(t, isFollowing, true, "other profile is a follower")
 		}
 	})
 }

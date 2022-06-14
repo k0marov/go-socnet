@@ -13,7 +13,7 @@ func NewProfilesRouter(updateMe, updateAvatar, getMe, getById, getFollowsById, t
 		r.Put("/me/avatar", updateAvatar)
 
 		r.Get("/{id}", getById)
-		r.Get("/{id}/follow", getFollowsById)
+		r.Get("/{id}/follows", getFollowsById)
 		r.Post("/{id}/toggle-follow", toggleFollow)
 	}
 }
