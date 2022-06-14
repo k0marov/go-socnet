@@ -119,17 +119,14 @@ func (db *SqlDB) GetFollows(userId values.UserId) ([]entities.Profile, error) {
 
 func (db *SqlDB) IsFollowing(target, follower values.UserId) (bool, error) {
 	row := db.sql.QueryRow(`
-	SELECT (target_id) FROM Follow WHERE target_id = ? AND follower_id = ? LIMIT 1
+	SELECT EXISTS(SELECT 1 FROM Follow WHERE target_id = ? AND follower_id = ?)
 	`, target, follower)
-	dummyTargetId := ""
-	err := row.Scan(&dummyTargetId)
+	isFollowing := 0
+	err := row.Scan(&isFollowing)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return false, nil
-		}
 		return false, fmt.Errorf("while querying for a Follow: %w", err)
 	}
-	return true, nil
+	return isFollowing == 1, nil
 }
 
 func (db *SqlDB) Follow(target, follower values.UserId) error {
