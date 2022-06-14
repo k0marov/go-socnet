@@ -54,25 +54,21 @@ func (db *SqlDB) CreateProfile(newProfile values.NewProfile) error {
 }
 
 func (db *SqlDB) GetProfile(profileId values.UserId) (entities.Profile, error) {
-	row := db.sql.QueryRow(`SELECT id, username, about, avatarPath from Profile where id = ?`, profileId)
+	row := db.sql.QueryRow(`
+		SELECT id, username, about, avatarPath,
+			(SELECT COUNT(*) FROM Follow WHERE follower_id = ?1) AS follows, 
+			(SELECT COUNT(*) FROM Follow WHERE target_id = ?1) AS followers 
+		FROM Profile
+		WHERE id = ?1`,
+		profileId,
+	)
 	profile := entities.Profile{}
-	err := row.Scan(&profile.Id, &profile.Username, &profile.About, &profile.AvatarPath)
+	err := row.Scan(&profile.Id, &profile.Username, &profile.About, &profile.AvatarPath, &profile.Follows, &profile.Followers)
 	if err == sql.ErrNoRows {
 		return entities.Profile{}, core_errors.ErrNotFound
 	}
 	if err != nil {
 		return entities.Profile{}, fmt.Errorf("while getting a profile from profile table: %w", err)
-	}
-
-	followsRow := db.sql.QueryRow(`SELECT COUNT(*) from Follow where follower_id = ? `, profileId)
-	err = followsRow.Scan(&profile.Follows)
-	if err != nil {
-		return entities.Profile{}, fmt.Errorf("while getting count of follows: %w", err)
-	}
-	followersRow := db.sql.QueryRow(`SELECT COUNT(*) from Follow where target_id = ?`, profileId)
-	err = followersRow.Scan(&profile.Followers)
-	if err != nil {
-		return entities.Profile{}, fmt.Errorf("while getting count of followers: %w", err)
 	}
 
 	return profile, nil
@@ -91,6 +87,10 @@ func (db *SqlDB) UpdateProfile(userId values.UserId, upd store.DBUpdateData) err
 }
 
 func (db *SqlDB) GetFollows(userId values.UserId) ([]entities.Profile, error) {
+	// rows, _ := db.sql.Query(`
+
+	// `, userId)
+
 	rows, err := db.sql.Query(`SELECT target_id from Follow where follower_id = ?`, userId)
 	if err != nil {
 		return []entities.Profile{}, fmt.Errorf("while selecting follows ids from sql: %w", err)
