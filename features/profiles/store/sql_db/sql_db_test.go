@@ -8,7 +8,6 @@ import (
 	"profiles/domain/values"
 	"profiles/store"
 	"profiles/store/sql_db"
-	"strconv"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -21,6 +20,10 @@ func TestSqlDB_ErrorHandling(t *testing.T) {
 	sql.Close() // this will force all calls to throw errors
 	t.Run("GetProfile", func(t *testing.T) {
 		_, err := sut.GetProfile(RandomString())
+		AssertSomeError(t, err)
+	})
+	t.Run("GetDetailedProfile", func(t *testing.T) {
+		_, err := sut.GetDetailedProfile(RandomString())
 		AssertSomeError(t, err)
 	})
 	t.Run("CreateProfile", func(t *testing.T) {
@@ -80,10 +83,16 @@ func TestSqlDB(t *testing.T) {
 			}
 			AssertNoError(t, err)
 			Assert(t, gotProfile, wantProfile, "profile stored in db")
+			gotDetailedProfile, err := db.GetDetailedProfile(profile.Id)
+			wantDetProfile := entities.DetailedProfile{Profile: wantProfile, FollowsProfiles: []entities.Profile{}}
+			AssertNoError(t, err)
+			Assert(t, gotDetailedProfile, wantDetProfile, "detailed profile stored in db")
 		}
 
 		// assert querying for unexisting profile returns ErrNotFound
-		_, err = db.GetProfile(strconv.Itoa(9999))
+		_, err = db.GetProfile("9999")
+		AssertError(t, err, core_errors.ErrNotFound)
+		_, err = db.GetDetailedProfile("9999")
 		AssertError(t, err, core_errors.ErrNotFound)
 	})
 	t.Run("updating profile", func(t *testing.T) {
@@ -177,6 +186,15 @@ func TestSqlDB(t *testing.T) {
 				Assert(t, targetProfile.Followers, 1, "amount of followers on the 'target' profile")
 			} else {
 				Assert(t, targetProfile.Followers, 0, "amount of followers on the 'target' profile")
+			}
+
+			detFollowerProfile, err := db.GetDetailedProfile(follower)
+			AssertNoError(t, err)
+			if shouldFollow {
+				AssertFatal(t, len(detFollowerProfile.FollowsProfiles), 1, "length of profiles the follower follows")
+				Assert(t, detFollowerProfile.FollowsProfiles[0].Id, target, "the followed profile id")
+			} else {
+				Assert(t, len(detFollowerProfile.FollowsProfiles), 0, "length of profiles the follower follows")
 			}
 		}
 		// they are not following each other

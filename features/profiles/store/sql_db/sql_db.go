@@ -78,6 +78,21 @@ func (db *SqlDB) GetProfile(profileId values.UserId) (entities.Profile, error) {
 	return profile, nil
 }
 
+func (db *SqlDB) GetDetailedProfile(profileId values.UserId) (entities.DetailedProfile, error) {
+	profile, err := db.GetProfile(profileId)
+	if err == core_errors.ErrNotFound {
+		return entities.DetailedProfile{}, core_errors.ErrNotFound
+	}
+	if err != nil {
+		return entities.DetailedProfile{}, err
+	}
+	follows, err := db.GetFollows(profileId)
+	if err != nil {
+		return entities.DetailedProfile{}, err
+	}
+	return entities.DetailedProfile{Profile: profile, FollowsProfiles: follows}, nil
+}
+
 func (db *SqlDB) UpdateProfile(userId values.UserId, upd store.DBUpdateData) error {
 	_, err := db.sql.Exec(`
 	UPDATE Profile SET 
