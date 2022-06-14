@@ -192,7 +192,7 @@ func TestSqlDB(t *testing.T) {
 		// and 2-nd profile should still not follow the 1-st profile
 		assertFollows(t, profile1.Id, profile2.Id, false)
 
-		// now call unfollow
+		// call unfollow
 		err = db.Unfollow(profile2.Id, profile1.Id)
 		AssertNoError(t, err)
 
