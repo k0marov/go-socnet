@@ -9,9 +9,10 @@ import (
 type (
 	AvatarFileCreator = func(data ref.Ref[[]byte], belongsToUser values.UserId) (string, error)
 
-	DBProfileGetter  = func(id values.UserId) (entities.Profile, error)
-	DBProfileCreator = func(values.NewProfile) error
-	DBProfileUpdater = func(id values.UserId, updData DBUpdateData) error
+	DBDetailedProfileGetter = func(values.UserId) (entities.DetailedProfile, error)
+	DBProfileGetter         = func(id values.UserId) (entities.Profile, error)
+	DBProfileCreator        = func(values.NewProfile) error
+	DBProfileUpdater        = func(id values.UserId, updData DBUpdateData) error
 
 	DBFollowsGetter = func(id values.UserId) ([]entities.Profile, error)
 	DBFollowChecker = func(target, follower values.UserId) (bool, error)

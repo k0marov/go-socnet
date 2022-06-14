@@ -1,7 +1,6 @@
 package store
 
 import (
-	"core/core_errors"
 	"fmt"
 	"profiles/domain/entities"
 	"profiles/domain/store_contracts"
@@ -31,24 +30,6 @@ func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBProfile DBProfi
 	}
 }
 
-func NewStoreDetailedProfileGetter(getDBProfile DBProfileGetter, getDBFollows DBFollowsGetter) store_contracts.StoreDetailedProfileGetter {
-	return func(id values.UserId) (entities.DetailedProfile, error) {
-		profile, err := getDBProfile(id)
-		if err != nil {
-			if err == core_errors.ErrNotFound {
-				return entities.DetailedProfile{}, core_errors.ErrNotFound
-			}
-			return entities.DetailedProfile{}, fmt.Errorf("error while getting a profile from db: %w", err)
-		}
-		follows, err := getDBFollows(id)
-		if err != nil {
-			return entities.DetailedProfile{}, fmt.Errorf("while getting follows from db: %w", err)
-		}
-		detailedProfile := entities.DetailedProfile{Profile: profile, FollowsProfiles: follows}
-		return detailedProfile, nil
-	}
-}
-
 func NewStoreProfileUpdater(updateDBProfile DBProfileUpdater, getProfile store_contracts.StoreDetailedProfileGetter) store_contracts.StoreProfileUpdater {
 	return func(id values.UserId, upd values.ProfileUpdateData) (entities.DetailedProfile, error) {
 		err := updateDBProfile(id, DBUpdateData{About: upd.About})
@@ -57,6 +38,10 @@ func NewStoreProfileUpdater(updateDBProfile DBProfileUpdater, getProfile store_c
 		}
 		return getProfile(id)
 	}
+}
+
+func NewStoreDetailedProfileGetter(getDBDetailedProfile DBDetailedProfileGetter) store_contracts.StoreDetailedProfileGetter {
+	return getDBDetailedProfile
 }
 
 func NewStoreProfileCreator(createDBProfile DBProfileCreator) store_contracts.StoreProfileCreator {
