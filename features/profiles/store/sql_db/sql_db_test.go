@@ -24,7 +24,7 @@ func TestSqlDB_ErrorHandling(t *testing.T) {
 		AssertSomeError(t, err)
 	})
 	t.Run("CreateProfile", func(t *testing.T) {
-		err := sut.CreateProfile(RandomProfile())
+		err := sut.CreateProfile(RandomNewProfile())
 		AssertSomeError(t, err)
 	})
 	t.Run("UpdateProfile", func(t *testing.T) {
@@ -53,9 +53,9 @@ func TestSqlDB(t *testing.T) {
 		AssertNoError(t, err)
 
 		// create 10 random profiles
-		profiles := []entities.Profile{}
+		profiles := []values.NewProfile{}
 		for i := 0; i < profileCount; i++ {
-			profiles = append(profiles, RandomProfile())
+			profiles = append(profiles, RandomNewProfile())
 		}
 
 		// add them to db
@@ -66,8 +66,16 @@ func TestSqlDB(t *testing.T) {
 		// assert they can be found in the database
 		for _, profile := range profiles {
 			gotProfile, err := db.GetProfile(profile.Id)
+			wantProfile := entities.Profile{
+				Id:         profile.Id,
+				Username:   profile.Username,
+				About:      profile.About,
+				AvatarPath: profile.AvatarPath,
+				Followers:  0,
+				Follows:    0,
+			}
 			AssertNoError(t, err)
-			Assert(t, gotProfile, profile, "profile stored in db")
+			Assert(t, gotProfile, wantProfile, "profile stored in db")
 		}
 
 		// assert querying for unexisting profile returns ErrNotFound
@@ -75,15 +83,27 @@ func TestSqlDB(t *testing.T) {
 		AssertError(t, err, core_errors.ErrNotFound)
 	})
 	t.Run("updating profile", func(t *testing.T) {
-		profile1 := RandomProfile()
-		profile2 := RandomProfile()
+		newProfile1 := RandomNewProfile()
+		newProfile2 := RandomNewProfile()
+		profile1 := entities.Profile{
+			Id:         newProfile1.Id,
+			Username:   newProfile1.Username,
+			About:      newProfile1.About,
+			AvatarPath: newProfile1.AvatarPath,
+		}
+		profile2 := entities.Profile{
+			Id:         newProfile2.Id,
+			Username:   newProfile2.Username,
+			About:      newProfile2.About,
+			AvatarPath: newProfile2.AvatarPath,
+		}
 
 		db, err := sql_db.NewSqlDB(OpenSqliteDB(t))
 		AssertNoError(t, err)
 
 		// insert both profiles into database
-		db.CreateProfile(profile1)
-		db.CreateProfile(profile2)
+		db.CreateProfile(newProfile1)
+		db.CreateProfile(newProfile2)
 
 		// update first profile
 		newAvatar := RandomString()
@@ -118,8 +138,8 @@ func TestSqlDB(t *testing.T) {
 		db, err := sql_db.NewSqlDB(OpenSqliteDB(t))
 		AssertNoError(t, err)
 
-		profile1 := RandomProfile()
-		profile2 := RandomProfile()
+		profile1 := RandomNewProfile()
+		profile2 := RandomNewProfile()
 
 		// create 2 profiles
 		db.CreateProfile(profile1)

@@ -10,7 +10,7 @@ type (
 	AvatarFileCreator = func(data ref.Ref[[]byte], belongsToUser values.UserId) (string, error)
 
 	DBProfileGetter  = func(id values.UserId) (entities.Profile, error)
-	DBProfileCreator = func(entities.Profile) error
+	DBProfileCreator = func(values.NewProfile) error
 	DBProfileUpdater = func(id values.UserId, updData DBUpdateData) error
 
 	DBFollowsGetter = func(id values.UserId) ([]entities.Profile, error)

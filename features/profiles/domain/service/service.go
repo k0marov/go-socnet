@@ -107,7 +107,7 @@ const DefaultAvatarPath = ""
 // this should be invoked when a new user is registered
 func NewProfileCreator(storeProfileCreator store.StoreProfileCreator) ProfileCreator {
 	return func(user core_entities.User) (entities.DetailedProfile, error) {
-		newProfile := entities.Profile{
+		newProfile := values.NewProfile{
 			Id:         user.Id,
 			Username:   user.Username,
 			About:      DefaultAbout,
@@ -118,7 +118,14 @@ func NewProfileCreator(storeProfileCreator store.StoreProfileCreator) ProfileCre
 			return entities.DetailedProfile{}, fmt.Errorf("got an error while creating a profile in a service: %w", err)
 		}
 		createdProfile := entities.DetailedProfile{
-			Profile: newProfile,
+			Profile: entities.Profile{
+				Id:         newProfile.Id,
+				Username:   newProfile.Username,
+				About:      newProfile.About,
+				AvatarPath: newProfile.AvatarPath,
+				Follows:    0,
+				Followers:  0,
+			}, FollowsProfiles: []entities.Profile{},
 		}
 		return createdProfile, nil
 	}

@@ -13,6 +13,6 @@ type (
 	StoreProfileGetter         = func(id values.UserId) (entities.Profile, error)
 	StoreProfileUpdater        = func(id values.UserId, upd values.ProfileUpdateData) (entities.DetailedProfile, error)
 	StoreDetailedProfileGetter = func(id values.UserId) (entities.DetailedProfile, error)
-	StoreProfileCreator        = func(entities.Profile) error
+	StoreProfileCreator        = func(values.NewProfile) error
 	StoreAvatarUpdater         = func(userId values.UserId, avatar values.AvatarData) (values.AvatarPath, error)
 )

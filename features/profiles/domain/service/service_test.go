@@ -186,14 +186,21 @@ func TestProfileGetter(t *testing.T) {
 func TestProfileCreator(t *testing.T) {
 	user := RandomUser()
 	t.Run("happy case", func(t *testing.T) {
-		wantProfile := entities.Profile{
+		wantProfile := values.NewProfile{
 			Id:         user.Id,
 			Username:   user.Username,
 			About:      service.DefaultAbout,
 			AvatarPath: service.DefaultAvatarPath,
 		}
-		wantCreatedProfile := entities.DetailedProfile{Profile: wantProfile}
-		storeNew := func(profile entities.Profile) error {
+		wantCreatedProfile := entities.DetailedProfile{Profile: entities.Profile{
+			Id:         user.Id,
+			Username:   user.Username,
+			About:      service.DefaultAbout,
+			AvatarPath: service.DefaultAvatarPath,
+			Follows:    0,
+			Followers:  0,
+		}, FollowsProfiles: []entities.Profile{}}
+		storeNew := func(profile values.NewProfile) error {
 			if profile == wantProfile {
 				return nil
 			}
@@ -206,7 +213,7 @@ func TestProfileCreator(t *testing.T) {
 		Assert(t, gotProfile, wantCreatedProfile, "created profile")
 	})
 	t.Run("error case - store throws, it is NOT a client error", func(t *testing.T) {
-		storeNew := func(entities.Profile) error {
+		storeNew := func(values.NewProfile) error {
 			return RandomError()
 		}
 		sut := service.NewProfileCreator(storeNew)

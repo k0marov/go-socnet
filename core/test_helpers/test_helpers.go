@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"profiles/domain/entities"
+	"profiles/domain/values"
 	"reflect"
 	"testing"
 
@@ -162,6 +163,15 @@ func RandomProfile() entities.Profile {
 		AvatarPath: RandomString(),
 		Follows:    RandomInt(),
 		Followers:  RandomInt(),
+	}
+}
+
+func RandomNewProfile() values.NewProfile {
+	return values.NewProfile{
+		Id:         RandomString(),
+		Username:   RandomString(),
+		About:      RandomString(),
+		AvatarPath: RandomString(),
 	}
 }
 

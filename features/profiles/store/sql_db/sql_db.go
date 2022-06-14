@@ -43,8 +43,8 @@ func createTables(sql *sql.DB) error {
 	return nil
 }
 
-func (db *SqlDB) CreateProfile(newProfile entities.Profile) error {
-	_, err := db.sql.Exec(`INSERT INTO Profile(id, username, about, avatarPath, follows, followers) values(
+func (db *SqlDB) CreateProfile(newProfile values.NewProfile) error {
+	_, err := db.sql.Exec(`INSERT INTO Profile(id, username, about, avatarPath) values(
 		?, ?, ?, ?
 	)`, newProfile.Id, newProfile.Username, newProfile.About, newProfile.AvatarPath)
 	if err != nil {
