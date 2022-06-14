@@ -1,51 +1,72 @@
 package profiles
 
 import (
+	"core/entities"
+	"core/image_decoder"
+	"core/static_file_creator"
 	"database/sql"
+	"log"
+	"profiles/delivery/http/handlers"
+	"profiles/delivery/http/router"
+	"profiles/domain/service"
+	"profiles/domain/validators"
+	"profiles/store"
+	"profiles/store/file_storage"
+	"profiles/store/sql_db"
 
 	"github.com/go-chi/chi/v5"
+	auth "github.com/k0marov/golang-auth"
 )
 
-// func NewRegisterCallback(db *sql.DB) func(auth.User) {
-// 	// db
-// 	sqlDB, err := sql_db.NewSqlDB(db)
-// 	if err != nil {
-// 		log.Fatalf("Error while opening sql db as a db for profiles: %v", err)
-// 	}
-// 	// store
-// 	storeProfileCreator := store.NewStoreProfileCreator(sqlDB.CreateProfile)
-// 	// domain
-// 	createProfile := service.NewProfileCreator(storeProfileCreator)
-// 	return func(u auth.User) {
-// 		createProfile(entities.UserFromAuth(u))
-// 	}
-// }
+func NewRegisterCallback(db *sql.DB) func(auth.User) {
+	// db
+	sqlDB, err := sql_db.NewSqlDB(db)
+	if err != nil {
+		log.Fatalf("Error while opening sql db as a db for profiles: %v", err)
+	}
+	// store
+	storeProfileCreator := store.NewStoreProfileCreator(sqlDB.CreateProfile)
+	// domain
+	createProfile := service.NewProfileCreator(storeProfileCreator)
+	return func(u auth.User) {
+		createProfile(entities.UserFromAuth(u))
+	}
+}
 
 func NewProfilesRouterImpl(db *sql.DB) func(chi.Router) {
-	panic("unimplemented")
+	// db
+	sqlDB, err := sql_db.NewSqlDB(db)
+	if err != nil {
+		log.Fatalf("Error while opening sql db as a db for profiles: %v", err)
+	}
+	// file storage
+	avatarFileCreator := file_storage.NewAvatarFileCreator(static_file_creator.NewStaticFileCreatorImpl())
+	// store
+	storeDetailedProfileGetter := store.NewStoreDetailedProfileGetter(sqlDB.GetDetailedProfile)
+	storeProfileUpdater := store.NewStoreProfileUpdater(sqlDB.UpdateProfile, storeDetailedProfileGetter)
+	storeAvatarUpdater := store.NewStoreAvatarUpdater(avatarFileCreator, sqlDB.UpdateProfile)
+	storeFollowsGetter := store.NewStoreFollowsGetter(sqlDB.GetFollows)
+	storeProfileGetter := store.NewStoreProfileGetter(sqlDB.GetProfile)
+	storeFollowChecker := store.NewStoreFollowChecker(sqlDB.IsFollowing)
+	storeFollower := store.NewStoreFollower(sqlDB.Follow)
+	storeUnfollower := store.NewStoreUnfollower(sqlDB.Unfollow)
+	// domain
+	profileUpdateValidator := validators.NewProfileUpdateValidator()
+	avatarValidator := validators.NewAvatarValidator(image_decoder.ImageDecoderImpl)
 
-	// // db
-	// sqlDB, err := sql_db.NewSqlDB(db)
-	// if err != nil {
-	// 	log.Fatalf("Error while opening sql db as a db for profiles: %v", err)
-	// }
-	// // file storage
-	// avatarFileCreator := file_storage.NewAvatarFileCreator(static_file_creator.NewStaticFileCreatorImpl())
-	// // store
-	// storeDetailedProfileGetter := store.NewStoreDetailedProfileGetter(sqlDB.GetProfile)
-	// storeProfileUpdater := store.NewStoreProfileUpdater(sqlDB.UpdateProfile, storeDetailedProfileGetter)
-	// storeAvatarUpdater := store.NewStoreAvatarUpdater(avatarFileCreator, sqlDB.UpdateProfile)
-	// // domain
-	// profileUpdateValidator := validators.NewProfileUpdateValidator()
-	// avatarValidator := validators.NewAvatarValidator(image_decoder.ImageDecoderImpl)
+	detailedProfileGetter := service.NewDetailedProfileGetter(storeDetailedProfileGetter)
+	profileUpdater := service.NewProfileUpdater(profileUpdateValidator, storeProfileUpdater)
+	avatarUpdater := service.NewAvatarUpdater(avatarValidator, storeAvatarUpdater)
+	followsGetter := service.NewFollowsGetter(storeFollowsGetter)
+	profileGetter := service.NewProfileGetter(storeProfileGetter)
+	followToggler := service.NewFollowToggler(storeFollowChecker, storeFollower, storeUnfollower)
+	// handlers
+	getMe := handlers.NewGetMeHandler(detailedProfileGetter)
+	updateMe := handlers.NewUpdateMeHandler(profileUpdater)
+	updateAvatar := handlers.NewUpdateAvatarHandler(avatarUpdater)
+	getFollows := handlers.NewGetFollowsHandler(followsGetter)
+	getById := handlers.NewGetByIdHandler(profileGetter)
+	toggleFollow := handlers.NewToggleFollowHandler(followToggler)
 
-	// detailedProfileGetter := service.NewDetailedProfileGetter(storeDetailedProfileGetter)
-	// profileUpdater := service.NewProfileUpdater(profileUpdateValidator, storeProfileUpdater)
-	// avatarUpdater := service.NewAvatarUpdater(avatarValidator, storeAvatarUpdater)
-	// // handlers
-	// getMe := handlers.NewGetMeHandler(detailedProfileGetter)
-	// updateMe := handlers.NewUpdateMeHandler(profileUpdater)
-	// updateAvatar := handlers.NewUpdateAvatarHandler(avatarUpdater)
-
-	// return router.NewProfilesRouter(updateMe, updateAvatar, getMe)
+	return router.NewProfilesRouter(updateMe, updateAvatar, getMe, getById, getFollows, toggleFollow)
 }

@@ -68,7 +68,10 @@ func TestProfiles(t *testing.T) {
 			Username:   user1.Username,
 			About:      "",
 			AvatarPath: "",
+			Follows:    0,
+			Followers:  0,
 		},
+		FollowsProfiles: []entities.Profile{},
 	}
 	profile2 := entities.DetailedProfile{
 		Profile: entities.Profile{
@@ -76,7 +79,10 @@ func TestProfiles(t *testing.T) {
 			Username:   user2.Username,
 			About:      "",
 			AvatarPath: "",
+			Follows:    0,
+			Followers:  0,
 		},
+		FollowsProfiles: []entities.Profile{},
 	}
 	checkGetMeRequestForUser := func(fromUser core_entities.User, wantProfile entities.DetailedProfile) {
 		request := addAuthToReq(httptest.NewRequest(http.MethodGet, "/profiles/me", nil), fromUser)
@@ -107,7 +113,10 @@ func TestProfiles(t *testing.T) {
 			Username:   user1.Username,
 			About:      "",
 			AvatarPath: wantAvatarPathStr,
+			Follows:    0,
+			Followers:  0,
 		},
+		FollowsProfiles: []entities.Profile{},
 	}
 	checkGetMeRequestForUser(user1, wantUpdatedProfile1)
 
@@ -128,7 +137,10 @@ func TestProfiles(t *testing.T) {
 			Username:   user2.Username,
 			About:      upd.About,
 			AvatarPath: "",
+			Follows:    0,
+			Followers:  0,
 		},
+		FollowsProfiles: []entities.Profile{},
 	}
 	AssertJSONData(t, response, wantUpdatedProfile2)
 
