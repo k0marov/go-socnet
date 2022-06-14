@@ -14,14 +14,14 @@ type SqlDB struct {
 }
 
 func NewSqlDB(sql *sql.DB) (*SqlDB, error) {
-	err := createTables(sql)
+	err := initSQL(sql)
 	if err != nil {
 		return nil, err
 	}
 	return &SqlDB{sql: sql}, nil
 }
 
-func createTables(sql *sql.DB) error {
+func initSQL(sql *sql.DB) error {
 	_, err := sql.Exec(`CREATE TABLE IF NOT EXISTS Profile(
 		id INTEGER PRIMARYKEY,
 		username VARCHAR(255) NOT NULL,
@@ -39,6 +39,10 @@ func createTables(sql *sql.DB) error {
 	);`)
 	if err != nil {
 		return fmt.Errorf("while creating Follow table: %w", err)
+	}
+	_, err = sql.Exec(`CREATE INDEX IF NOT EXISTS FollowIndex ON Follow(target_id, follower_id)`)
+	if err != nil {
+		return fmt.Errorf("while creating Follow index: %w", err)
 	}
 	return nil
 }
