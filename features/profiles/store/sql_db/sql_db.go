@@ -80,9 +80,6 @@ func (db *SqlDB) GetProfile(profileId values.UserId) (entities.Profile, error) {
 
 func (db *SqlDB) GetDetailedProfile(profileId values.UserId) (entities.DetailedProfile, error) {
 	profile, err := db.GetProfile(profileId)
-	if err == core_errors.ErrNotFound {
-		return entities.DetailedProfile{}, core_errors.ErrNotFound
-	}
 	if err != nil {
 		return entities.DetailedProfile{}, err
 	}
