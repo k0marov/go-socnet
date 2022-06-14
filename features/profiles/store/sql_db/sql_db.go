@@ -24,16 +24,16 @@ func NewSqlDB(sql *sql.DB) (*SqlDB, error) {
 func createTables(sql *sql.DB) error {
 	_, err := sql.Exec(`CREATE TABLE IF NOT EXISTS Profile(
 		id INTEGER PRIMARYKEY,
-		username VARCHAR(255),
-		about TEXT,
-		avatarPath VARCHAR(255)
+		username VARCHAR(255) NOT NULL,
+		about TEXT NOT NULL,
+		avatarPath VARCHAR(255) NOT NULL
 	);`)
 	if err != nil {
 		return fmt.Errorf("while creating Profile table: %w", err)
 	}
 	_, err = sql.Exec(`CREATE TABLE IF NOT EXISTS Follow(
-		target_id   INT,
-		follower_id INT,
+		target_id   INT NOT NULL,
+		follower_id INT NOT NULL,
 		FOREIGN KEY(target_id) REFERENCES Profile(id) ON DELETE CASCADE,
 		FOREIGN KEY(follower_id) REFERENCES Profile(id) ON DELETE CASCADE
 	);`)
