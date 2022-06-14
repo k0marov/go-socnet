@@ -43,6 +43,10 @@ func TestSqlDB_ErrorHandling(t *testing.T) {
 		err := sut.Unfollow("42", "33")
 		AssertSomeError(t, err)
 	})
+	t.Run("GetFollows", func(t *testing.T) {
+		_, err := sut.GetFollows("42")
+		AssertSomeError(t, err)
+	})
 }
 
 func TestSqlDB(t *testing.T) {
@@ -133,8 +137,7 @@ func TestSqlDB(t *testing.T) {
 		AssertNoError(t, err)
 		Assert(t, gotProfile2, profile2, "the unaffected profile")
 	})
-
-	t.Run("IsFollowing(), Follow(), Unfollow()", func(t *testing.T) {
+	t.Run("following profiles", func(t *testing.T) {
 		db, err := sql_db.NewSqlDB(OpenSqliteDB(t))
 		AssertNoError(t, err)
 
@@ -145,36 +148,87 @@ func TestSqlDB(t *testing.T) {
 		db.CreateProfile(profile1)
 		db.CreateProfile(profile2)
 
-		// they are not following each other
-		assertFollows := func(target, follower values.UserId, value bool) {
-			follows, err := db.IsFollowing(target, follower)
+		assertFollows := func(t testing.TB, target, follower values.UserId, shouldFollow bool) {
+			t.Helper()
+			isFollowing, err := db.IsFollowing(target, follower)
 			AssertNoError(t, err)
-			Assert(t, follows, value, "returned value")
+			Assert(t, isFollowing, shouldFollow, "returned value of IsFollowing")
+
+			follows, err := db.GetFollows(follower)
+			AssertNoError(t, err)
+			if shouldFollow {
+				AssertFatal(t, len(follows), 1, "number of profiles the 'follower' follows")
+				Assert(t, follows[0].Id, target, "the id of followed profile")
+			} else {
+				AssertFatal(t, len(follows), 0, "number of profiles the 'follower' follows")
+			}
+
+			followerProfile, err := db.GetProfile(follower)
+			AssertNoError(t, err)
+			if shouldFollow {
+				Assert(t, followerProfile.Follows, 1, "amount of profiles the 'follower' follows")
+			} else {
+				Assert(t, followerProfile.Follows, 0, "amount of profiles the 'follower' follows")
+			}
+
+			targetProfile, err := db.GetProfile(target)
+			AssertNoError(t, err)
+			if shouldFollow {
+				Assert(t, targetProfile.Followers, 1, "amount of followers on the 'target' profile")
+			} else {
+				Assert(t, targetProfile.Followers, 0, "amount of followers on the 'target' profile")
+			}
 		}
-		assertFollows(profile1.Id, profile2.Id, false)
-		assertFollows(profile2.Id, profile1.Id, false)
+		// they are not following each other
+		assertFollows(t, profile1.Id, profile2.Id, false)
+		assertFollows(t, profile2.Id, profile1.Id, false)
 
 		// make 1-st profile follow the 2-nd profile
 		err = db.Follow(profile2.Id, profile1.Id)
 		AssertNoError(t, err)
 
 		// now 1-st profile should follow the 2-nd profile
-		assertFollows(profile2.Id, profile1.Id, true)
+		assertFollows(t, profile2.Id, profile1.Id, true)
 		// and 2-nd profile should still not follow the 1-st profile
-		assertFollows(profile1.Id, profile2.Id, false)
+		assertFollows(t, profile1.Id, profile2.Id, false)
 
 		// now call unfollow
 		err = db.Unfollow(profile2.Id, profile1.Id)
 		AssertNoError(t, err)
 
 		// now profile1 shouldn't follow profile2
-		assertFollows(profile1.Id, profile2.Id, false)
-		assertFollows(profile2.Id, profile1.Id, false)
+		assertFollows(t, profile1.Id, profile2.Id, false)
+		assertFollows(t, profile2.Id, profile1.Id, false)
 
 	})
-	t.Run("following many profiles: Follows(), GetProfile()", func(t *testing.T) {
-		// followingProfile := RandomProfile()
+	t.Run("following many profiles", func(t *testing.T) {
+		db, _ := sql_db.NewSqlDB(OpenSqliteDB(t))
 
+		mainProfileNew := RandomNewProfile()
+		db.CreateProfile(mainProfileNew)
+
+		profileCount := 100
+		// create 10 random otherProfiles
+		otherProfiles := []values.NewProfile{}
+		for i := 0; i < profileCount; i++ {
+			newProfile := RandomNewProfile()
+			otherProfiles = append(otherProfiles, newProfile)
+			db.CreateProfile(newProfile)
+		}
+
+		// follow them from the main profile
+		for i, otherProfile := range otherProfiles {
+			db.Follow(otherProfile.Id, mainProfileNew.Id)
+			currentMainProfile, _ := db.GetProfile(mainProfileNew.Id)
+			Assert(t, currentMainProfile.Follows, i+1, "number of profiles that main follows")
+		}
+
+		// make them followers of the main profile
+		for i, otherProfile := range otherProfiles {
+			db.Follow(mainProfileNew.Id, otherProfile.Id)
+			currentMainProfile, _ := db.GetProfile(mainProfileNew.Id)
+			Assert(t, currentMainProfile.Followers, i+1, "number of followers of the main profile")
+		}
 	})
 }
 
