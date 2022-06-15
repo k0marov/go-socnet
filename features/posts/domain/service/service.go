@@ -6,7 +6,7 @@ import (
 	"posts/domain/values"
 )
 
-type PostDeleter = func(values.PostId) error
+type PostDeleter = func(post values.PostId, fromUser core_values.UserId) error
 type PostLikeToggler = func(values.PostId, core_values.UserId) error
 type PostCreater = func(values.NewPostData) error
 type PostsGetter = func(core_values.UserId) ([]entities.Post, error)

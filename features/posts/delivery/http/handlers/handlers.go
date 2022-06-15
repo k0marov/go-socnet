@@ -1,13 +1,14 @@
 package handlers
 
 import (
+	// helpers "core/http_helpers"
 	"net/http"
 	"posts/domain/service"
 )
 
 func NewDeleteHandler(deletePost service.PostDeleter) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
+		// helpers.GetUserOrAddUnauthorized(w, r)
 	})
 }
 
