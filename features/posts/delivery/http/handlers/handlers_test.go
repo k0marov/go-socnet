@@ -56,7 +56,37 @@ func TestGetListById(t *testing.T) {
 	})
 }
 func TestToggleLike(t *testing.T) {
-
+	helpers.BaseTest401(t, handlers.NewToggleLikeHandler(nil))
+	t.Run("happy case", func(t *testing.T) {
+		randomPost := RandomString()
+		randomUser := RandomAuthUser()
+		called := false
+		toggler := func(post values.PostId, fromUser core_values.UserId) error {
+			if post == randomPost && fromUser == randomUser.Id {
+				called = true
+				return nil
+			}
+			panic("unexpected args")
+		}
+		request := helpers.AddAuthDataToRequest(createRequestWithPostId(randomPost), randomUser)
+		response := httptest.NewRecorder()
+		handlers.NewToggleLikeHandler(toggler).ServeHTTP(response, request)
+		AssertStatusCode(t, response, http.StatusOK)
+		Assert(t, called, true, "service called")
+	})
+	t.Run("error case - id is not provided", func(t *testing.T) {
+		request := helpers.AddAuthDataToRequest(helpers.CreateRequest(nil), RandomAuthUser())
+		response := httptest.NewRecorder()
+		handlers.NewToggleLikeHandler(nil).ServeHTTP(response, request)
+		AssertClientError(t, response, client_errors.IdNotProvided)
+	})
+	helpers.BaseTestServiceErrorHandling(t, func(err error, rr *httptest.ResponseRecorder) {
+		toggler := func(values.PostId, core_values.UserId) error {
+			return err
+		}
+		request := helpers.AddAuthDataToRequest(createRequestWithPostId("42"), RandomAuthUser())
+		handlers.NewToggleLikeHandler(toggler).ServeHTTP(rr, request)
+	})
 }
 func TestCreateNew(t *testing.T) {
 
