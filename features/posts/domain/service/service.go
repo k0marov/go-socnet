@@ -2,7 +2,9 @@ package service
 
 import (
 	"core/core_values"
+	"fmt"
 	"posts/domain/entities"
+	"posts/domain/store_contracts"
 	"posts/domain/values"
 )
 
@@ -31,8 +33,12 @@ func NewPostCreator() PostCreator {
 	}
 }
 
-func NewPostsGetter() PostsGetter {
+func NewPostsGetter(getPosts store_contracts.StorePostsGetter) PostsGetter {
 	return func(authorId core_values.UserId) ([]entities.Post, error) {
-		panic("unimplemented")
+		posts, err := getPosts(authorId)
+		if err != nil {
+			return []entities.Post{}, fmt.Errorf("while getting posts from store: %w", err)
+		}
+		return posts, nil
 	}
 }
