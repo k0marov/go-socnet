@@ -3,11 +3,9 @@ package test_helpers
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"profiles/domain/entities"
 	"profiles/domain/values"
 	"reflect"
@@ -18,25 +16,6 @@ import (
 
 	auth "github.com/k0marov/golang-auth"
 )
-
-func CreateTempFile(t testing.TB, initialData string) (*os.File, func()) {
-	t.Helper()
-
-	tmpFile, err := ioutil.TempFile("", "db")
-
-	if err != nil {
-		t.Fatalf("could not create temp file %v", err)
-	}
-
-	tmpFile.Write([]byte(initialData))
-
-	removeFile := func() {
-		tmpFile.Close()
-		os.Remove(tmpFile.Name())
-	}
-
-	return tmpFile, removeFile
-}
 
 func AssertStatusCode(t testing.TB, got *httptest.ResponseRecorder, want int) {
 	t.Helper()

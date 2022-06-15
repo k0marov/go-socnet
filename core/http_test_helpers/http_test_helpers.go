@@ -1,4 +1,4 @@
-package handlers_test
+package http_test_helpers
 
 import (
 	"context"
@@ -11,17 +11,17 @@ import (
 	auth "github.com/k0marov/golang-auth"
 )
 
-func addAuthDataToRequest(r *http.Request, user auth.User) *http.Request {
+func AddAuthDataToRequest(r *http.Request, user auth.User) *http.Request {
 	ctx := context.WithValue(r.Context(), auth.UserContextKey, user)
 	return r.WithContext(ctx)
 }
 
 // Since I am using go-chi router, handlers can be independent of urls and http methods
-func createRequest(body io.Reader) *http.Request {
+func CreateRequest(body io.Reader) *http.Request {
 	return httptest.NewRequest(http.MethodGet, "/handler-should-not-care", body)
 }
 
-func baseTestServiceErrorHandling(t *testing.T, callErroringHandler func(error, *httptest.ResponseRecorder)) {
+func BaseTestServiceErrorHandling(t *testing.T, callErroringHandler func(error, *httptest.ResponseRecorder)) {
 	t.Helper()
 	t.Run("service throws a client error", func(t *testing.T) {
 		clientError := RandomClientError()
@@ -36,10 +36,10 @@ func baseTestServiceErrorHandling(t *testing.T, callErroringHandler func(error, 
 	})
 }
 
-func baseTest401(t *testing.T, handlerWithPanickingService http.Handler) {
+func BaseTest401(t *testing.T, handlerWithPanickingService http.Handler) {
 	t.Helper()
 	t.Run("should return 401 if authentication details are not provided via context (using auth middleware)", func(t *testing.T) {
-		request := createRequest(nil)
+		request := CreateRequest(nil)
 		response := httptest.NewRecorder()
 		handlerWithPanickingService.ServeHTTP(response, request)
 

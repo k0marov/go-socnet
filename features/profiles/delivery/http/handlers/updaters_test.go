@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"core/client_errors"
 	core_entities "core/entities"
+	helpers "core/http_test_helpers"
 	. "core/test_helpers"
 	"encoding/json"
 	"fmt"
@@ -25,10 +26,10 @@ func TestUpdateMeHandler(t *testing.T) {
 	createGoodRequest := func() *http.Request {
 		body := bytes.NewBuffer(nil)
 		json.NewEncoder(body).Encode(profileUpdate)
-		return addAuthDataToRequest(createRequest(body), authUser)
+		return helpers.AddAuthDataToRequest(helpers.CreateRequest(body), authUser)
 	}
 
-	baseTest401(t, handlers.NewUpdateMeHandler(nil))
+	helpers.BaseTest401(t, handlers.NewUpdateMeHandler(nil))
 	t.Run("should update profile about if about field is provided", func(t *testing.T) {
 		updatedProfile := RandomDetailedProfile()
 		update := func(gotUser core_entities.User, updateData values.ProfileUpdateData) (entities.DetailedProfile, error) {
@@ -44,7 +45,7 @@ func TestUpdateMeHandler(t *testing.T) {
 		AssertStatusCode(t, response, http.StatusOK)
 		AssertJSONData(t, response, updatedProfile)
 	})
-	baseTestServiceErrorHandling(t, func(wantErr error, w *httptest.ResponseRecorder) {
+	helpers.BaseTestServiceErrorHandling(t, func(wantErr error, w *httptest.ResponseRecorder) {
 		update := func(gotUser core_entities.User, updateData values.ProfileUpdateData) (entities.DetailedProfile, error) {
 			return entities.DetailedProfile{}, wantErr
 		}
@@ -52,7 +53,7 @@ func TestUpdateMeHandler(t *testing.T) {
 	})
 	t.Run("should return invalid json client error if request is not valid json", func(t *testing.T) {
 		response := httptest.NewRecorder()
-		request := addAuthDataToRequest(createRequest(bytes.NewBufferString("non-json")), authUser)
+		request := helpers.AddAuthDataToRequest(helpers.CreateRequest(bytes.NewBufferString("non-json")), authUser)
 		handler := handlers.NewUpdateMeHandler(nil) // service is nil, since it shouldn't be called
 		handler.ServeHTTP(response, request)
 
@@ -61,7 +62,7 @@ func TestUpdateMeHandler(t *testing.T) {
 }
 
 func TestToggleFollowHandler(t *testing.T) {
-	baseTest401(t, handlers.NewToggleFollowHandler(nil))
+	helpers.BaseTest401(t, handlers.NewToggleFollowHandler(nil))
 	t.Run("should toggle follow using service", func(t *testing.T) {
 		targetId := RandomString()
 		followerAuth := RandomAuthUser()
@@ -74,7 +75,7 @@ func TestToggleFollowHandler(t *testing.T) {
 			panic("called with unexpected args")
 		}
 
-		request := addAuthDataToRequest(createRequestWithId(targetId), followerAuth)
+		request := helpers.AddAuthDataToRequest(createRequestWithId(targetId), followerAuth)
 		response := httptest.NewRecorder()
 		handlers.NewToggleFollowHandler(followToggler).ServeHTTP(response, request)
 
@@ -83,14 +84,14 @@ func TestToggleFollowHandler(t *testing.T) {
 	})
 	t.Run("error case - id is not provided", func(t *testing.T) {
 		response := httptest.NewRecorder()
-		handlers.NewToggleFollowHandler(nil).ServeHTTP(response, addAuthDataToRequest(createRequest(nil), RandomAuthUser())) // toggler is nil, since it shouldn't be called
+		handlers.NewToggleFollowHandler(nil).ServeHTTP(response, helpers.AddAuthDataToRequest(helpers.CreateRequest(nil), RandomAuthUser())) // toggler is nil, since it shouldn't be called
 		AssertClientError(t, response, client_errors.IdNotProvided)
 	})
-	baseTestServiceErrorHandling(t, func(err error, w *httptest.ResponseRecorder) {
+	helpers.BaseTestServiceErrorHandling(t, func(err error, w *httptest.ResponseRecorder) {
 		followToggler := func(target, follower values.UserId) error {
 			return err
 		}
-		handlers.NewToggleFollowHandler(followToggler).ServeHTTP(w, addAuthDataToRequest(createRequestWithId("42"), RandomAuthUser()))
+		handlers.NewToggleFollowHandler(followToggler).ServeHTTP(w, helpers.AddAuthDataToRequest(createRequestWithId("42"), RandomAuthUser()))
 
 	})
 }
@@ -110,11 +111,11 @@ func TestUpdateAvatarHandler(t *testing.T) {
 	}
 	createRequestWithAuth := func() *http.Request {
 		body, contentType := getMultipartBody(tAvatar)
-		req := addAuthDataToRequest(createRequest(body), authUser)
+		req := helpers.AddAuthDataToRequest(helpers.CreateRequest(body), authUser)
 		req.Header.Set("Content-Type", contentType)
-		return addAuthDataToRequest(req, authUser)
+		return helpers.AddAuthDataToRequest(req, authUser)
 	}
-	baseTest401(t, handlers.NewUpdateAvatarHandler(nil))
+	helpers.BaseTest401(t, handlers.NewUpdateAvatarHandler(nil))
 	t.Run("should update avatar using service", func(t *testing.T) {
 		t.Run("happy case", func(t *testing.T) {
 			avatarURL := values.AvatarPath{Path: RandomString()}
@@ -133,14 +134,14 @@ func TestUpdateAvatarHandler(t *testing.T) {
 		})
 		t.Run("error case - avatar file is not provided", func(t *testing.T) {
 			response := httptest.NewRecorder()
-			req := addAuthDataToRequest(createRequest(nil), authUser)
+			req := helpers.AddAuthDataToRequest(helpers.CreateRequest(nil), authUser)
 			handler := handlers.NewUpdateAvatarHandler(nil) // since the service function shouldn't be called, it's nil
 			handler.ServeHTTP(response, req)
 
 			AssertClientError(t, response, client_errors.AvatarNotProvidedError)
 		})
 	})
-	baseTestServiceErrorHandling(t, func(err error, w *httptest.ResponseRecorder) {
+	helpers.BaseTestServiceErrorHandling(t, func(err error, w *httptest.ResponseRecorder) {
 		updateAvatar := func(core_entities.User, values.AvatarData) (values.AvatarPath, error) {
 			return values.AvatarPath{}, err
 		}

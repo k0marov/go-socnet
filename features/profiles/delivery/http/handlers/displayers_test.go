@@ -4,6 +4,7 @@ import (
 	"context"
 	"core/client_errors"
 	core_entities "core/entities"
+	helpers "core/http_test_helpers"
 	. "core/test_helpers"
 	"fmt"
 	"net/http"
@@ -20,9 +21,9 @@ func TestGetMeHandler(t *testing.T) {
 	authUser := RandomAuthUser()
 	user := core_entities.UserFromAuth(authUser)
 	createRequestWithAuth := func() *http.Request {
-		return addAuthDataToRequest(createRequest(nil), authUser)
+		return helpers.AddAuthDataToRequest(helpers.CreateRequest(nil), authUser)
 	}
-	baseTest401(t, handlers.NewGetMeHandler(nil))
+	helpers.BaseTest401(t, handlers.NewGetMeHandler(nil))
 	t.Run("should return 200 and a profile if authentication details are provided via context", func(t *testing.T) {
 		wantedProfile := RandomDetailedProfile()
 		getter := func(gotUser core_entities.User) (entities.DetailedProfile, error) {
@@ -37,7 +38,7 @@ func TestGetMeHandler(t *testing.T) {
 
 		AssertJSONData(t, response, wantedProfile)
 	})
-	baseTestServiceErrorHandling(t, func(wantErr error, response *httptest.ResponseRecorder) {
+	helpers.BaseTestServiceErrorHandling(t, func(wantErr error, response *httptest.ResponseRecorder) {
 		getter := func(core_entities.User) (entities.DetailedProfile, error) {
 			return entities.DetailedProfile{}, wantErr
 		}
@@ -45,7 +46,7 @@ func TestGetMeHandler(t *testing.T) {
 	})
 }
 func createRequestWithId(userId string) *http.Request {
-	request := createRequest(nil)
+	request := helpers.CreateRequest(nil)
 	ctx := chi.NewRouteContext()
 	ctx.URLParams.Add("id", userId)
 	request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, ctx))
@@ -71,10 +72,10 @@ func TestGetByIdHandler(t *testing.T) {
 	})
 	t.Run("error case - id is not provided", func(t *testing.T) {
 		response := httptest.NewRecorder()
-		handlers.NewGetByIdHandler(nil).ServeHTTP(response, createRequest(nil)) // getter is nil, since it shouldn't be called
+		handlers.NewGetByIdHandler(nil).ServeHTTP(response, helpers.CreateRequest(nil)) // getter is nil, since it shouldn't be called
 		AssertClientError(t, response, client_errors.IdNotProvided)
 	})
-	baseTestServiceErrorHandling(t, func(err error, rr *httptest.ResponseRecorder) {
+	helpers.BaseTestServiceErrorHandling(t, func(err error, rr *httptest.ResponseRecorder) {
 		getter := func(userId values.UserId) (entities.Profile, error) {
 			return entities.Profile{}, err
 		}
@@ -103,10 +104,10 @@ func TestFollowsHandler(t *testing.T) {
 	})
 	t.Run("error case - id is not provided", func(t *testing.T) {
 		response := httptest.NewRecorder()
-		handlers.NewGetFollowsHandler(nil).ServeHTTP(response, createRequest(nil)) // getter is nil, since it shouldn't be called
+		handlers.NewGetFollowsHandler(nil).ServeHTTP(response, helpers.CreateRequest(nil)) // getter is nil, since it shouldn't be called
 		AssertClientError(t, response, client_errors.IdNotProvided)
 	})
-	baseTestServiceErrorHandling(t, func(err error, rr *httptest.ResponseRecorder) {
+	helpers.BaseTestServiceErrorHandling(t, func(err error, rr *httptest.ResponseRecorder) {
 		getter := func(userId values.UserId) ([]entities.Profile, error) {
 			return nil, err
 		}

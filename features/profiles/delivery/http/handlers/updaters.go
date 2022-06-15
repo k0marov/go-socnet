@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"core/client_errors"
+	helpers "core/http_helpers"
 	"core/ref"
 	"encoding/json"
 	"io"
@@ -14,23 +15,23 @@ import (
 
 func NewUpdateMeHandler(profileUpdater service.ProfileUpdater) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user, ok := getUserOrAddUnauthorized(w, r)
+		user, ok := helpers.GetUserOrAddUnauthorized(w, r)
 		if !ok {
 			return
 		}
 
-		setJsonHeader(w)
+		helpers.SetJsonHeader(w)
 
 		var updateData values.ProfileUpdateData
 		err := json.NewDecoder(r.Body).Decode(&updateData)
 		if err != nil {
-			throwClientError(w, client_errors.InvalidJsonError)
+			helpers.ThrowClientError(w, client_errors.InvalidJsonError)
 			return
 		}
 
 		updatedProfile, err := profileUpdater(user, updateData)
 		if err != nil {
-			handleServiceError(w, err)
+			helpers.HandleServiceError(w, err)
 			return
 		}
 
@@ -40,20 +41,20 @@ func NewUpdateMeHandler(profileUpdater service.ProfileUpdater) http.HandlerFunc 
 
 func NewToggleFollowHandler(followToggler service.FollowToggler) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		follower, ok := getUserOrAddUnauthorized(w, r)
+		follower, ok := helpers.GetUserOrAddUnauthorized(w, r)
 		if !ok {
 			return
 		}
 
 		targetId := chi.URLParam(r, "id")
 		if targetId == "" {
-			throwClientError(w, client_errors.IdNotProvided)
+			helpers.ThrowClientError(w, client_errors.IdNotProvided)
 			return
 		}
 
 		err := followToggler(targetId, follower.Id)
 		if err != nil {
-			handleServiceError(w, err)
+			helpers.HandleServiceError(w, err)
 			return
 		}
 	})
@@ -61,21 +62,21 @@ func NewToggleFollowHandler(followToggler service.FollowToggler) http.HandlerFun
 
 func NewUpdateAvatarHandler(avatarUpdater service.AvatarUpdater) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user, ok := getUserOrAddUnauthorized(w, r)
+		user, ok := helpers.GetUserOrAddUnauthorized(w, r)
 		if !ok {
 			return
 		}
 
 		avatarData, ok := _parseAvatar(r)
 		if !ok {
-			throwClientError(w, client_errors.AvatarNotProvidedError)
+			helpers.ThrowClientError(w, client_errors.AvatarNotProvidedError)
 			return
 		}
 
-		setJsonHeader(w)
+		helpers.SetJsonHeader(w)
 		url, err := avatarUpdater(user, avatarData)
 		if err != nil {
-			handleServiceError(w, err)
+			helpers.HandleServiceError(w, err)
 			return
 		}
 

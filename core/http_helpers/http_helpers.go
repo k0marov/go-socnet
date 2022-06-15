@@ -1,4 +1,4 @@
-package handlers
+package http_helpers
 
 import (
 	"core/client_errors"
@@ -10,11 +10,11 @@ import (
 	auth "github.com/k0marov/golang-auth"
 )
 
-func setJsonHeader(w http.ResponseWriter) {
+func SetJsonHeader(w http.ResponseWriter) {
 	w.Header().Add("contentType", "application/json")
 }
 
-func getUserOrAddUnauthorized(w http.ResponseWriter, r *http.Request) (core_entities.User, bool) {
+func GetUserOrAddUnauthorized(w http.ResponseWriter, r *http.Request) (core_entities.User, bool) {
 	authUser, castSuccess := r.Context().Value(auth.UserContextKey).(auth.User) // try to cast this to User
 	if !castSuccess {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -23,18 +23,18 @@ func getUserOrAddUnauthorized(w http.ResponseWriter, r *http.Request) (core_enti
 	return core_entities.UserFromAuth(authUser), true
 }
 
-func handleServiceError(w http.ResponseWriter, err error) {
+func HandleServiceError(w http.ResponseWriter, err error) {
 	clientError, isClientError := err.(client_errors.ClientError)
 	if isClientError {
-		throwClientError(w, clientError)
+		ThrowClientError(w, clientError)
 	} else {
 		log.Printf("Error while serving request: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 	}
 }
 
-func throwClientError(w http.ResponseWriter, clientError client_errors.ClientError) {
-	setJsonHeader(w)
+func ThrowClientError(w http.ResponseWriter, clientError client_errors.ClientError) {
+	SetJsonHeader(w)
 	errorJson, _ := json.Marshal(clientError)
 	http.Error(w, string(errorJson), clientError.HTTPCode)
 }
