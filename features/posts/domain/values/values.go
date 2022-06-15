@@ -9,5 +9,5 @@ type PostId = string
 type NewPostData struct {
 	Author core_values.UserId
 	Text   string
-	Images []core_values.Image
+	Images []core_values.FileData
 }

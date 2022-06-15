@@ -15,7 +15,7 @@ type NewProfile struct {
 }
 
 type AvatarData struct {
-	Data core_values.Image
+	Data core_values.FileData
 }
 
 type AvatarPath struct {
