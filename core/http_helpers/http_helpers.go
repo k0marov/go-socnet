@@ -3,9 +3,12 @@ package http_helpers
 import (
 	"core/client_errors"
 	core_entities "core/entities"
+	"core/ref"
 	"encoding/json"
+	"io"
 	"log"
 	"net/http"
+	"profiles/domain/values"
 
 	auth "github.com/k0marov/golang-auth"
 )
@@ -37,4 +40,22 @@ func ThrowClientError(w http.ResponseWriter, clientError client_errors.ClientErr
 	SetJsonHeader(w)
 	errorJson, _ := json.Marshal(clientError)
 	http.Error(w, string(errorJson), clientError.HTTPCode)
+}
+
+const MaxFileSize = 3 << 20 // 3 MB
+func ParseFile(r *http.Request, field string) (values.AvatarData, bool) {
+	file, _, err := r.FormFile(field)
+	if err != nil {
+		return values.AvatarData{}, false
+	}
+	defer file.Close()
+	avatarData, err := io.ReadAll(file)
+	if err != nil {
+		return values.AvatarData{}, false
+	}
+	dataRef, err := ref.NewRef(&avatarData)
+	if err != nil {
+		return values.AvatarData{}, false
+	}
+	return values.AvatarData{Data: dataRef}, true
 }

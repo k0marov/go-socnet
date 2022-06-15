@@ -3,9 +3,7 @@ package handlers
 import (
 	"core/client_errors"
 	helpers "core/http_helpers"
-	"core/ref"
 	"encoding/json"
-	"io"
 	"net/http"
 	"profiles/domain/service"
 	"profiles/domain/values"
@@ -67,7 +65,7 @@ func NewUpdateAvatarHandler(avatarUpdater service.AvatarUpdater) http.HandlerFun
 			return
 		}
 
-		avatarData, ok := _parseAvatar(r)
+		avatarData, ok := helpers.ParseFile(r, "avatar")
 		if !ok {
 			helpers.ThrowClientError(w, client_errors.AvatarNotProvidedError)
 			return
@@ -82,22 +80,4 @@ func NewUpdateAvatarHandler(avatarUpdater service.AvatarUpdater) http.HandlerFun
 
 		json.NewEncoder(w).Encode(url)
 	})
-}
-
-const MaxFileSize = 3 << 20 // 3 MB
-func _parseAvatar(r *http.Request) (values.AvatarData, bool) {
-	file, _, err := r.FormFile("avatar")
-	if err != nil {
-		return values.AvatarData{}, false
-	}
-	defer file.Close()
-	avatarData, err := io.ReadAll(file)
-	if err != nil {
-		return values.AvatarData{}, false
-	}
-	dataRef, err := ref.NewRef(&avatarData)
-	if err != nil {
-		return values.AvatarData{}, false
-	}
-	return values.AvatarData{Data: dataRef}, true
 }
