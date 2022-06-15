@@ -89,7 +89,21 @@ func TestToggleLike(t *testing.T) {
 	})
 }
 func TestCreateNew(t *testing.T) {
+	cases := []struct {
+		text       string
+		imagesData []string
+	}{
+		{"", []string{"Cat Image", "Sky Image"}},
+		{"One Image", []string{"Puppy Image"}},
+		{"Five Images", []string{"1", "2", "3", "4", "5"}},
+		{"Zero Images", []string{}},
+	}
 
+	for _, testCase := range cases {
+		t.Run(testCase.text, func(t *testing.T) {
+
+		})
+	}
 }
 
 func createRequestWithPostId(postId values.PostId) *http.Request {

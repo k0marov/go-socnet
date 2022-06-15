@@ -9,7 +9,6 @@ import (
 	. "core/test_helpers"
 	"encoding/json"
 	"fmt"
-	"io"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -102,7 +101,7 @@ func TestUpdateAvatarHandler(t *testing.T) {
 	user := core_entities.UserFromAuth(authUser)
 	tAvatar := []byte(RandomString())
 
-	getMultipartBody := func(data []byte) (io.Reader, string) {
+	createMultipartBody := func(data []byte) (*bytes.Buffer, string) {
 		body := bytes.NewBuffer(nil)
 		writer := multipart.NewWriter(body)
 		defer writer.Close()
@@ -111,7 +110,7 @@ func TestUpdateAvatarHandler(t *testing.T) {
 		return body, writer.FormDataContentType()
 	}
 	createRequestWithAuth := func() *http.Request {
-		body, contentType := getMultipartBody(tAvatar)
+		body, contentType := createMultipartBody(tAvatar)
 		req := helpers.AddAuthDataToRequest(helpers.CreateRequest(body), authUser)
 		req.Header.Set("Content-Type", contentType)
 		return helpers.AddAuthDataToRequest(req, authUser)
