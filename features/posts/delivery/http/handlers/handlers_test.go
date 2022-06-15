@@ -99,8 +99,8 @@ func TestToggleLike(t *testing.T) {
 func TestCreatePost_ErrorHandling(t *testing.T) {
 	helpers.BaseTest401(t, handlers.NewCreateHandler(nil))
 	helpers.BaseTestServiceErrorHandling(t, func(err error, rr *httptest.ResponseRecorder) {
-		creator := func(values.NewPostData) error {
-			return err
+		creator := func(values.NewPostData) (entities.Post, error) {
+			return entities.Post{}, err
 		}
 		request := helpers.AddAuthDataToRequest(helpers.CreateRequest(nil), RandomAuthUser())
 		handlers.NewCreateHandler(creator).ServeHTTP(rr, request)
@@ -155,11 +155,10 @@ func TestCreatePost_Parsing(t *testing.T) {
 
 	for _, testNewPost := range cases {
 		t.Run(testNewPost.Text, func(t *testing.T) {
-			called := false
-			creator := func(newPost values.NewPostData) error {
+			randomPost := RandomPost()
+			creator := func(newPost values.NewPostData) (entities.Post, error) {
 				if reflect.DeepEqual(newPost, testNewPost) {
-					called = true
-					return nil
+					return randomPost, nil
 				}
 				panic(fmt.Sprintf("enexpected args: newPost = %+v", newPost))
 			}
@@ -167,7 +166,7 @@ func TestCreatePost_Parsing(t *testing.T) {
 			handlers.NewCreateHandler(creator).ServeHTTP(response, createRequest(testNewPost))
 
 			AssertStatusCode(t, response, http.StatusOK)
-			Assert(t, called, true, "service called")
+			AssertJSONData(t, response, randomPost)
 		})
 	}
 }

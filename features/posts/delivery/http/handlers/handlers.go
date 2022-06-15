@@ -81,11 +81,12 @@ func NewCreateHandler(createPost service.PostCreator) http.HandlerFunc {
 			Text:   r.FormValue("text"),
 			Images: parseImages(r),
 		}
-		err := createPost(newPost)
+		createdPost, err := createPost(newPost)
 		if err != nil {
 			helpers.HandleServiceError(w, err)
 			return
 		}
+		helpers.WriteJson(w, createdPost)
 	})
 }
 
