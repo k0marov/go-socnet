@@ -1,7 +1,7 @@
 package values
 
 import (
-	"core/ref"
+	"core/core_values"
 )
 
 type ProfileUpdateData struct {
@@ -15,7 +15,7 @@ type NewProfile struct {
 }
 
 type AvatarData struct {
-	Data ref.Ref[[]byte]
+	Data core_values.Image
 }
 
 type AvatarPath struct {
