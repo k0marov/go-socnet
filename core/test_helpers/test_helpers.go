@@ -6,10 +6,12 @@ import (
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
-	"profiles/domain/entities"
+	profile_entities "profiles/domain/entities"
 	"profiles/domain/values"
 	"reflect"
 	"testing"
+
+	post_entities "posts/domain/entities"
 
 	"core/client_errors"
 	core_entities "core/entities"
@@ -127,15 +129,15 @@ func RandomAuthUser() auth.User {
 	}
 }
 
-func RandomDetailedProfile() entities.DetailedProfile {
-	return entities.DetailedProfile{
+func RandomDetailedProfile() profile_entities.DetailedProfile {
+	return profile_entities.DetailedProfile{
 		Profile:         RandomProfile(),
-		FollowsProfiles: []entities.Profile{RandomProfile(), RandomProfile(), RandomProfile()},
+		FollowsProfiles: []profile_entities.Profile{RandomProfile(), RandomProfile(), RandomProfile()},
 	}
 }
 
-func RandomProfile() entities.Profile {
-	return entities.Profile{
+func RandomProfile() profile_entities.Profile {
+	return profile_entities.Profile{
 		Id:         RandomString(),
 		Username:   RandomString(),
 		About:      RandomString(),
@@ -152,6 +154,10 @@ func RandomNewProfile() values.NewProfile {
 		About:      RandomString(),
 		AvatarPath: RandomString(),
 	}
+}
+
+func RandomPost() post_entities.Post {
+	return post_entities.Post{}
 }
 
 func RandomClientError() client_errors.ClientError {

@@ -45,7 +45,7 @@ func TestGetMeHandler(t *testing.T) {
 		handlers.NewGetMeHandler(getter).ServeHTTP(response, createRequestWithAuth())
 	})
 }
-func createRequestWithId(userId string) *http.Request {
+func createRequestWithId(userId core_values.UserId) *http.Request {
 	request := helpers.CreateRequest(nil)
 	ctx := chi.NewRouteContext()
 	ctx.URLParams.Add("id", userId)
@@ -54,7 +54,7 @@ func createRequestWithId(userId string) *http.Request {
 }
 
 func TestGetByIdHandler(t *testing.T) {
-	t.Run("should return 200 and a profile if profile with given id exists", func(t *testing.T) {
+	t.Run("happy case", func(t *testing.T) {
 		randomId := RandomString()
 		randomProfile := RandomProfile()
 		profileGetter := func(userId core_values.UserId) (entities.Profile, error) {
