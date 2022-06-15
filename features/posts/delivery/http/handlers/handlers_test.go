@@ -9,7 +9,6 @@ import (
 	"core/ref"
 	. "core/test_helpers"
 	"fmt"
-	"io"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -21,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/go-chi/chi/v5"
+	auth "github.com/k0marov/golang-auth"
 )
 
 func createRequestWithProfileId(profileId core_values.UserId) *http.Request {
@@ -95,18 +95,23 @@ func TestToggleLike(t *testing.T) {
 		handlers.NewToggleLikeHandler(toggler).ServeHTTP(rr, request)
 	})
 }
-func TestCreateNew_Parsing(t *testing.T) {
-	createMultipartBody := func(text string, images []string) (io.Reader, string) {
+func TestCreatePost_Parsing(t *testing.T) {
+	createRequest := func(postData values.NewPostData) *http.Request {
 		body := bytes.NewBuffer(nil)
 		writer := multipart.NewWriter(body)
 		defer writer.Close()
 
-		writer.WriteField("text", text)
-		for i, image := range images {
+		writer.WriteField("text", postData.Text)
+		for i, image := range postData.Images {
 			fw, _ := writer.CreateFormFile("image_"+strconv.Itoa(i+1), RandomString())
-			fw.Write([]byte(image))
+			fw.Write(image.Value())
 		}
-		return body, writer.FormDataContentType()
+
+		user := auth.User{Id: postData.Author, Username: RandomString()}
+		request := helpers.AddAuthDataToRequest(helpers.CreateRequest(body), user)
+		request.Header.Set("Content-Type", writer.FormDataContentType())
+
+		return request
 	}
 	convertImages := func(images []string) []core_values.FileData {
 		files := []core_values.FileData{}
@@ -118,37 +123,36 @@ func TestCreateNew_Parsing(t *testing.T) {
 		return files
 	}
 
-	cases := []struct {
-		text       string
-		imagesData []string
-	}{
-		{"", []string{"Cat Image", "Sky Image"}},
-		{"One Image", []string{"Puppy Image"}},
-		// {"Five Images", []string{"1", "2", "3", "4", "5"}},
-		{"Zero Images", []string{}},
+	cases := []values.NewPostData{
+		{
+			Text:   "0 Images",
+			Author: "42",
+			Images: convertImages([]string{}),
+		},
+		{
+			Text:   "2 Images",
+			Author: "77",
+			Images: convertImages([]string{"Cat Image", "Sky Image"}),
+		},
+		{
+			Text:   "5 images",
+			Author: "33",
+			Images: convertImages([]string{"1", "2", "3", "4", "5"}),
+		},
 	}
 
-	for _, testCase := range cases {
-		t.Run(testCase.text, func(t *testing.T) {
-			author := RandomAuthUser()
-			expectedNewPost := values.NewPostData{
-				Author: author.Id,
-				Text:   testCase.text,
-				Images: convertImages(testCase.imagesData),
-			}
+	for _, testNewPost := range cases {
+		t.Run(testNewPost.Text, func(t *testing.T) {
 			called := false
 			creator := func(newPost values.NewPostData) error {
-				if reflect.DeepEqual(newPost, expectedNewPost) {
+				if reflect.DeepEqual(newPost, testNewPost) {
 					called = true
 					return nil
 				}
 				panic(fmt.Sprintf("enexpected args: newPost = %+v", newPost))
 			}
-			requestBody, contentType := createMultipartBody(testCase.text, testCase.imagesData)
-			request := helpers.AddAuthDataToRequest(helpers.CreateRequest(requestBody), author)
-			request.Header.Set("Content-Type", contentType)
 			response := httptest.NewRecorder()
-			handlers.NewCreateNewHandler(creator).ServeHTTP(response, request)
+			handlers.NewCreateHandler(creator).ServeHTTP(response, createRequest(testNewPost))
 
 			AssertStatusCode(t, response, http.StatusOK)
 			Assert(t, called, true, "service called")
