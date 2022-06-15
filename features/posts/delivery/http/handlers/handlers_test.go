@@ -95,6 +95,18 @@ func TestToggleLike(t *testing.T) {
 		handlers.NewToggleLikeHandler(toggler).ServeHTTP(rr, request)
 	})
 }
+
+func TestCreatePost_ErrorHandling(t *testing.T) {
+	helpers.BaseTest401(t, handlers.NewCreateHandler(nil))
+	helpers.BaseTestServiceErrorHandling(t, func(err error, rr *httptest.ResponseRecorder) {
+		creator := func(values.NewPostData) error {
+			return err
+		}
+		request := helpers.AddAuthDataToRequest(helpers.CreateRequest(nil), RandomAuthUser())
+		handlers.NewCreateHandler(creator).ServeHTTP(rr, request)
+	})
+}
+
 func TestCreatePost_Parsing(t *testing.T) {
 	createRequest := func(postData values.NewPostData) *http.Request {
 		body := bytes.NewBuffer(nil)

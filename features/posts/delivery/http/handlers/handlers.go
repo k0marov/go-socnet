@@ -74,13 +74,20 @@ func NewToggleLikeHandler(toggleLike service.PostLikeToggler) http.HandlerFunc {
 
 func NewCreateHandler(createPost service.PostCreator) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user, _ := helpers.GetUserOrAddUnauthorized(w, r)
+		user, ok := helpers.GetUserOrAddUnauthorized(w, r)
+		if !ok {
+			return
+		}
 		newPost := values.NewPostData{
 			Author: user.Id,
 			Text:   r.FormValue("text"),
 			Images: parseImages(r),
 		}
-		createPost(newPost)
+		err := createPost(newPost)
+		if err != nil {
+			helpers.HandleServiceError(w, err)
+			return
+		}
 	})
 }
 
