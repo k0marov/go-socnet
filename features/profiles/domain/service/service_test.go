@@ -36,7 +36,7 @@ func TestDetailedProfileGetter(t *testing.T) {
 		}
 		sut := service.NewDetailedProfileGetter(storeGetter)
 		_, err := sut(user)
-		AssertError(t, err, client_errors.ProfileNotFound)
+		AssertError(t, err, client_errors.NotFound)
 	})
 	t.Run("error case - store throws, it is NOT a client error", func(t *testing.T) {
 		storeGetter := func(userId string) (entities.DetailedProfile, error) {
@@ -70,7 +70,7 @@ func TestFollowsGetter(t *testing.T) {
 		}
 		sut := service.NewFollowsGetter(storeFollowsGetter)
 		_, err := sut(userId)
-		AssertError(t, err, client_errors.ProfileNotFound)
+		AssertError(t, err, client_errors.NotFound)
 	})
 	t.Run("error case - store returns some other error", func(t *testing.T) {
 		storeFollowsGetter := func(core_values.UserId) ([]entities.Profile, error) {
@@ -100,7 +100,7 @@ func TestFollowToggler(t *testing.T) {
 			}
 			sut := service.NewFollowToggler(followChecker, nil, nil)
 			err := sut(testTarget, testFollower)
-			AssertError(t, err, client_errors.ProfileNotFound)
+			AssertError(t, err, client_errors.NotFound)
 		})
 		t.Run("some other error is returned", func(t *testing.T) {
 			followChecker := func(target, follower core_values.UserId) (bool, error) {
@@ -177,7 +177,7 @@ func TestProfileGetter(t *testing.T) {
 		}
 		sut := service.NewProfileGetter(storeProfileGetter)
 		_, err := sut(userId)
-		AssertError(t, err, client_errors.ProfileNotFound)
+		AssertError(t, err, client_errors.NotFound)
 	})
 	t.Run("error case - store returns some other error", func(t *testing.T) {
 		storeProfileGetter := func(core_values.UserId) (entities.Profile, error) {

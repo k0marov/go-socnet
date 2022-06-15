@@ -27,7 +27,7 @@ func NewProfileGetter(storeProfileGetter store.StoreProfileGetter) ProfileGetter
 		profile, err := storeProfileGetter(id)
 		if err != nil {
 			if err == core_errors.ErrNotFound {
-				return entities.Profile{}, client_errors.ProfileNotFound
+				return entities.Profile{}, client_errors.NotFound
 			}
 			return entities.Profile{}, fmt.Errorf("while getting profile in a service: %w", err)
 		}
@@ -40,7 +40,7 @@ func NewFollowsGetter(storeFollowsGetter store.StoreFollowsGetter) FollowsGetter
 		follows, err := storeFollowsGetter(userId)
 		if err != nil {
 			if err == core_errors.ErrNotFound {
-				return []entities.Profile{}, client_errors.ProfileNotFound
+				return []entities.Profile{}, client_errors.NotFound
 			}
 			return []entities.Profile{}, fmt.Errorf("while getting follows in service: %w", err)
 		}
@@ -56,7 +56,7 @@ func NewFollowToggler(storeFollowChecker store.StoreFollowChecker, storeFollower
 		isFollowed, err := storeFollowChecker(target, follower)
 		if err != nil {
 			if err == core_errors.ErrNotFound {
-				return client_errors.ProfileNotFound
+				return client_errors.NotFound
 			}
 			return fmt.Errorf("while checking if target is already followed: %w", err)
 		}
@@ -83,7 +83,7 @@ func NewProfileUpdater(validator validators.ProfileUpdateValidator, storeProfile
 		updatedProfile, err := storeProfileUpdater(user.Id, updateData)
 		if err != nil {
 			if err == core_errors.ErrNotFound {
-				return entities.DetailedProfile{}, client_errors.ProfileNotFound
+				return entities.DetailedProfile{}, client_errors.NotFound
 			}
 			return entities.DetailedProfile{}, fmt.Errorf("got an error while updating profile in a service: %w", err)
 		}
@@ -96,7 +96,7 @@ func NewDetailedProfileGetter(storeDetailedGetter store.StoreDetailedProfileGett
 		profile, err := storeDetailedGetter(user.Id)
 		if err != nil {
 			if err == core_errors.ErrNotFound {
-				return entities.DetailedProfile{}, client_errors.ProfileNotFound
+				return entities.DetailedProfile{}, client_errors.NotFound
 			}
 			return entities.DetailedProfile{}, fmt.Errorf("got an error while getting profile in a service: %w", err)
 		}

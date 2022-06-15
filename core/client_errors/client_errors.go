@@ -36,9 +36,9 @@ var BodyIsNotMultipartForm = ClientError{
 	HTTPCode:       http.StatusBadRequest,
 }
 
-var ProfileNotFound = ClientError{
-	DetailCode:     "profile-not-found",
-	ReadableDetail: "The requested profile was not found",
+var NotFound = ClientError{
+	DetailCode:     "not-found",
+	ReadableDetail: "The requested entity was not found",
 	HTTPCode:       http.StatusNotFound,
 }
 
