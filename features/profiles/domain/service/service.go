@@ -13,13 +13,13 @@ import (
 )
 
 type (
-	ProfileGetter         = func(core_values.UserId) (entities.Profile, error)
-	FollowsGetter         = func(core_values.UserId) ([]entities.Profile, error)
-	FollowToggler         = func(target, follower core_values.UserId) error
-	DetailedProfileGetter = func(core_entities.User) (entities.DetailedProfile, error)
-	ProfileUpdater        = func(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
-	AvatarUpdater         = func(core_entities.User, values.AvatarData) (values.AvatarPath, error)
-	ProfileCreator        = func(core_entities.User) (entities.DetailedProfile, error)
+	ProfileGetter         func(core_values.UserId) (entities.Profile, error)
+	FollowsGetter         func(core_values.UserId) ([]entities.Profile, error)
+	FollowToggler         func(target, follower core_values.UserId) error
+	DetailedProfileGetter func(core_entities.User) (entities.DetailedProfile, error)
+	ProfileUpdater        func(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
+	AvatarUpdater         func(core_entities.User, values.AvatarData) (values.AvatarPath, error)
+	ProfileCreator        func(core_entities.User) (entities.DetailedProfile, error)
 )
 
 func NewProfileGetter(storeProfileGetter store.StoreProfileGetter) ProfileGetter {

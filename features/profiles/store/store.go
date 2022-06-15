@@ -42,29 +42,29 @@ func NewStoreProfileUpdater(updateDBProfile DBProfileUpdater, getProfile store_c
 }
 
 func NewStoreDetailedProfileGetter(getDBDetailedProfile DBDetailedProfileGetter) store_contracts.StoreDetailedProfileGetter {
-	return getDBDetailedProfile
+	return store_contracts.StoreDetailedProfileGetter(getDBDetailedProfile)
 }
 
 func NewStoreProfileCreator(createDBProfile DBProfileCreator) store_contracts.StoreProfileCreator {
-	return createDBProfile
+	return store_contracts.StoreProfileCreator(createDBProfile)
 }
 
 func NewStoreProfileGetter(getDBProfile DBProfileGetter) store_contracts.StoreProfileGetter {
-	return getDBProfile
+	return store_contracts.StoreProfileGetter(getDBProfile)
 }
 
 func NewStoreFollowsGetter(dbFollowsGetter DBFollowsGetter) store_contracts.StoreFollowsGetter {
-	return dbFollowsGetter
+	return store_contracts.StoreFollowsGetter(dbFollowsGetter)
 }
 
 func NewStoreFollowChecker(dbFollowChecker DBFollowChecker) store_contracts.StoreFollowChecker {
-	return dbFollowChecker
+	return store_contracts.StoreFollowChecker(dbFollowChecker)
 }
 
 func NewStoreFollower(dbFollower DBFollower) store_contracts.StoreFollower {
-	return dbFollower
+	return store_contracts.StoreFollower(dbFollower)
 }
 
 func NewStoreUnfollower(dbUnfollower DBUnfollower) store_contracts.StoreUnfollower {
-	return dbUnfollower
+	return store_contracts.StoreUnfollower(dbUnfollower)
 }

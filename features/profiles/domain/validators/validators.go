@@ -6,8 +6,8 @@ import (
 	"profiles/domain/values"
 )
 
-type ProfileUpdateValidator = func(values.ProfileUpdateData) (client_errors.ClientError, bool)
-type AvatarValidator = func(values.AvatarData) (client_errors.ClientError, bool)
+type ProfileUpdateValidator func(values.ProfileUpdateData) (client_errors.ClientError, bool)
+type AvatarValidator func(values.AvatarData) (client_errors.ClientError, bool)
 
 const MaxAboutLength = 255
 
