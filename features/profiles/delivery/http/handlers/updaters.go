@@ -65,11 +65,12 @@ func NewUpdateAvatarHandler(avatarUpdater service.AvatarUpdater) http.HandlerFun
 			return
 		}
 
-		avatarData, ok := helpers.ParseFile(r, "avatar")
+		avatarFileData, ok := helpers.ParseFile(r, "avatar")
 		if !ok {
 			helpers.ThrowClientError(w, client_errors.AvatarNotProvidedError)
 			return
 		}
+		avatarData := values.AvatarData{Data: avatarFileData}
 
 		helpers.SetJsonHeader(w)
 		url, err := avatarUpdater(user, avatarData)

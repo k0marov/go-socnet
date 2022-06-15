@@ -2,11 +2,14 @@ package handlers
 
 import (
 	"core/client_errors"
+	"core/core_values"
 	helpers "core/http_helpers"
 	"encoding/json"
 	"net/http"
 	"posts/domain/entities"
 	"posts/domain/service"
+	"posts/domain/values"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -71,6 +74,25 @@ func NewToggleLikeHandler(toggleLike service.PostLikeToggler) http.HandlerFunc {
 
 func NewCreateNewHandler(createNew service.PostCreater) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user, _ := helpers.GetUserOrAddUnauthorized(w, r)
+		text := r.FormValue("text")
 
+		newPost := values.NewPostData{
+			Author: user.Id,
+			Text:   text,
+			Images: parseImages(r),
+		}
+		createNew(newPost)
 	})
+}
+
+func parseImages(r *http.Request) []core_values.FileData {
+	images := []core_values.FileData{}
+	for i := 1; ; i++ {
+		image, ok := helpers.ParseFile(r, "image_"+strconv.Itoa(i))
+		if !ok {
+			return images
+		}
+		images = append(images, image)
+	}
 }

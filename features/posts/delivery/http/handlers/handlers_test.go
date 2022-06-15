@@ -1,16 +1,23 @@
 package handlers_test
 
 import (
+	"bytes"
 	"context"
 	"core/client_errors"
 	"core/core_values"
 	helpers "core/http_test_helpers"
+	"core/ref"
 	. "core/test_helpers"
+	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"posts/delivery/http/handlers"
 	"posts/domain/entities"
 	"posts/domain/values"
+	"reflect"
+	"strconv"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
@@ -88,20 +95,63 @@ func TestToggleLike(t *testing.T) {
 		handlers.NewToggleLikeHandler(toggler).ServeHTTP(rr, request)
 	})
 }
-func TestCreateNew(t *testing.T) {
+func TestCreateNew_Parsing(t *testing.T) {
+	createMultipartBody := func(text string, images []string) (io.Reader, string) {
+		body := bytes.NewBuffer(nil)
+		writer := multipart.NewWriter(body)
+		defer writer.Close()
+
+		writer.WriteField("text", text)
+		for i, image := range images {
+			fw, _ := writer.CreateFormFile("image_"+strconv.Itoa(i+1), RandomString())
+			fw.Write([]byte(image))
+		}
+		return body, writer.FormDataContentType()
+	}
+	convertImages := func(images []string) []core_values.FileData {
+		files := []core_values.FileData{}
+		for _, image := range images {
+			imageBytes := []byte(image)
+			ref, _ := ref.NewRef(&imageBytes)
+			files = append(files, ref)
+		}
+		return files
+	}
+
 	cases := []struct {
 		text       string
 		imagesData []string
 	}{
 		{"", []string{"Cat Image", "Sky Image"}},
 		{"One Image", []string{"Puppy Image"}},
-		{"Five Images", []string{"1", "2", "3", "4", "5"}},
+		// {"Five Images", []string{"1", "2", "3", "4", "5"}},
 		{"Zero Images", []string{}},
 	}
 
 	for _, testCase := range cases {
 		t.Run(testCase.text, func(t *testing.T) {
+			author := RandomAuthUser()
+			expectedNewPost := values.NewPostData{
+				Author: author.Id,
+				Text:   testCase.text,
+				Images: convertImages(testCase.imagesData),
+			}
+			called := false
+			creator := func(newPost values.NewPostData) error {
+				if reflect.DeepEqual(newPost, expectedNewPost) {
+					called = true
+					return nil
+				}
+				panic(fmt.Sprintf("enexpected args: newPost = %+v", newPost))
+			}
+			requestBody, contentType := createMultipartBody(testCase.text, testCase.imagesData)
+			request := helpers.AddAuthDataToRequest(helpers.CreateRequest(requestBody), author)
+			request.Header.Set("Content-Type", contentType)
+			response := httptest.NewRecorder()
+			handlers.NewCreateNewHandler(creator).ServeHTTP(response, request)
 
+			AssertStatusCode(t, response, http.StatusOK)
+			Assert(t, called, true, "service called")
 		})
 	}
 }
