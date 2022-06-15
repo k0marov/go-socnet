@@ -18,8 +18,6 @@ func NewUpdateMeHandler(profileUpdater service.ProfileUpdater) http.HandlerFunc 
 			return
 		}
 
-		helpers.SetJsonHeader(w)
-
 		var updateData values.ProfileUpdateData
 		err := json.NewDecoder(r.Body).Decode(&updateData)
 		if err != nil {
@@ -33,7 +31,7 @@ func NewUpdateMeHandler(profileUpdater service.ProfileUpdater) http.HandlerFunc 
 			return
 		}
 
-		json.NewEncoder(w).Encode(updatedProfile)
+		helpers.WriteJson(w, updatedProfile)
 	})
 }
 
@@ -72,13 +70,12 @@ func NewUpdateAvatarHandler(avatarUpdater service.AvatarUpdater) http.HandlerFun
 		}
 		avatarData := values.AvatarData{Data: avatarFileData}
 
-		helpers.SetJsonHeader(w)
 		url, err := avatarUpdater(user, avatarData)
 		if err != nil {
 			helpers.HandleServiceError(w, err)
 			return
 		}
 
-		json.NewEncoder(w).Encode(url)
+		helpers.WriteJson(w, url)
 	})
 }

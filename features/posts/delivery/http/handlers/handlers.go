@@ -4,7 +4,6 @@ import (
 	"core/client_errors"
 	"core/core_values"
 	helpers "core/http_helpers"
-	"encoding/json"
 	"net/http"
 	"posts/domain/entities"
 	"posts/domain/service"
@@ -39,7 +38,6 @@ type PostsResponse struct {
 
 func NewGetListByIdHandler(getPosts service.PostsGetter) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		helpers.SetJsonHeader(w)
 		profileId := chi.URLParam(r, "profile_id")
 		if profileId == "" {
 			helpers.ThrowClientError(w, client_errors.IdNotProvided)
@@ -50,7 +48,7 @@ func NewGetListByIdHandler(getPosts service.PostsGetter) http.HandlerFunc {
 			helpers.HandleServiceError(w, err)
 			return
 		}
-		json.NewEncoder(w).Encode(PostsResponse{posts})
+		helpers.WriteJson(w, PostsResponse{posts})
 	})
 }
 

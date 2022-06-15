@@ -13,8 +13,13 @@ import (
 	auth "github.com/k0marov/golang-auth"
 )
 
-func SetJsonHeader(w http.ResponseWriter) {
+func setJsonHeader(w http.ResponseWriter) {
 	w.Header().Add("contentType", "application/json")
+}
+
+func WriteJson(w http.ResponseWriter, obj any) {
+	setJsonHeader(w)
+	json.NewEncoder(w).Encode(obj)
 }
 
 func GetUserOrAddUnauthorized(w http.ResponseWriter, r *http.Request) (core_entities.User, bool) {
@@ -37,7 +42,7 @@ func HandleServiceError(w http.ResponseWriter, err error) {
 }
 
 func ThrowClientError(w http.ResponseWriter, clientError client_errors.ClientError) {
-	SetJsonHeader(w)
+	setJsonHeader(w)
 	errorJson, _ := json.Marshal(clientError)
 	http.Error(w, string(errorJson), clientError.HTTPCode)
 }
