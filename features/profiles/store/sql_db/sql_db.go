@@ -2,6 +2,7 @@ package sql_db
 
 import (
 	"core/core_errors"
+	"core/core_values"
 	"database/sql"
 	"fmt"
 	"profiles/domain/entities"
@@ -57,7 +58,7 @@ func (db *SqlDB) CreateProfile(newProfile values.NewProfile) error {
 	return nil
 }
 
-func (db *SqlDB) GetProfile(profileId values.UserId) (entities.Profile, error) {
+func (db *SqlDB) GetProfile(profileId core_values.UserId) (entities.Profile, error) {
 	row := db.sql.QueryRow(`
 		SELECT id, username, about, avatarPath,
 			(SELECT COUNT(*) FROM Follow WHERE follower_id = ?1) AS follows, 
@@ -78,7 +79,7 @@ func (db *SqlDB) GetProfile(profileId values.UserId) (entities.Profile, error) {
 	return profile, nil
 }
 
-func (db *SqlDB) GetDetailedProfile(profileId values.UserId) (entities.DetailedProfile, error) {
+func (db *SqlDB) GetDetailedProfile(profileId core_values.UserId) (entities.DetailedProfile, error) {
 	profile, err := db.GetProfile(profileId)
 	if err != nil {
 		return entities.DetailedProfile{}, err
@@ -90,7 +91,7 @@ func (db *SqlDB) GetDetailedProfile(profileId values.UserId) (entities.DetailedP
 	return entities.DetailedProfile{Profile: profile, FollowsProfiles: follows}, nil
 }
 
-func (db *SqlDB) UpdateProfile(userId values.UserId, upd store.DBUpdateData) error {
+func (db *SqlDB) UpdateProfile(userId core_values.UserId, upd store.DBUpdateData) error {
 	_, err := db.sql.Exec(`
 	UPDATE Profile SET 
 		avatarPath = CASE WHEN ?1 = "" THEN avatarPath ELSE ?1 END,
@@ -102,7 +103,7 @@ func (db *SqlDB) UpdateProfile(userId values.UserId, upd store.DBUpdateData) err
 	return nil
 }
 
-func (db *SqlDB) GetFollows(userId values.UserId) ([]entities.Profile, error) {
+func (db *SqlDB) GetFollows(userId core_values.UserId) ([]entities.Profile, error) {
 	rows, err := db.sql.Query(`
 		SELECT target.id, target.username, target.about, target.avatarPath, 
 			(SELECT COUNT(*) FROM Follow WHERE follower_id = target.id) AS follows, 
@@ -129,7 +130,7 @@ func (db *SqlDB) GetFollows(userId values.UserId) ([]entities.Profile, error) {
 	return followsProfiles, nil
 }
 
-func (db *SqlDB) IsFollowing(target, follower values.UserId) (bool, error) {
+func (db *SqlDB) IsFollowing(target, follower core_values.UserId) (bool, error) {
 	row := db.sql.QueryRow(`
 	SELECT EXISTS(SELECT 1 FROM Follow WHERE target_id = ? AND follower_id = ?)
 	`, target, follower)
@@ -141,7 +142,7 @@ func (db *SqlDB) IsFollowing(target, follower values.UserId) (bool, error) {
 	return isFollowing == 1, nil
 }
 
-func (db *SqlDB) Follow(target, follower values.UserId) error {
+func (db *SqlDB) Follow(target, follower core_values.UserId) error {
 	_, err := db.sql.Exec(`
 	INSERT INTO Follow(target_id, follower_id) values (?, ?)
 	`, target, follower)
@@ -151,7 +152,7 @@ func (db *SqlDB) Follow(target, follower values.UserId) error {
 	return nil
 }
 
-func (db *SqlDB) Unfollow(target, unfollower values.UserId) error {
+func (db *SqlDB) Unfollow(target, unfollower core_values.UserId) error {
 	_, err := db.sql.Exec(`
 	DELETE FROM Follow where target_id = ? AND follower_id = ?
 	`, target, unfollower)

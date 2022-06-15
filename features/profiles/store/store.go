@@ -1,6 +1,7 @@
 package store
 
 import (
+	"core/core_values"
 	"fmt"
 	"profiles/domain/entities"
 	"profiles/domain/store_contracts"
@@ -13,7 +14,7 @@ type DBUpdateData struct {
 }
 
 func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBProfile DBProfileUpdater) store_contracts.StoreAvatarUpdater {
-	return func(userId values.UserId, avatar values.AvatarData) (values.AvatarPath, error) {
+	return func(userId core_values.UserId, avatar values.AvatarData) (values.AvatarPath, error) {
 		path, err := createFile(avatar.Data, userId)
 		if err != nil {
 			return values.AvatarPath{}, fmt.Errorf("error while storing avatar file: %w", err)
@@ -31,7 +32,7 @@ func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBProfile DBProfi
 }
 
 func NewStoreProfileUpdater(updateDBProfile DBProfileUpdater, getProfile store_contracts.StoreDetailedProfileGetter) store_contracts.StoreProfileUpdater {
-	return func(id values.UserId, upd values.ProfileUpdateData) (entities.DetailedProfile, error) {
+	return func(id core_values.UserId, upd values.ProfileUpdateData) (entities.DetailedProfile, error) {
 		err := updateDBProfile(id, DBUpdateData{About: upd.About})
 		if err != nil {
 			return entities.DetailedProfile{}, fmt.Errorf("error while updating profile in db: %w", err)

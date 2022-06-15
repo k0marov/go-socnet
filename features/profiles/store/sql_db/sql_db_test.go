@@ -2,6 +2,7 @@ package sql_db_test
 
 import (
 	"core/core_errors"
+	"core/core_values"
 	. "core/test_helpers"
 	"database/sql"
 	"profiles/domain/entities"
@@ -157,7 +158,7 @@ func TestSqlDB(t *testing.T) {
 		db.CreateProfile(profile1)
 		db.CreateProfile(profile2)
 
-		assertFollows := func(t testing.TB, target, follower values.UserId, shouldFollow bool) {
+		assertFollows := func(t testing.TB, target, follower core_values.UserId, shouldFollow bool) {
 			t.Helper()
 			isFollowing, err := db.IsFollowing(target, follower)
 			AssertNoError(t, err)

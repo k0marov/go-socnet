@@ -3,6 +3,7 @@ package handlers_test
 import (
 	"bytes"
 	"core/client_errors"
+	"core/core_values"
 	core_entities "core/entities"
 	helpers "core/http_test_helpers"
 	. "core/test_helpers"
@@ -67,7 +68,7 @@ func TestToggleFollowHandler(t *testing.T) {
 		targetId := RandomString()
 		followerAuth := RandomAuthUser()
 		called := false
-		followToggler := func(target, follower values.UserId) error {
+		followToggler := func(target, follower core_values.UserId) error {
 			if follower == followerAuth.Id && target == targetId {
 				called = true
 				return nil
@@ -88,7 +89,7 @@ func TestToggleFollowHandler(t *testing.T) {
 		AssertClientError(t, response, client_errors.IdNotProvided)
 	})
 	helpers.BaseTestServiceErrorHandling(t, func(err error, w *httptest.ResponseRecorder) {
-		followToggler := func(target, follower values.UserId) error {
+		followToggler := func(target, follower core_values.UserId) error {
 			return err
 		}
 		handlers.NewToggleFollowHandler(followToggler).ServeHTTP(w, helpers.AddAuthDataToRequest(createRequestWithId("42"), RandomAuthUser()))

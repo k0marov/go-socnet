@@ -1,9 +1,9 @@
 package entities
 
-import "profiles/domain/values"
+import "core/core_values"
 
 type Profile struct {
-	Id         values.UserId
+	Id         core_values.UserId
 	Username   string
 	About      string
 	AvatarPath string

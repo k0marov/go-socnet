@@ -3,6 +3,7 @@ package service
 import (
 	"core/client_errors"
 	"core/core_errors"
+	"core/core_values"
 	core_entities "core/entities"
 	"fmt"
 	"profiles/domain/entities"
@@ -12,9 +13,9 @@ import (
 )
 
 type (
-	ProfileGetter         = func(values.UserId) (entities.Profile, error)
-	FollowsGetter         = func(values.UserId) ([]entities.Profile, error)
-	FollowToggler         = func(target, follower values.UserId) error
+	ProfileGetter         = func(core_values.UserId) (entities.Profile, error)
+	FollowsGetter         = func(core_values.UserId) ([]entities.Profile, error)
+	FollowToggler         = func(target, follower core_values.UserId) error
 	DetailedProfileGetter = func(core_entities.User) (entities.DetailedProfile, error)
 	ProfileUpdater        = func(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
 	AvatarUpdater         = func(core_entities.User, values.AvatarData) (values.AvatarPath, error)
@@ -22,7 +23,7 @@ type (
 )
 
 func NewProfileGetter(storeProfileGetter store.StoreProfileGetter) ProfileGetter {
-	return func(id values.UserId) (entities.Profile, error) {
+	return func(id core_values.UserId) (entities.Profile, error) {
 		profile, err := storeProfileGetter(id)
 		if err != nil {
 			if err == core_errors.ErrNotFound {
@@ -35,7 +36,7 @@ func NewProfileGetter(storeProfileGetter store.StoreProfileGetter) ProfileGetter
 }
 
 func NewFollowsGetter(storeFollowsGetter store.StoreFollowsGetter) FollowsGetter {
-	return func(userId values.UserId) ([]entities.Profile, error) {
+	return func(userId core_values.UserId) ([]entities.Profile, error) {
 		follows, err := storeFollowsGetter(userId)
 		if err != nil {
 			if err == core_errors.ErrNotFound {
@@ -48,7 +49,7 @@ func NewFollowsGetter(storeFollowsGetter store.StoreFollowsGetter) FollowsGetter
 }
 
 func NewFollowToggler(storeFollowChecker store.StoreFollowChecker, storeFollower store.StoreFollower, storeUnfollower store.StoreUnfollower) FollowToggler {
-	return func(target, follower values.UserId) error {
+	return func(target, follower core_values.UserId) error {
 		if target == follower {
 			return client_errors.FollowingYourself
 		}

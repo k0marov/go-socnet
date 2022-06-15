@@ -1,21 +1,22 @@
 package store
 
 import (
+	"core/core_values"
 	"core/ref"
 	"profiles/domain/entities"
 	"profiles/domain/values"
 )
 
 type (
-	AvatarFileCreator = func(data ref.Ref[[]byte], belongsToUser values.UserId) (string, error)
+	AvatarFileCreator = func(data ref.Ref[[]byte], belongsToUser core_values.UserId) (string, error)
 
-	DBDetailedProfileGetter = func(values.UserId) (entities.DetailedProfile, error)
-	DBProfileGetter         = func(id values.UserId) (entities.Profile, error)
+	DBDetailedProfileGetter = func(core_values.UserId) (entities.DetailedProfile, error)
+	DBProfileGetter         = func(id core_values.UserId) (entities.Profile, error)
 	DBProfileCreator        = func(values.NewProfile) error
-	DBProfileUpdater        = func(id values.UserId, updData DBUpdateData) error
+	DBProfileUpdater        = func(id core_values.UserId, updData DBUpdateData) error
 
-	DBFollowsGetter = func(id values.UserId) ([]entities.Profile, error)
-	DBFollowChecker = func(target, follower values.UserId) (bool, error)
-	DBFollower      = func(target, follower values.UserId) error
-	DBUnfollower    = func(target, unfollower values.UserId) error
+	DBFollowsGetter = func(id core_values.UserId) ([]entities.Profile, error)
+	DBFollowChecker = func(target, follower core_values.UserId) (bool, error)
+	DBFollower      = func(target, follower core_values.UserId) error
+	DBUnfollower    = func(target, unfollower core_values.UserId) error
 )

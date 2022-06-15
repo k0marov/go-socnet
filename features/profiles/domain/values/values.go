@@ -4,8 +4,6 @@ import (
 	"core/ref"
 )
 
-type UserId = string
-
 type ProfileUpdateData struct {
 	About string
 }

@@ -3,6 +3,7 @@ package profiles_test
 import (
 	"bytes"
 	"context"
+	"core/core_values"
 	core_entities "core/entities"
 	. "core/test_helpers"
 	"database/sql"
@@ -156,7 +157,7 @@ func TestProfiles(t *testing.T) {
 
 	})
 	t.Run("following", func(t *testing.T) {
-		checkFollows := func(t testing.TB, id values.UserId, wantFollows []entities.Profile) {
+		checkFollows := func(t testing.TB, id core_values.UserId, wantFollows []entities.Profile) {
 			t.Helper()
 			request := addAuthToReq(httptest.NewRequest(http.MethodGet, "/profiles/"+id+"/follows", nil), RandomUser())
 			response := httptest.NewRecorder()

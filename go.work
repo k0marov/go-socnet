@@ -3,5 +3,6 @@ go 1.18
 use (
 	./core
 	./deploy
+	./features/posts
 	./features/profiles
 )

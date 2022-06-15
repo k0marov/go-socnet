@@ -3,6 +3,7 @@ package service_test
 import (
 	"core/client_errors"
 	"core/core_errors"
+	"core/core_values"
 	"core/ref"
 	. "core/test_helpers"
 	"fmt"
@@ -51,7 +52,7 @@ func TestFollowsGetter(t *testing.T) {
 	userId := RandomString()
 	t.Run("happy case", func(t *testing.T) {
 		randomFollows := []entities.Profile{RandomProfile(), RandomProfile()}
-		storeFollowsGetter := func(gotUserId values.UserId) ([]entities.Profile, error) {
+		storeFollowsGetter := func(gotUserId core_values.UserId) ([]entities.Profile, error) {
 			if gotUserId == userId {
 				return randomFollows, nil
 			}
@@ -64,7 +65,7 @@ func TestFollowsGetter(t *testing.T) {
 		Assert(t, gotFollows, randomFollows, "returned follows")
 	})
 	t.Run("error case - store returns not found", func(t *testing.T) {
-		storeFollowsGetter := func(values.UserId) ([]entities.Profile, error) {
+		storeFollowsGetter := func(core_values.UserId) ([]entities.Profile, error) {
 			return nil, core_errors.ErrNotFound
 		}
 		sut := service.NewFollowsGetter(storeFollowsGetter)
@@ -72,7 +73,7 @@ func TestFollowsGetter(t *testing.T) {
 		AssertError(t, err, client_errors.ProfileNotFound)
 	})
 	t.Run("error case - store returns some other error", func(t *testing.T) {
-		storeFollowsGetter := func(values.UserId) ([]entities.Profile, error) {
+		storeFollowsGetter := func(core_values.UserId) ([]entities.Profile, error) {
 			return nil, RandomError()
 		}
 		sut := service.NewFollowsGetter(storeFollowsGetter)
@@ -91,7 +92,7 @@ func TestFollowToggler(t *testing.T) {
 	})
 	t.Run("checking if target is already followed", func(t *testing.T) {
 		t.Run("target does not exist", func(t *testing.T) {
-			followChecker := func(target, follower values.UserId) (bool, error) {
+			followChecker := func(target, follower core_values.UserId) (bool, error) {
 				if target == testTarget && follower == testFollower {
 					return false, core_errors.ErrNotFound
 				}
@@ -102,7 +103,7 @@ func TestFollowToggler(t *testing.T) {
 			AssertError(t, err, client_errors.ProfileNotFound)
 		})
 		t.Run("some other error is returned", func(t *testing.T) {
-			followChecker := func(target, follower values.UserId) (bool, error) {
+			followChecker := func(target, follower core_values.UserId) (bool, error) {
 				return false, RandomError()
 			}
 			sut := service.NewFollowToggler(followChecker, nil, nil)
@@ -111,11 +112,11 @@ func TestFollowToggler(t *testing.T) {
 		})
 	})
 	t.Run("target is already followed - unfollow it", func(t *testing.T) {
-		followChecker := func(target, follower values.UserId) (bool, error) {
+		followChecker := func(target, follower core_values.UserId) (bool, error) {
 			return true, nil
 		}
 		t.Run("happy case", func(t *testing.T) {
-			storeUnfollower := func(target, follower values.UserId) error {
+			storeUnfollower := func(target, follower core_values.UserId) error {
 				return nil
 			}
 			sut := service.NewFollowToggler(followChecker, nil, storeUnfollower)
@@ -123,7 +124,7 @@ func TestFollowToggler(t *testing.T) {
 			AssertNoError(t, err)
 		})
 		t.Run("error case - store throws", func(t *testing.T) {
-			storeUnfollower := func(target, follower values.UserId) error {
+			storeUnfollower := func(target, follower core_values.UserId) error {
 				return RandomError()
 			}
 			sut := service.NewFollowToggler(followChecker, nil, storeUnfollower)
@@ -132,11 +133,11 @@ func TestFollowToggler(t *testing.T) {
 		})
 	})
 	t.Run("target is not already followed - follow it", func(t *testing.T) {
-		followChecker := func(target, follower values.UserId) (bool, error) {
+		followChecker := func(target, follower core_values.UserId) (bool, error) {
 			return false, nil
 		}
 		t.Run("happy case", func(t *testing.T) {
-			storeFollower := func(target, follower values.UserId) error {
+			storeFollower := func(target, follower core_values.UserId) error {
 				return nil
 			}
 			sut := service.NewFollowToggler(followChecker, storeFollower, nil)
@@ -144,7 +145,7 @@ func TestFollowToggler(t *testing.T) {
 			AssertNoError(t, err)
 		})
 		t.Run("error case - store throws", func(t *testing.T) {
-			storeFollower := func(target, follower values.UserId) error {
+			storeFollower := func(target, follower core_values.UserId) error {
 				return RandomError()
 			}
 			sut := service.NewFollowToggler(followChecker, storeFollower, nil)
@@ -158,7 +159,7 @@ func TestProfileGetter(t *testing.T) {
 	userId := RandomString()
 	t.Run("happy case", func(t *testing.T) {
 		randomProfile := RandomProfile()
-		storeProfileGetter := func(gotUserId values.UserId) (entities.Profile, error) {
+		storeProfileGetter := func(gotUserId core_values.UserId) (entities.Profile, error) {
 			if gotUserId == userId {
 				return randomProfile, nil
 			}
@@ -171,7 +172,7 @@ func TestProfileGetter(t *testing.T) {
 		Assert(t, gotProfile, randomProfile, "returned profile")
 	})
 	t.Run("error case - store returns NotFoundErr", func(t *testing.T) {
-		storeProfileGetter := func(values.UserId) (entities.Profile, error) {
+		storeProfileGetter := func(core_values.UserId) (entities.Profile, error) {
 			return entities.Profile{}, core_errors.ErrNotFound
 		}
 		sut := service.NewProfileGetter(storeProfileGetter)
@@ -179,7 +180,7 @@ func TestProfileGetter(t *testing.T) {
 		AssertError(t, err, client_errors.ProfileNotFound)
 	})
 	t.Run("error case - store returns some other error", func(t *testing.T) {
-		storeProfileGetter := func(values.UserId) (entities.Profile, error) {
+		storeProfileGetter := func(core_values.UserId) (entities.Profile, error) {
 			return entities.Profile{}, RandomError()
 		}
 		sut := service.NewProfileGetter(storeProfileGetter)

@@ -3,6 +3,7 @@ package handlers_test
 import (
 	"context"
 	"core/client_errors"
+	"core/core_values"
 	core_entities "core/entities"
 	helpers "core/http_test_helpers"
 	. "core/test_helpers"
@@ -11,7 +12,6 @@ import (
 	"net/http/httptest"
 	"profiles/delivery/http/handlers"
 	"profiles/domain/entities"
-	"profiles/domain/values"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
@@ -57,7 +57,7 @@ func TestGetByIdHandler(t *testing.T) {
 	t.Run("should return 200 and a profile if profile with given id exists", func(t *testing.T) {
 		randomId := RandomString()
 		randomProfile := RandomProfile()
-		profileGetter := func(userId values.UserId) (entities.Profile, error) {
+		profileGetter := func(userId core_values.UserId) (entities.Profile, error) {
 			if userId == randomId {
 				return randomProfile, nil
 			}
@@ -76,7 +76,7 @@ func TestGetByIdHandler(t *testing.T) {
 		AssertClientError(t, response, client_errors.IdNotProvided)
 	})
 	helpers.BaseTestServiceErrorHandling(t, func(err error, rr *httptest.ResponseRecorder) {
-		getter := func(userId values.UserId) (entities.Profile, error) {
+		getter := func(userId core_values.UserId) (entities.Profile, error) {
 			return entities.Profile{}, err
 		}
 		handlers.NewGetByIdHandler(getter).ServeHTTP(rr, createRequestWithId("42"))
@@ -87,7 +87,7 @@ func TestFollowsHandler(t *testing.T) {
 	t.Run("should return 200 and a list of profiles if profile with given id exists", func(t *testing.T) {
 		randomId := RandomString()
 		randomProfiles := []entities.Profile{RandomProfile(), RandomProfile()}
-		followsGetter := func(userId values.UserId) ([]entities.Profile, error) {
+		followsGetter := func(userId core_values.UserId) ([]entities.Profile, error) {
 			if userId == randomId {
 				return randomProfiles, nil
 			}
@@ -108,7 +108,7 @@ func TestFollowsHandler(t *testing.T) {
 		AssertClientError(t, response, client_errors.IdNotProvided)
 	})
 	helpers.BaseTestServiceErrorHandling(t, func(err error, rr *httptest.ResponseRecorder) {
-		getter := func(userId values.UserId) ([]entities.Profile, error) {
+		getter := func(userId core_values.UserId) ([]entities.Profile, error) {
 			return nil, err
 		}
 		handlers.NewGetFollowsHandler(getter).ServeHTTP(rr, createRequestWithId("42"))
