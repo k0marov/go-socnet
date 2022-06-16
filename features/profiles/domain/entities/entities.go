@@ -1,6 +1,6 @@
 package entities
 
-import "core/core_values"
+import "github.com/k0marov/socnet/core/core_values"
 
 type Profile struct {
 	Id         core_values.UserId

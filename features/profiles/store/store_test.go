@@ -1,14 +1,16 @@
 package store_test
 
 import (
-	"core/ref"
-	. "core/test_helpers"
 	"fmt"
-	"profiles/domain/entities"
-	"profiles/domain/values"
-	"profiles/store"
 	"reflect"
 	"testing"
+
+	"github.com/k0marov/socnet/features/profiles/domain/entities"
+	"github.com/k0marov/socnet/features/profiles/domain/values"
+	"github.com/k0marov/socnet/features/profiles/store"
+
+	"github.com/k0marov/socnet/core/ref"
+	. "github.com/k0marov/socnet/core/test_helpers"
 )
 
 func TestStoreProfileUpdater(t *testing.T) {

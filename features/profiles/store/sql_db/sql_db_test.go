@@ -1,14 +1,14 @@
 package sql_db_test
 
 import (
-	"core/core_errors"
-	"core/core_values"
-	. "core/test_helpers"
 	"database/sql"
-	"profiles/domain/entities"
-	"profiles/domain/values"
-	"profiles/store"
-	"profiles/store/sql_db"
+	"github.com/k0marov/socnet/core/core_errors"
+	"github.com/k0marov/socnet/core/core_values"
+	. "github.com/k0marov/socnet/core/test_helpers"
+	"github.com/k0marov/socnet/features/profiles/domain/entities"
+	"github.com/k0marov/socnet/features/profiles/domain/values"
+	"github.com/k0marov/socnet/features/profiles/store"
+	"github.com/k0marov/socnet/features/profiles/store/sql_db"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"

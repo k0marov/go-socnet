@@ -1,10 +1,12 @@
 package file_storage_test
 
 import (
-	"core/ref"
-	. "core/test_helpers"
-	"profiles/store/file_storage"
 	"testing"
+
+	"github.com/k0marov/socnet/features/profiles/store/file_storage"
+
+	"github.com/k0marov/socnet/core/ref"
+	. "github.com/k0marov/socnet/core/test_helpers"
 )
 
 func TestAvatarFileCreator(t *testing.T) {

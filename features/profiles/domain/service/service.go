@@ -1,15 +1,17 @@
 package service
 
 import (
-	"core/client_errors"
-	"core/core_errors"
-	"core/core_values"
-	core_entities "core/entities"
 	"fmt"
-	"profiles/domain/entities"
-	"profiles/domain/store"
-	"profiles/domain/validators"
-	"profiles/domain/values"
+
+	"github.com/k0marov/socnet/features/profiles/domain/entities"
+	"github.com/k0marov/socnet/features/profiles/domain/store"
+	"github.com/k0marov/socnet/features/profiles/domain/validators"
+	"github.com/k0marov/socnet/features/profiles/domain/values"
+
+	"github.com/k0marov/socnet/core/client_errors"
+	"github.com/k0marov/socnet/core/core_errors"
+	"github.com/k0marov/socnet/core/core_values"
+	core_entities "github.com/k0marov/socnet/core/entities"
 )
 
 type (

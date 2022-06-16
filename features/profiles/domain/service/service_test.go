@@ -1,16 +1,18 @@
 package service_test
 
 import (
-	"core/client_errors"
-	"core/core_errors"
-	"core/core_values"
-	"core/ref"
-	. "core/test_helpers"
 	"fmt"
-	"profiles/domain/entities"
-	"profiles/domain/service"
-	"profiles/domain/values"
 	"testing"
+
+	"github.com/k0marov/socnet/features/profiles/domain/entities"
+	"github.com/k0marov/socnet/features/profiles/domain/service"
+	"github.com/k0marov/socnet/features/profiles/domain/values"
+
+	"github.com/k0marov/socnet/core/client_errors"
+	"github.com/k0marov/socnet/core/core_errors"
+	"github.com/k0marov/socnet/core/core_values"
+	"github.com/k0marov/socnet/core/ref"
+	. "github.com/k0marov/socnet/core/test_helpers"
 )
 
 func TestFollowsGetter(t *testing.T) {

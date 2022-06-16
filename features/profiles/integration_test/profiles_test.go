@@ -3,9 +3,6 @@ package profiles_test
 import (
 	"bytes"
 	"context"
-	"core/core_values"
-	core_entities "core/entities"
-	. "core/test_helpers"
 	"database/sql"
 	"encoding/json"
 	"io"
@@ -14,11 +11,16 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
-	"profiles"
-	"profiles/delivery/http/handlers"
-	"profiles/domain/entities"
-	"profiles/domain/values"
 	"testing"
+
+	"github.com/k0marov/socnet/features/profiles"
+	"github.com/k0marov/socnet/features/profiles/delivery/http/handlers"
+	"github.com/k0marov/socnet/features/profiles/domain/entities"
+	"github.com/k0marov/socnet/features/profiles/domain/values"
+
+	"github.com/k0marov/socnet/core/core_values"
+	core_entities "github.com/k0marov/socnet/core/entities"
+	. "github.com/k0marov/socnet/core/test_helpers"
 
 	_ "github.com/mattn/go-sqlite3"
 

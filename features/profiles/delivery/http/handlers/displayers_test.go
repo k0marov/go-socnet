@@ -2,17 +2,19 @@ package handlers_test
 
 import (
 	"context"
-	"core/client_errors"
-	"core/core_values"
-	core_entities "core/entities"
-	helpers "core/http_test_helpers"
-	. "core/test_helpers"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"profiles/delivery/http/handlers"
-	"profiles/domain/entities"
 	"testing"
+
+	"github.com/k0marov/socnet/features/profiles/delivery/http/handlers"
+	"github.com/k0marov/socnet/features/profiles/domain/entities"
+
+	"github.com/k0marov/socnet/core/client_errors"
+	"github.com/k0marov/socnet/core/core_values"
+	core_entities "github.com/k0marov/socnet/core/entities"
+	helpers "github.com/k0marov/socnet/core/http_test_helpers"
+	. "github.com/k0marov/socnet/core/test_helpers"
 
 	"github.com/go-chi/chi/v5"
 )

@@ -1,6 +1,6 @@
 package core_values
 
-import "core/ref"
+import "github.com/k0marov/socnet/core/ref"
 
 type UserId = string
 

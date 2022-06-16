@@ -1,14 +1,15 @@
 package http_helpers
 
 import (
-	"core/client_errors"
-	"core/core_values"
-	core_entities "core/entities"
-	"core/ref"
 	"encoding/json"
 	"io"
 	"log"
 	"net/http"
+
+	"github.com/k0marov/socnet/core/client_errors"
+	"github.com/k0marov/socnet/core/core_values"
+	core_entities "github.com/k0marov/socnet/core/entities"
+	"github.com/k0marov/socnet/core/ref"
 
 	auth "github.com/k0marov/golang-auth"
 )
@@ -47,7 +48,6 @@ func ThrowClientError(w http.ResponseWriter, clientError client_errors.ClientErr
 	http.Error(w, string(errorJson), clientError.HTTPCode)
 }
 
-const MaxFileSize = 3 << 20 // 3 MB
 func ParseFile(r *http.Request, field string) (core_values.FileData, bool) {
 	file, _, err := r.FormFile(field)
 	if err != nil {

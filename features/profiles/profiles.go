@@ -1,18 +1,20 @@
 package profiles
 
 import (
-	"core/entities"
-	"core/image_decoder"
-	"core/static_file_creator"
 	"database/sql"
 	"log"
-	"profiles/delivery/http/handlers"
-	"profiles/delivery/http/router"
-	"profiles/domain/service"
-	"profiles/domain/validators"
-	"profiles/store"
-	"profiles/store/file_storage"
-	"profiles/store/sql_db"
+
+	"github.com/k0marov/socnet/features/profiles/delivery/http/handlers"
+	"github.com/k0marov/socnet/features/profiles/delivery/http/router"
+	"github.com/k0marov/socnet/features/profiles/domain/service"
+	"github.com/k0marov/socnet/features/profiles/domain/validators"
+	"github.com/k0marov/socnet/features/profiles/store"
+	"github.com/k0marov/socnet/features/profiles/store/file_storage"
+	"github.com/k0marov/socnet/features/profiles/store/sql_db"
+
+	"github.com/k0marov/socnet/core/entities"
+	"github.com/k0marov/socnet/core/image_decoder"
+	"github.com/k0marov/socnet/core/static_file_creator"
 
 	"github.com/go-chi/chi/v5"
 	auth "github.com/k0marov/golang-auth"

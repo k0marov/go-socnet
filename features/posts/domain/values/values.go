@@ -1,7 +1,7 @@
 package values
 
 import (
-	"core/core_values"
+	"github.com/k0marov/socnet/core/core_values"
 )
 
 type PostId = string

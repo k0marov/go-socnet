@@ -1,6 +1,0 @@
-github.com/go-chi/chi/v5 v5.0.7 h1:rDTPXLDHGATaeHvVlLcR4Qe0zftYethFucbjVQ1PxU8=
-github.com/go-chi/chi/v5 v5.0.7/go.mod h1:DslCQbL2OYiznFReuXYUmQ2hGd1aDpCnlMNITLSKoi8=
-github.com/k0marov/golang-auth v0.0.0-20220609160628-c376872b8f92 h1:FI6mwMKIba6c8xN6U2p22Tb4gWvDS9dGOBRG5Yd7ggs=
-github.com/k0marov/golang-auth v0.0.0-20220609160628-c376872b8f92/go.mod h1:88TtwLzBMAV4sY3emds5Dz3xb8hCppDE/V/84a4uhd0=
-github.com/mattn/go-sqlite3 v1.14.13 h1:1tj15ngiFfcZzii7yd82foL+ks+ouQcj8j/TPq3fk1I=
-github.com/mattn/go-sqlite3 v1.14.13/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=

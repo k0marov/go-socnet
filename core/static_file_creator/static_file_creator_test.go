@@ -1,13 +1,14 @@
 package static_file_creator_test
 
 import (
-	"core/ref"
-	"core/static_file_creator"
-	. "core/test_helpers"
 	"io/fs"
 	"path/filepath"
 	"reflect"
 	"testing"
+
+	"github.com/k0marov/socnet/core/ref"
+	"github.com/k0marov/socnet/core/static_file_creator"
+	. "github.com/k0marov/socnet/core/test_helpers"
 )
 
 func TestStaticFileCreator(t *testing.T) {

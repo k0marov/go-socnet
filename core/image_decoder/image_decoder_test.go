@@ -1,13 +1,14 @@
 package image_decoder_test
 
 import (
-	"core/image_decoder"
-	. "core/test_helpers"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/k0marov/socnet/core/image_decoder"
+	. "github.com/k0marov/socnet/core/test_helpers"
 )
 
 func TestImageDecoderImpl(t *testing.T) {

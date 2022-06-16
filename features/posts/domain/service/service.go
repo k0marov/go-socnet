@@ -1,14 +1,16 @@
 package service
 
 import (
-	"core/client_errors"
-	"core/core_errors"
-	"core/core_values"
 	"fmt"
-	"posts/domain/entities"
 
-	"posts/domain/store"
-	"posts/domain/values"
+	"github.com/k0marov/socnet/features/posts/domain/entities"
+
+	"github.com/k0marov/socnet/core/client_errors"
+	"github.com/k0marov/socnet/core/core_errors"
+	"github.com/k0marov/socnet/core/core_values"
+
+	"github.com/k0marov/socnet/features/posts/domain/store"
+	"github.com/k0marov/socnet/features/posts/domain/values"
 )
 
 type (

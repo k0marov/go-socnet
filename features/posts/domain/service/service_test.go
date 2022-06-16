@@ -1,14 +1,16 @@
 package service_test
 
 import (
-	"core/client_errors"
-	"core/core_errors"
-	"core/core_values"
-	. "core/test_helpers"
-	"posts/domain/entities"
-	"posts/domain/service"
-	"posts/domain/values"
 	"testing"
+
+	"github.com/k0marov/socnet/features/posts/domain/entities"
+	"github.com/k0marov/socnet/features/posts/domain/service"
+	"github.com/k0marov/socnet/features/posts/domain/values"
+
+	"github.com/k0marov/socnet/core/client_errors"
+	"github.com/k0marov/socnet/core/core_errors"
+	"github.com/k0marov/socnet/core/core_values"
+	. "github.com/k0marov/socnet/core/test_helpers"
 )
 
 func TestPostsGetter(t *testing.T) {

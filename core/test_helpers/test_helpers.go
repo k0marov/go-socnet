@@ -6,15 +6,16 @@ import (
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
-	profile_entities "profiles/domain/entities"
-	"profiles/domain/values"
 	"reflect"
 	"testing"
 
-	post_entities "posts/domain/entities"
+	profile_entities "github.com/k0marov/socnet/features/profiles/domain/entities"
+	"github.com/k0marov/socnet/features/profiles/domain/values"
 
-	"core/client_errors"
-	core_entities "core/entities"
+	post_entities "github.com/k0marov/socnet/features/posts/domain/entities"
+
+	"github.com/k0marov/socnet/core/client_errors"
+	core_entities "github.com/k0marov/socnet/core/entities"
 
 	auth "github.com/k0marov/golang-auth"
 )

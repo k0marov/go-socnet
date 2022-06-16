@@ -1,9 +1,10 @@
 package file_storage
 
 import (
-	"core/ref"
-	"core/static_file_creator"
-	"profiles/store"
+	"github.com/k0marov/socnet/features/profiles/store"
+
+	"github.com/k0marov/socnet/core/ref"
+	"github.com/k0marov/socnet/core/static_file_creator"
 )
 
 const UserPrefix = "user_"

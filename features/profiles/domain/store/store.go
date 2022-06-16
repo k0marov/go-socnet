@@ -1,9 +1,10 @@
 package store
 
 import (
-	"core/core_values"
-	"profiles/domain/entities"
-	"profiles/domain/values"
+	"github.com/k0marov/socnet/features/profiles/domain/entities"
+	"github.com/k0marov/socnet/features/profiles/domain/values"
+
+	"github.com/k0marov/socnet/core/core_values"
 )
 
 type (

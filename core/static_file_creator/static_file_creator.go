@@ -1,11 +1,12 @@
 package static_file_creator
 
 import (
-	"core/ref"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
+
+	"github.com/k0marov/socnet/core/ref"
 )
 
 type StaticFileCreator = func(data ref.Ref[[]byte], dir, filename string) (string, error)

@@ -1,13 +1,15 @@
 package sql_db
 
 import (
-	"core/core_errors"
-	"core/core_values"
 	"database/sql"
 	"fmt"
-	"profiles/domain/entities"
-	"profiles/domain/values"
-	"profiles/store"
+
+	"github.com/k0marov/socnet/features/profiles/domain/entities"
+	"github.com/k0marov/socnet/features/profiles/domain/values"
+	"github.com/k0marov/socnet/features/profiles/store"
+
+	"github.com/k0marov/socnet/core/core_errors"
+	"github.com/k0marov/socnet/core/core_values"
 )
 
 type SqlDB struct {

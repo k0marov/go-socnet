@@ -1,11 +1,13 @@
 package store
 
 import (
-	"core/core_values"
 	"fmt"
-	"profiles/domain/entities"
-	"profiles/domain/store"
-	"profiles/domain/values"
+
+	"github.com/k0marov/socnet/features/profiles/domain/entities"
+	"github.com/k0marov/socnet/features/profiles/domain/store"
+	"github.com/k0marov/socnet/features/profiles/domain/values"
+
+	"github.com/k0marov/socnet/core/core_values"
 )
 
 type DBUpdateData struct {

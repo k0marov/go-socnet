@@ -1,16 +1,18 @@
 package validators_test
 
 import (
-	"core/client_errors"
-	"core/image_decoder"
-	"core/ref"
-	. "core/test_helpers"
 	"fmt"
-	"profiles/domain/validators"
-	"profiles/domain/values"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/k0marov/socnet/features/profiles/domain/validators"
+	"github.com/k0marov/socnet/features/profiles/domain/values"
+
+	"github.com/k0marov/socnet/core/client_errors"
+	"github.com/k0marov/socnet/core/image_decoder"
+	"github.com/k0marov/socnet/core/ref"
+	. "github.com/k0marov/socnet/core/test_helpers"
 )
 
 func TestProfileUpdateValidator(t *testing.T) {
