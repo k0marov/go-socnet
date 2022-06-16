@@ -1,7 +1,6 @@
 package sql_db_test
 
 import (
-	"database/sql"
 	"github.com/k0marov/socnet/core/core_errors"
 	"github.com/k0marov/socnet/core/core_values"
 	. "github.com/k0marov/socnet/core/test_helpers"
@@ -235,13 +234,4 @@ func TestSqlDB(t *testing.T) {
 			Assert(t, isFollowing, true, "other profile is a follower")
 		}
 	})
-}
-
-func OpenSqliteDB(t testing.TB) *sql.DB {
-	t.Helper()
-	sql, err := sql.Open("sqlite3", "file::memory:?cache=shared")
-	if err != nil {
-		t.Fatalf("error while opening in-memory database: %v", err)
-	}
-	return sql
 }

@@ -26,7 +26,7 @@ func NewSqlDB(sql *sql.DB) (*SqlDB, error) {
 
 func initSQL(sql *sql.DB) error {
 	_, err := sql.Exec(`CREATE TABLE IF NOT EXISTS Profile(
-		id INTEGER PRIMARYKEY,
+		id INTEGER PRIMARY KEY,
 		username VARCHAR(255) NOT NULL,
 		about TEXT NOT NULL,
 		avatarPath VARCHAR(255) NOT NULL

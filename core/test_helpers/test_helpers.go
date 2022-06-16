@@ -1,6 +1,7 @@
 package test_helpers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"github.com/k0marov/socnet/core/core_values"
@@ -65,14 +66,6 @@ func AssertFatal[T comparable](t testing.TB, got, want T, description string) {
 	}
 }
 
-func AssertNotNil[T comparable](t testing.TB, got T, description string) {
-	t.Helper()
-	var nilT T
-	if got == nilT {
-		t.Errorf("expected %s to be non nil, but got nil", description)
-	}
-}
-
 func AssertClientError(t testing.TB, response *httptest.ResponseRecorder, err client_errors.ClientError) {
 	t.Helper()
 	var got client_errors.ClientError
@@ -95,26 +88,6 @@ func AssertJSONData[T any](t testing.TB, response *httptest.ResponseRecorder, wa
 	var gotData T
 	json.NewDecoder(response.Body).Decode(&gotData)
 	Assert(t, gotData, wantData, "json encoded data")
-}
-
-func AssertUniqueCount[T comparable](t testing.TB, slice []T, want int) {
-	t.Helper()
-	unique := []T{}
-	for _, val := range slice {
-		if !CheckInSlice(val, unique) {
-			unique = append(unique, val)
-		}
-	}
-	Assert(t, len(unique), want, "number of unique elements")
-}
-
-func CheckInSlice[T comparable](elem T, slice []T) bool {
-	for _, sliceElem := range slice {
-		if sliceElem == elem {
-			return true
-		}
-	}
-	return false
 }
 
 func RandomError() error {
@@ -171,6 +144,15 @@ func RandomNewPostData() post_values.NewPostData {
 		Author: RandomString(),
 		Images: []core_values.FileData{RandomFileData(), RandomFileData()},
 	}
+}
+
+func OpenSqliteDB(t testing.TB) *sql.DB {
+	t.Helper()
+	sql, err := sql.Open("sqlite3", "file::memory:?cache=shared")
+	if err != nil {
+		t.Fatalf("error while opening in-memory database: %v", err)
+	}
+	return sql
 }
 
 func TimeAlmostEqual(t, want time.Time) bool {
