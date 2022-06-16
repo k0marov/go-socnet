@@ -98,7 +98,7 @@ func TestProfiles(t *testing.T) {
 		checkProfileFromServer(t, profile2)
 
 		// update avatar for first user
-		wantAvatarPath := filepath.Join("static", "user_"+user1.Id, "avatar")
+		wantAvatarPath := filepath.Join("static", "profile_"+user1.Id, "avatar")
 		avatar := readFixture(t, "test_avatar.jpg")
 
 		body, contentType := createMultipartBody(avatar)

@@ -15,7 +15,7 @@ func TestAvatarFileCreator(t *testing.T) {
 		tData := []byte(RandomString())
 		tDataRef, _ := ref.NewRef(&tData)
 
-		expectedDir := file_storage.UserPrefix + tUserId
+		expectedDir := file_storage.ProfilePrefix + tUserId
 		expectedName := file_storage.AvatarFileName
 
 		wantPath := RandomString()
