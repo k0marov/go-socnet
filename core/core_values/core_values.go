@@ -7,3 +7,4 @@ type UserId = string
 type FileData = ref.Ref[[]byte]
 
 type ImageUrl = string
+type StaticFilePath = string

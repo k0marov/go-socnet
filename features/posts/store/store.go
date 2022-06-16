@@ -5,6 +5,8 @@ import (
 	"github.com/k0marov/socnet/features/posts/domain/entities"
 	"github.com/k0marov/socnet/features/posts/domain/store"
 	"github.com/k0marov/socnet/features/posts/domain/values"
+	"github.com/k0marov/socnet/features/posts/store/file_storage"
+	"github.com/k0marov/socnet/features/posts/store/models"
 	"time"
 )
 
@@ -14,9 +16,12 @@ type (
 	DBUnliker      func(values.PostId, core_values.UserId) error
 	DBLikeChecker  func(values.PostId, core_values.UserId) (bool, error)
 	DBAuthorGetter func(values.PostId) (core_values.UserId, error)
+
+	DBPostCreator     func(newPost models.PostToCreate) (values.PostId, error)
+	DBPostImagesAdder func(values.PostId, []core_values.StaticFilePath) error
 )
 
-func NewStorePostCreator() store.StorePostCreator {
+func NewStorePostCreator(createPost DBPostCreator, storeImages file_storage.PostImageFilesCreator, addImages DBPostImagesAdder) store.StorePostCreator {
 	return func(post values.NewPostData, createdAt time.Time) error {
 		panic("unimplemented")
 	}

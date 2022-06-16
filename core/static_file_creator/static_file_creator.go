@@ -13,10 +13,10 @@ type StaticFileCreator = func(data ref.Ref[[]byte], dir, filename string) (strin
 
 const StaticDir = "static/"
 
-// os.MkdirAll implements this
+// RecursiveDirCreator os.MkdirAll implements this
 type RecursiveDirCreator = func(path string, perm fs.FileMode) error
 
-// os.WriteFile implements this
+// FileCreator os.WriteFile implements this
 type FileCreator = func(name string, data []byte, perm fs.FileMode) error
 
 func NewStaticFileCreator(mkdirAll RecursiveDirCreator, writeFile FileCreator) StaticFileCreator {
