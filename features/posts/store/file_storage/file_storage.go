@@ -34,6 +34,11 @@ func NewPostImageFilesCreator(createFile static_store.StaticFileCreator) PostIma
 
 func NewPostFilesDeleter(deleteDir static_store.StaticDirDeleter) PostFilesDeleter {
 	return func(post values.PostId, author core_values.UserId) error {
-		panic("unimplemented")
+		dir := filepath.Join(profiles.ProfilePrefix+author, PostPrefix+post)
+		err := deleteDir(dir)
+		if err != nil {
+			return fmt.Errorf("while deleting the post directory: %w", err)
+		}
+		return nil
 	}
 }

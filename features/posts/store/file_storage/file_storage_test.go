@@ -41,5 +41,24 @@ func TestPostImageFilesCreator(t *testing.T) {
 }
 
 func TestPostFilesDeleter(t *testing.T) {
-
+	post := RandomString()
+	author := RandomString()
+	t.Run("happy case", func(t *testing.T) {
+		wantDir := filepath.Join(profiles.ProfilePrefix+author, file_storage.PostPrefix+post)
+		deleteDir := func(dir string) error {
+			if dir == wantDir {
+				return nil
+			}
+			panic("unexpected args")
+		}
+		err := file_storage.NewPostFilesDeleter(deleteDir)(post, author)
+		AssertNoError(t, err)
+	})
+	t.Run("error case", func(t *testing.T) {
+		deleteDir := func(string) error {
+			return RandomError()
+		}
+		err := file_storage.NewPostFilesDeleter(deleteDir)(post, author)
+		AssertSomeError(t, err)
+	})
 }
