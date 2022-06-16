@@ -201,7 +201,7 @@ func TestPostCreator(t *testing.T) {
 			panic("unexpected args")
 		}
 		storeCreator := func(newPost values.NewPostData, createdAt time.Time) error {
-			if reflect.DeepEqual(newPost, tNewPost) && time.Since(createdAt).Minutes() < 1 {
+			if reflect.DeepEqual(newPost, tNewPost) && TimeAlmostNow(createdAt) {
 				return nil
 			}
 			panic("unexpected args")

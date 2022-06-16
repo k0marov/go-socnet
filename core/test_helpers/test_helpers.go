@@ -6,11 +6,13 @@ import (
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/core/ref"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
+	"math"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
+	"time"
 
 	profile_entities "github.com/k0marov/socnet/features/profiles/domain/entities"
 	"github.com/k0marov/socnet/features/profiles/domain/values"
@@ -169,6 +171,14 @@ func RandomNewPostData() post_values.NewPostData {
 		Author: RandomString(),
 		Images: []core_values.FileData{RandomFileData(), RandomFileData()},
 	}
+}
+
+func TimeAlmostEqual(t, want time.Time) bool {
+	return math.Abs(t.Sub(want).Minutes()) < 1
+}
+
+func TimeAlmostNow(t time.Time) bool {
+	return TimeAlmostEqual(t, time.Now())
 }
 
 func RandomFileData() core_values.FileData {

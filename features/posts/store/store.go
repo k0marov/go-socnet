@@ -1,6 +1,7 @@
 package store
 
 import (
+	"fmt"
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/features/posts/domain/entities"
 	"github.com/k0marov/socnet/features/posts/domain/store"
@@ -23,7 +24,24 @@ type (
 
 func NewStorePostCreator(createPost DBPostCreator, storeImages file_storage.PostImageFilesCreator, addImages DBPostImagesAdder) store.StorePostCreator {
 	return func(post values.NewPostData, createdAt time.Time) error {
-		panic("unimplemented")
+		postToCreate := models.PostToCreate{
+			Author:    post.Author,
+			Text:      post.Text,
+			CreatedAt: createdAt,
+		}
+		postId, err := createPost(postToCreate)
+		if err != nil {
+			return fmt.Errorf("while creating a post in db: %w", err)
+		}
+		imagePaths, err := storeImages(postId, post.Author, post.Images)
+		if err != nil {
+			return fmt.Errorf("while storing image files: %w", err)
+		}
+		err = addImages(postId, imagePaths)
+		if err != nil {
+			return fmt.Errorf("while adding image paths to db: %w", err)
+		}
+		return nil
 	}
 }
 
