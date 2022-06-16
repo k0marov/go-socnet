@@ -10,13 +10,13 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func NewGetMeHandler(detailedProfileGetter service.DetailedProfileGetter) http.HandlerFunc {
+func NewGetMeHandler(getProfile service.ProfileGetter) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user, ok := helpers.GetUserOrAddUnauthorized(w, r)
 		if !ok {
 			return
 		}
-		profile, err := detailedProfileGetter(user)
+		profile, err := getProfile(user.Id)
 		if err != nil {
 			helpers.HandleServiceError(w, err)
 			return

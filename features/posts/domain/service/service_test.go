@@ -33,7 +33,20 @@ func TestPostsGetter(t *testing.T) {
 }
 
 func TestPostDeleter(t *testing.T) {
+	t.Run("happy case", func(t *testing.T) {
+		// authorGetter := func(postId values.PostId) (core_values.UserId, error) {
 
+		// }
+	})
+	t.Run("error case - the calling user is not the post author", func(t *testing.T) {
+
+	})
+	t.Run("error case - store returns 404", func(t *testing.T) {
+
+	})
+	t.Run("error case - store returns some other error", func(t *testing.T) {
+
+	})
 }
 
 func TestPostCreator(t *testing.T) {

@@ -4,7 +4,8 @@ import (
 	"core/core_values"
 	"fmt"
 	"posts/domain/entities"
-	"posts/domain/store_contracts"
+
+	"posts/domain/store"
 	"posts/domain/values"
 )
 
@@ -15,8 +16,8 @@ type (
 	PostsGetter     func(authorId core_values.UserId) ([]entities.Post, error)
 )
 
-func NewPostDeleter() PostDeleter {
-	return func(post, fromUser core_values.UserId) error {
+func NewPostDeleter(getAuthor store.StoreAuthorGetter, deletePost store.StorePostDeleter) PostDeleter {
+	return func(post values.PostId, fromUser core_values.UserId) error {
 		panic("unimplemented")
 	}
 }
@@ -33,7 +34,7 @@ func NewPostCreator() PostCreator {
 	}
 }
 
-func NewPostsGetter(getPosts store_contracts.StorePostsGetter) PostsGetter {
+func NewPostsGetter(getPosts store.StorePostsGetter) PostsGetter {
 	return func(authorId core_values.UserId) ([]entities.Post, error) {
 		posts, err := getPosts(authorId)
 		if err != nil {

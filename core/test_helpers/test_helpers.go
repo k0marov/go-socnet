@@ -129,13 +129,6 @@ func RandomAuthUser() auth.User {
 	}
 }
 
-func RandomDetailedProfile() profile_entities.DetailedProfile {
-	return profile_entities.DetailedProfile{
-		Profile:         RandomProfile(),
-		FollowsProfiles: []profile_entities.Profile{RandomProfile(), RandomProfile(), RandomProfile()},
-	}
-}
-
 func RandomProfile() profile_entities.Profile {
 	return profile_entities.Profile{
 		Id:         RandomString(),

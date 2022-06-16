@@ -42,8 +42,7 @@ func NewProfilesRouterImpl(db *sql.DB) func(chi.Router) {
 	// file storage
 	avatarFileCreator := file_storage.NewAvatarFileCreator(static_file_creator.NewStaticFileCreatorImpl())
 	// store
-	storeDetailedProfileGetter := store.NewStoreDetailedProfileGetter(sqlDB.GetDetailedProfile)
-	storeProfileUpdater := store.NewStoreProfileUpdater(sqlDB.UpdateProfile, storeDetailedProfileGetter)
+	storeProfileUpdater := store.NewStoreProfileUpdater(sqlDB.UpdateProfile, sqlDB.GetProfile)
 	storeAvatarUpdater := store.NewStoreAvatarUpdater(avatarFileCreator, sqlDB.UpdateProfile)
 	storeFollowsGetter := store.NewStoreFollowsGetter(sqlDB.GetFollows)
 	storeProfileGetter := store.NewStoreProfileGetter(sqlDB.GetProfile)
@@ -54,14 +53,13 @@ func NewProfilesRouterImpl(db *sql.DB) func(chi.Router) {
 	profileUpdateValidator := validators.NewProfileUpdateValidator()
 	avatarValidator := validators.NewAvatarValidator(image_decoder.ImageDecoderImpl)
 
-	detailedProfileGetter := service.NewDetailedProfileGetter(storeDetailedProfileGetter)
 	profileUpdater := service.NewProfileUpdater(profileUpdateValidator, storeProfileUpdater)
 	avatarUpdater := service.NewAvatarUpdater(avatarValidator, storeAvatarUpdater)
 	followsGetter := service.NewFollowsGetter(storeFollowsGetter)
 	profileGetter := service.NewProfileGetter(storeProfileGetter)
 	followToggler := service.NewFollowToggler(storeFollowChecker, storeFollower, storeUnfollower)
 	// handlers
-	getMe := handlers.NewGetMeHandler(detailedProfileGetter)
+	getMe := handlers.NewGetMeHandler(profileGetter)
 	updateMe := handlers.NewUpdateMeHandler(profileUpdater)
 	updateAvatar := handlers.NewUpdateAvatarHandler(avatarUpdater)
 	getFollows := handlers.NewGetFollowsHandler(followsGetter)

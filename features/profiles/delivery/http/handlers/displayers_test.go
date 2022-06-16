@@ -25,9 +25,9 @@ func TestGetMeHandler(t *testing.T) {
 	}
 	helpers.BaseTest401(t, handlers.NewGetMeHandler(nil))
 	t.Run("should return 200 and a profile if authentication details are provided via context", func(t *testing.T) {
-		wantedProfile := RandomDetailedProfile()
-		getter := func(gotUser core_entities.User) (entities.DetailedProfile, error) {
-			if gotUser == user {
+		wantedProfile := RandomProfile()
+		getter := func(gotUser core_values.UserId) (entities.Profile, error) {
+			if gotUser == user.Id {
 				return wantedProfile, nil
 			}
 			panic(fmt.Sprintf("called with user=%v", gotUser))
@@ -39,8 +39,8 @@ func TestGetMeHandler(t *testing.T) {
 		AssertJSONData(t, response, wantedProfile)
 	})
 	helpers.BaseTestServiceErrorHandling(t, func(wantErr error, response *httptest.ResponseRecorder) {
-		getter := func(core_entities.User) (entities.DetailedProfile, error) {
-			return entities.DetailedProfile{}, wantErr
+		getter := func(core_values.UserId) (entities.Profile, error) {
+			return entities.Profile{}, wantErr
 		}
 		handlers.NewGetMeHandler(getter).ServeHTTP(response, createRequestWithAuth())
 	})

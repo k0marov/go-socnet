@@ -12,16 +12,14 @@ import (
 )
 
 func TestStoreProfileUpdater(t *testing.T) {
-	testDetailedProfile := RandomDetailedProfile()
+	testDetailedProfile := RandomProfile()
 	testUpdData := values.ProfileUpdateData{About: RandomString()}
 	testDBUpdData := store.DBUpdateData{About: testUpdData.About}
-	wantUpdatedProfile := entities.DetailedProfile{
-		Profile: entities.Profile{
-			Id:         testDetailedProfile.Id,
-			Username:   testDetailedProfile.Username,
-			AvatarPath: testDetailedProfile.AvatarPath,
-			About:      testUpdData.About,
-		},
+	wantUpdatedProfile := entities.Profile{
+		Id:         testDetailedProfile.Id,
+		Username:   testDetailedProfile.Username,
+		AvatarPath: testDetailedProfile.AvatarPath,
+		About:      testUpdData.About,
 	}
 	t.Run("happy case", func(t *testing.T) {
 		updaterCalled := false
@@ -32,7 +30,7 @@ func TestStoreProfileUpdater(t *testing.T) {
 			}
 			panic(fmt.Sprintf("called with unexpected arguments, id=%v, updData=%v", id, updData))
 		}
-		profileGetter := func(id string) (entities.DetailedProfile, error) {
+		profileGetter := func(id string) (entities.Profile, error) {
 			if id == testDetailedProfile.Id {
 				return wantUpdatedProfile, nil
 			}
@@ -58,8 +56,8 @@ func TestStoreProfileUpdater(t *testing.T) {
 		dbUpdater := func(string, store.DBUpdateData) error {
 			return nil
 		}
-		profileGetter := func(string) (entities.DetailedProfile, error) {
-			return entities.DetailedProfile{}, tErr
+		profileGetter := func(string) (entities.Profile, error) {
+			return entities.Profile{}, tErr
 		}
 		sut := store.NewStoreProfileUpdater(dbUpdater, profileGetter)
 		_, err := sut(testDetailedProfile.Id, testUpdData)

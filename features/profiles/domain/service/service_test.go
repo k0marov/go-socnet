@@ -13,41 +13,6 @@ import (
 	"testing"
 )
 
-func TestDetailedProfileGetter(t *testing.T) {
-	user := RandomUser()
-	t.Run("happy case", func(t *testing.T) {
-		wantProfile := RandomDetailedProfile()
-		storeGetter := func(userId string) (entities.DetailedProfile, error) {
-			if userId == user.Id {
-				return wantProfile, nil
-			}
-			panic("GetById called with incorrect arguments")
-		}
-		sut := service.NewDetailedProfileGetter(storeGetter)
-
-		gotProfile, err := sut(user)
-
-		AssertNoError(t, err)
-		Assert(t, gotProfile, wantProfile, "returned profile")
-	})
-	t.Run("error case - profile does not exist", func(t *testing.T) {
-		storeGetter := func(string) (entities.DetailedProfile, error) {
-			return entities.DetailedProfile{}, core_errors.ErrNotFound
-		}
-		sut := service.NewDetailedProfileGetter(storeGetter)
-		_, err := sut(user)
-		AssertError(t, err, client_errors.NotFound)
-	})
-	t.Run("error case - store throws, it is NOT a client error", func(t *testing.T) {
-		storeGetter := func(userId string) (entities.DetailedProfile, error) {
-			return entities.DetailedProfile{}, RandomError()
-		}
-		sut := service.NewDetailedProfileGetter(storeGetter)
-		_, err := sut(user)
-		AssertSomeError(t, err)
-	})
-}
-
 func TestFollowsGetter(t *testing.T) {
 	userId := RandomString()
 	t.Run("happy case", func(t *testing.T) {
@@ -192,22 +157,22 @@ func TestProfileGetter(t *testing.T) {
 func TestProfileCreator(t *testing.T) {
 	user := RandomUser()
 	t.Run("happy case", func(t *testing.T) {
-		wantProfile := values.NewProfile{
+		testNewProfile := values.NewProfile{
 			Id:         user.Id,
 			Username:   user.Username,
 			About:      service.DefaultAbout,
 			AvatarPath: service.DefaultAvatarPath,
 		}
-		wantCreatedProfile := entities.DetailedProfile{Profile: entities.Profile{
+		wantCreatedProfile := entities.Profile{
 			Id:         user.Id,
 			Username:   user.Username,
 			About:      service.DefaultAbout,
 			AvatarPath: service.DefaultAvatarPath,
 			Follows:    0,
 			Followers:  0,
-		}, FollowsProfiles: []entities.Profile{}}
+		}
 		storeNew := func(profile values.NewProfile) error {
-			if profile == wantProfile {
+			if profile == testNewProfile {
 				return nil
 			}
 			panic(fmt.Sprintf("StoreNew called with unexpected profile: %v", profile))
@@ -239,8 +204,8 @@ func TestProfileUpdater(t *testing.T) {
 		return client_errors.ClientError{}, true
 	}
 	t.Run("happy case", func(t *testing.T) {
-		wantUpdatedProfile := RandomDetailedProfile()
-		storeUpdater := func(id string, updData values.ProfileUpdateData) (entities.DetailedProfile, error) {
+		wantUpdatedProfile := RandomProfile()
+		storeUpdater := func(id string, updData values.ProfileUpdateData) (entities.Profile, error) {
 			if id == user.Id && updData == testUpdateData {
 				return wantUpdatedProfile, nil
 			}
@@ -265,8 +230,8 @@ func TestProfileUpdater(t *testing.T) {
 		AssertError(t, gotErr, clientError)
 	})
 	t.Run("error case - store throws an error", func(t *testing.T) {
-		storeUpdater := func(string, values.ProfileUpdateData) (entities.DetailedProfile, error) {
-			return entities.DetailedProfile{}, RandomError()
+		storeUpdater := func(string, values.ProfileUpdateData) (entities.Profile, error) {
+			return entities.Profile{}, RandomError()
 		}
 		sut := service.NewProfileUpdater(silentValidator, storeUpdater)
 		_, err := sut(user, testUpdateData)

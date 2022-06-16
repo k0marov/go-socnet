@@ -79,18 +79,6 @@ func (db *SqlDB) GetProfile(profileId core_values.UserId) (entities.Profile, err
 	return profile, nil
 }
 
-func (db *SqlDB) GetDetailedProfile(profileId core_values.UserId) (entities.DetailedProfile, error) {
-	profile, err := db.GetProfile(profileId)
-	if err != nil {
-		return entities.DetailedProfile{}, err
-	}
-	follows, err := db.GetFollows(profileId)
-	if err != nil {
-		return entities.DetailedProfile{}, err
-	}
-	return entities.DetailedProfile{Profile: profile, FollowsProfiles: follows}, nil
-}
-
 func (db *SqlDB) UpdateProfile(userId core_values.UserId, upd store.DBUpdateData) error {
 	_, err := db.sql.Exec(`
 	UPDATE Profile SET 

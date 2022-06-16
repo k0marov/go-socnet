@@ -9,9 +9,5 @@ type Profile struct {
 	AvatarPath string
 	Follows    int
 	Followers  int
-}
-
-type DetailedProfile struct {
-	Profile
-	FollowsProfiles []Profile
+	// IsFollowedByCaller bool
 }

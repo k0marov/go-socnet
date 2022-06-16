@@ -4,7 +4,7 @@ import (
 	"core/core_values"
 	"fmt"
 	"profiles/domain/entities"
-	"profiles/domain/store_contracts"
+	"profiles/domain/store"
 	"profiles/domain/values"
 )
 
@@ -13,7 +13,7 @@ type DBUpdateData struct {
 	AvatarPath string
 }
 
-func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBProfile DBProfileUpdater) store_contracts.StoreAvatarUpdater {
+func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBProfile DBProfileUpdater) store.StoreAvatarUpdater {
 	return func(userId core_values.UserId, avatar values.AvatarData) (values.AvatarPath, error) {
 		path, err := createFile(avatar.Data, userId)
 		if err != nil {
@@ -31,40 +31,36 @@ func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBProfile DBProfi
 	}
 }
 
-func NewStoreProfileUpdater(updateDBProfile DBProfileUpdater, getProfile store_contracts.StoreDetailedProfileGetter) store_contracts.StoreProfileUpdater {
-	return func(id core_values.UserId, upd values.ProfileUpdateData) (entities.DetailedProfile, error) {
+func NewStoreProfileUpdater(updateDBProfile DBProfileUpdater, getProfile store.StoreDetailedProfileGetter) store.StoreProfileUpdater {
+	return func(id core_values.UserId, upd values.ProfileUpdateData) (entities.Profile, error) {
 		err := updateDBProfile(id, DBUpdateData{About: upd.About})
 		if err != nil {
-			return entities.DetailedProfile{}, fmt.Errorf("error while updating profile in db: %w", err)
+			return entities.Profile{}, fmt.Errorf("error while updating profile in db: %w", err)
 		}
 		return getProfile(id)
 	}
 }
 
-func NewStoreDetailedProfileGetter(getDBDetailedProfile DBDetailedProfileGetter) store_contracts.StoreDetailedProfileGetter {
-	return store_contracts.StoreDetailedProfileGetter(getDBDetailedProfile)
+func NewStoreProfileCreator(createDBProfile DBProfileCreator) store.StoreProfileCreator {
+	return store.StoreProfileCreator(createDBProfile)
 }
 
-func NewStoreProfileCreator(createDBProfile DBProfileCreator) store_contracts.StoreProfileCreator {
-	return store_contracts.StoreProfileCreator(createDBProfile)
+func NewStoreProfileGetter(getDBProfile DBProfileGetter) store.StoreProfileGetter {
+	return store.StoreProfileGetter(getDBProfile)
 }
 
-func NewStoreProfileGetter(getDBProfile DBProfileGetter) store_contracts.StoreProfileGetter {
-	return store_contracts.StoreProfileGetter(getDBProfile)
+func NewStoreFollowsGetter(dbFollowsGetter DBFollowsGetter) store.StoreFollowsGetter {
+	return store.StoreFollowsGetter(dbFollowsGetter)
 }
 
-func NewStoreFollowsGetter(dbFollowsGetter DBFollowsGetter) store_contracts.StoreFollowsGetter {
-	return store_contracts.StoreFollowsGetter(dbFollowsGetter)
+func NewStoreFollowChecker(dbFollowChecker DBFollowChecker) store.StoreFollowChecker {
+	return store.StoreFollowChecker(dbFollowChecker)
 }
 
-func NewStoreFollowChecker(dbFollowChecker DBFollowChecker) store_contracts.StoreFollowChecker {
-	return store_contracts.StoreFollowChecker(dbFollowChecker)
+func NewStoreFollower(dbFollower DBFollower) store.StoreFollower {
+	return store.StoreFollower(dbFollower)
 }
 
-func NewStoreFollower(dbFollower DBFollower) store_contracts.StoreFollower {
-	return store_contracts.StoreFollower(dbFollower)
-}
-
-func NewStoreUnfollower(dbUnfollower DBUnfollower) store_contracts.StoreUnfollower {
-	return store_contracts.StoreUnfollower(dbUnfollower)
+func NewStoreUnfollower(dbUnfollower DBUnfollower) store.StoreUnfollower {
+	return store.StoreUnfollower(dbUnfollower)
 }

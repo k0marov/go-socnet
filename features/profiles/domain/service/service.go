@@ -7,19 +7,18 @@ import (
 	core_entities "core/entities"
 	"fmt"
 	"profiles/domain/entities"
-	store "profiles/domain/store_contracts"
+	"profiles/domain/store"
 	"profiles/domain/validators"
 	"profiles/domain/values"
 )
 
 type (
-	ProfileGetter         func(core_values.UserId) (entities.Profile, error)
-	FollowsGetter         func(core_values.UserId) ([]entities.Profile, error)
-	FollowToggler         func(target, follower core_values.UserId) error
-	DetailedProfileGetter func(core_entities.User) (entities.DetailedProfile, error)
-	ProfileUpdater        func(core_entities.User, values.ProfileUpdateData) (entities.DetailedProfile, error)
-	AvatarUpdater         func(core_entities.User, values.AvatarData) (values.AvatarPath, error)
-	ProfileCreator        func(core_entities.User) (entities.DetailedProfile, error)
+	ProfileGetter  func(core_values.UserId) (entities.Profile, error)
+	FollowsGetter  func(core_values.UserId) ([]entities.Profile, error)
+	FollowToggler  func(target, follower core_values.UserId) error
+	ProfileUpdater func(core_entities.User, values.ProfileUpdateData) (entities.Profile, error)
+	AvatarUpdater  func(core_entities.User, values.AvatarData) (values.AvatarPath, error)
+	ProfileCreator func(core_entities.User) (entities.Profile, error)
 )
 
 func NewProfileGetter(storeProfileGetter store.StoreProfileGetter) ProfileGetter {
@@ -76,32 +75,15 @@ func NewFollowToggler(storeFollowChecker store.StoreFollowChecker, storeFollower
 }
 
 func NewProfileUpdater(validator validators.ProfileUpdateValidator, storeProfileUpdater store.StoreProfileUpdater) ProfileUpdater {
-	return func(user core_entities.User, updateData values.ProfileUpdateData) (entities.DetailedProfile, error) {
+	return func(user core_entities.User, updateData values.ProfileUpdateData) (entities.Profile, error) {
 		if clientError, ok := validator(updateData); !ok {
-			return entities.DetailedProfile{}, clientError
+			return entities.Profile{}, clientError
 		}
 		updatedProfile, err := storeProfileUpdater(user.Id, updateData)
 		if err != nil {
-			if err == core_errors.ErrNotFound {
-				return entities.DetailedProfile{}, client_errors.NotFound
-			}
-			return entities.DetailedProfile{}, fmt.Errorf("got an error while updating profile in a service: %w", err)
+			return entities.Profile{}, fmt.Errorf("got an error while updating profile in a service: %w", err)
 		}
 		return updatedProfile, nil
-	}
-}
-
-func NewDetailedProfileGetter(storeDetailedGetter store.StoreDetailedProfileGetter) DetailedProfileGetter {
-	return func(user core_entities.User) (entities.DetailedProfile, error) {
-		profile, err := storeDetailedGetter(user.Id)
-		if err != nil {
-			if err == core_errors.ErrNotFound {
-				return entities.DetailedProfile{}, client_errors.NotFound
-			}
-			return entities.DetailedProfile{}, fmt.Errorf("got an error while getting profile in a service: %w", err)
-		}
-
-		return profile, nil
 	}
 }
 
@@ -110,7 +92,7 @@ const DefaultAvatarPath = ""
 
 // this should be invoked when a new user is registered
 func NewProfileCreator(storeProfileCreator store.StoreProfileCreator) ProfileCreator {
-	return func(user core_entities.User) (entities.DetailedProfile, error) {
+	return func(user core_entities.User) (entities.Profile, error) {
 		newProfile := values.NewProfile{
 			Id:         user.Id,
 			Username:   user.Username,
@@ -119,17 +101,15 @@ func NewProfileCreator(storeProfileCreator store.StoreProfileCreator) ProfileCre
 		}
 		err := storeProfileCreator(newProfile)
 		if err != nil {
-			return entities.DetailedProfile{}, fmt.Errorf("got an error while creating a profile in a service: %w", err)
+			return entities.Profile{}, fmt.Errorf("got an error while creating a profile in a service: %w", err)
 		}
-		createdProfile := entities.DetailedProfile{
-			Profile: entities.Profile{
-				Id:         newProfile.Id,
-				Username:   newProfile.Username,
-				About:      newProfile.About,
-				AvatarPath: newProfile.AvatarPath,
-				Follows:    0,
-				Followers:  0,
-			}, FollowsProfiles: []entities.Profile{},
+		createdProfile := entities.Profile{
+			Id:         newProfile.Id,
+			Username:   newProfile.Username,
+			About:      newProfile.About,
+			AvatarPath: newProfile.AvatarPath,
+			Follows:    0,
+			Followers:  0,
 		}
 		return createdProfile, nil
 	}

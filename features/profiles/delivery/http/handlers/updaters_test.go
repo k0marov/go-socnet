@@ -30,9 +30,9 @@ func TestUpdateMeHandler(t *testing.T) {
 	}
 
 	helpers.BaseTest401(t, handlers.NewUpdateMeHandler(nil))
-	t.Run("should update profile about if about field is provided", func(t *testing.T) {
-		updatedProfile := RandomDetailedProfile()
-		update := func(gotUser core_entities.User, updateData values.ProfileUpdateData) (entities.DetailedProfile, error) {
+	t.Run("happy case", func(t *testing.T) {
+		updatedProfile := RandomProfile()
+		update := func(gotUser core_entities.User, updateData values.ProfileUpdateData) (entities.Profile, error) {
 			if gotUser == user && updateData == profileUpdate {
 				return updatedProfile, nil
 			}
@@ -46,8 +46,8 @@ func TestUpdateMeHandler(t *testing.T) {
 		AssertJSONData(t, response, updatedProfile)
 	})
 	helpers.BaseTestServiceErrorHandling(t, func(wantErr error, w *httptest.ResponseRecorder) {
-		update := func(gotUser core_entities.User, updateData values.ProfileUpdateData) (entities.DetailedProfile, error) {
-			return entities.DetailedProfile{}, wantErr
+		update := func(gotUser core_entities.User, updateData values.ProfileUpdateData) (entities.Profile, error) {
+			return entities.Profile{}, wantErr
 		}
 		handlers.NewUpdateMeHandler(update).ServeHTTP(w, createGoodRequest())
 	})
