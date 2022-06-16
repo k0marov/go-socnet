@@ -16,8 +16,8 @@ import (
 func TestFollowsGetter(t *testing.T) {
 	userId := RandomString()
 	t.Run("happy case", func(t *testing.T) {
-		randomFollows := []entities.Profile{RandomProfile(), RandomProfile()}
-		storeFollowsGetter := func(gotUserId core_values.UserId) ([]entities.Profile, error) {
+		randomFollows := []core_values.UserId{RandomString(), RandomString()}
+		storeFollowsGetter := func(gotUserId core_values.UserId) ([]core_values.UserId, error) {
 			if gotUserId == userId {
 				return randomFollows, nil
 			}
@@ -30,7 +30,7 @@ func TestFollowsGetter(t *testing.T) {
 		Assert(t, gotFollows, randomFollows, "returned follows")
 	})
 	t.Run("error case - store returns not found", func(t *testing.T) {
-		storeFollowsGetter := func(core_values.UserId) ([]entities.Profile, error) {
+		storeFollowsGetter := func(core_values.UserId) ([]core_values.UserId, error) {
 			return nil, core_errors.ErrNotFound
 		}
 		sut := service.NewFollowsGetter(storeFollowsGetter)
@@ -38,7 +38,7 @@ func TestFollowsGetter(t *testing.T) {
 		AssertError(t, err, client_errors.NotFound)
 	})
 	t.Run("error case - store returns some other error", func(t *testing.T) {
-		storeFollowsGetter := func(core_values.UserId) ([]entities.Profile, error) {
+		storeFollowsGetter := func(core_values.UserId) ([]core_values.UserId, error) {
 			return nil, RandomError()
 		}
 		sut := service.NewFollowsGetter(storeFollowsGetter)

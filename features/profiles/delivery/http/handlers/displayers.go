@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"core/client_errors"
+	"core/core_values"
 	helpers "core/http_helpers"
 	"net/http"
-	"profiles/domain/entities"
 	"profiles/domain/service"
 
 	"github.com/go-chi/chi/v5"
@@ -46,7 +46,7 @@ func NewGetByIdHandler(profileGetter service.ProfileGetter) http.HandlerFunc {
 }
 
 type FollowsResponse struct {
-	Profiles []entities.Profile
+	Profiles []core_values.UserId
 }
 
 func NewGetFollowsHandler(followsGetter service.FollowsGetter) http.HandlerFunc {

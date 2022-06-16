@@ -158,7 +158,7 @@ func TestSqlDB(t *testing.T) {
 			AssertNoError(t, err)
 			if shouldFollow {
 				AssertFatal(t, len(follows), 1, "number of profiles the 'follower' follows")
-				Assert(t, follows[0].Id, target, "the id of followed profile")
+				Assert(t, follows[0], target, "the id of followed profile")
 			} else {
 				AssertFatal(t, len(follows), 0, "number of profiles the 'follower' follows")
 			}

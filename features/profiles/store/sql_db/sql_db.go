@@ -91,31 +91,27 @@ func (db *SqlDB) UpdateProfile(userId core_values.UserId, upd store.DBUpdateData
 	return nil
 }
 
-func (db *SqlDB) GetFollows(userId core_values.UserId) ([]entities.Profile, error) {
+func (db *SqlDB) GetFollows(userId core_values.UserId) ([]core_values.UserId, error) {
 	rows, err := db.sql.Query(`
-		SELECT target.id, target.username, target.about, target.avatarPath, 
-			(SELECT COUNT(*) FROM Follow WHERE follower_id = target.id) AS follows, 
-			(SELECT COUNT(*) FROM Follow WHERE target_id = target.id) AS followers
+		SELECT target_id
 		FROM Follow f
-		INNER JOIN Profile target 
-		ON target.id = f.target_id
 		WHERE f.follower_id = ?
 	`, userId)
 	if err != nil {
-		return []entities.Profile{}, fmt.Errorf("while querying for follows: %w", err)
+		return []core_values.UserId{}, fmt.Errorf("while querying for follows: %w", err)
 	}
 	defer rows.Close()
 
-	followsProfiles := []entities.Profile{}
+	follows := []core_values.UserId{}
 	for rows.Next() {
-		profile := entities.Profile{}
-		err := rows.Scan(&profile.Id, &profile.Username, &profile.About, &profile.AvatarPath, &profile.Follows, &profile.Followers)
+		followId := ""
+		err := rows.Scan(&followId)
 		if err != nil {
-			return []entities.Profile{}, fmt.Errorf("while scanning for a follow: %w", err)
+			return []core_values.UserId{}, fmt.Errorf("while scanning for a follow: %w", err)
 		}
-		followsProfiles = append(followsProfiles, profile)
+		follows = append(follows, followId)
 	}
-	return followsProfiles, nil
+	return follows, nil
 }
 
 func (db *SqlDB) IsFollowing(target, follower core_values.UserId) (bool, error) {

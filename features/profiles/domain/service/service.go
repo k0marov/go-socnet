@@ -14,7 +14,7 @@ import (
 
 type (
 	ProfileGetter  func(id, caller core_values.UserId) (entities.ContextedProfile, error)
-	FollowsGetter  func(core_values.UserId) ([]entities.Profile, error)
+	FollowsGetter  func(core_values.UserId) ([]core_values.UserId, error)
 	FollowToggler  func(target, follower core_values.UserId) error
 	ProfileUpdater func(core_entities.User, values.ProfileUpdateData) (entities.Profile, error)
 	AvatarUpdater  func(core_entities.User, values.AvatarData) (values.AvatarPath, error)
@@ -39,14 +39,14 @@ func NewProfileGetter(getProfile store.StoreProfileGetter, isFollowed store.Stor
 	}
 }
 
-func NewFollowsGetter(storeFollowsGetter store.StoreFollowsGetter) FollowsGetter {
-	return func(userId core_values.UserId) ([]entities.Profile, error) {
-		follows, err := storeFollowsGetter(userId)
+func NewFollowsGetter(getFollows store.StoreFollowsGetter) FollowsGetter {
+	return func(user core_values.UserId) ([]core_values.UserId, error) {
+		follows, err := getFollows(user)
 		if err != nil {
 			if err == core_errors.ErrNotFound {
-				return []entities.Profile{}, client_errors.NotFound
+				return []core_values.UserId{}, client_errors.NotFound
 			}
-			return []entities.Profile{}, fmt.Errorf("while getting follows in service: %w", err)
+			return []core_values.UserId{}, fmt.Errorf("while getting follows in service: %w", err)
 		}
 		return follows, nil
 	}

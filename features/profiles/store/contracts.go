@@ -14,7 +14,7 @@ type (
 	DBProfileCreator func(values.NewProfile) error
 	DBProfileUpdater func(id core_values.UserId, updData DBUpdateData) error
 
-	DBFollowsGetter func(id core_values.UserId) ([]entities.Profile, error)
+	DBFollowsGetter func(id core_values.UserId) ([]core_values.UserId, error)
 	DBFollowChecker func(target, follower core_values.UserId) (bool, error)
 	DBFollower      func(target, follower core_values.UserId) error
 	DBUnfollower    func(target, unfollower core_values.UserId) error

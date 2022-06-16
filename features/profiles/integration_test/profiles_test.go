@@ -145,7 +145,7 @@ func TestProfiles(t *testing.T) {
 
 	})
 	t.Run("following", func(t *testing.T) {
-		checkFollows := func(t testing.TB, id core_values.UserId, wantFollows []entities.Profile) {
+		checkFollows := func(t testing.TB, id core_values.UserId, wantFollows []core_values.UserId) {
 			t.Helper()
 			request := addAuthToReq(httptest.NewRequest(http.MethodGet, "/profiles/"+id+"/follows", nil), RandomUser())
 			response := httptest.NewRecorder()
@@ -184,7 +184,7 @@ func TestProfiles(t *testing.T) {
 		}
 		checkProfileFromServer(t, wantProfile1)
 
-		wantFollows := []entities.Profile{wantProfile1}
+		wantFollows := []core_values.UserId{wantProfile1.Id}
 		checkFollows(t, user2.Id, wantFollows)
 		wantProfile2 := entities.Profile{
 			Id:        user2.Id,
@@ -204,8 +204,7 @@ func TestProfiles(t *testing.T) {
 		assertIsFollowed(t, user1.Id, user2, false)
 		wantProfile1.Followers = 0
 		checkProfileFromServer(t, wantProfile1)
-		wantFollows = []entities.Profile{}
-		checkFollows(t, user2.Id, wantFollows)
+		checkFollows(t, user2.Id, []core_values.UserId{})
 		wantProfile2.Follows = 0
 		checkProfileFromServer(t, wantProfile2)
 	})

@@ -90,8 +90,8 @@ func TestGetByIdHandler(t *testing.T) {
 func TestFollowsHandler(t *testing.T) {
 	t.Run("should return 200 and a list of profiles if profile with given id exists", func(t *testing.T) {
 		randomId := RandomString()
-		randomProfiles := []entities.Profile{RandomProfile(), RandomProfile()}
-		followsGetter := func(userId core_values.UserId) ([]entities.Profile, error) {
+		randomProfiles := []core_values.UserId{RandomString(), RandomString(), RandomString()}
+		followsGetter := func(userId core_values.UserId) ([]core_values.UserId, error) {
 			if userId == randomId {
 				return randomProfiles, nil
 			}
@@ -112,7 +112,7 @@ func TestFollowsHandler(t *testing.T) {
 		AssertClientError(t, response, client_errors.IdNotProvided)
 	})
 	helpers.BaseTestServiceErrorHandling(t, func(err error, rr *httptest.ResponseRecorder) {
-		getter := func(userId core_values.UserId) ([]entities.Profile, error) {
+		getter := func(userId core_values.UserId) ([]core_values.UserId, error) {
 			return nil, err
 		}
 		handlers.NewGetFollowsHandler(getter).ServeHTTP(rr, createRequestWithId("42"))
