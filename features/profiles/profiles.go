@@ -56,7 +56,7 @@ func NewProfilesRouterImpl(db *sql.DB) func(chi.Router) {
 	profileUpdater := service.NewProfileUpdater(profileUpdateValidator, storeProfileUpdater)
 	avatarUpdater := service.NewAvatarUpdater(avatarValidator, storeAvatarUpdater)
 	followsGetter := service.NewFollowsGetter(storeFollowsGetter)
-	profileGetter := service.NewProfileGetter(storeProfileGetter)
+	profileGetter := service.NewProfileGetter(storeProfileGetter, storeFollowChecker)
 	followToggler := service.NewFollowToggler(storeFollowChecker, storeFollower, storeUnfollower)
 	// handlers
 	getMe := handlers.NewGetMeHandler(profileGetter)

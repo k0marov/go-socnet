@@ -152,6 +152,15 @@ func TestProfiles(t *testing.T) {
 			r.ServeHTTP(response, request)
 			AssertJSONData(t, response, handlers.FollowsResponse{Profiles: wantFollows})
 		}
+		assertIsFollowed := func(t testing.TB, target core_values.UserId, caller core_entities.User, isFollowed bool) {
+			t.Helper()
+			request := addAuthToReq(httptest.NewRequest(http.MethodGet, "/profiles/"+target, nil), caller)
+			response := httptest.NewRecorder()
+			r.ServeHTTP(response, request)
+			contextedProfile := entities.ContextedProfile{}
+			json.NewDecoder(response.Body).Decode(&contextedProfile)
+			Assert(t, contextedProfile.IsFollowedByCaller, isFollowed, "caller following or not following target")
+		}
 
 		// create 2 users
 		user1 := RandomUser()
@@ -166,6 +175,7 @@ func TestProfiles(t *testing.T) {
 		AssertStatusCode(t, response, http.StatusOK)
 
 		// assert it was followed
+		assertIsFollowed(t, user1.Id, user2, true)
 		wantProfile1 := entities.Profile{
 			Id:        user1.Id,
 			Username:  user1.Username,
@@ -191,6 +201,7 @@ func TestProfiles(t *testing.T) {
 		AssertStatusCode(t, response, http.StatusOK)
 
 		// assert it is now not followed
+		assertIsFollowed(t, user1.Id, user2, false)
 		wantProfile1.Followers = 0
 		checkProfileFromServer(t, wantProfile1)
 		wantFollows = []entities.Profile{}

@@ -16,7 +16,7 @@ func NewGetMeHandler(getProfile service.ProfileGetter) http.HandlerFunc {
 		if !ok {
 			return
 		}
-		profile, err := getProfile(user.Id)
+		profile, err := getProfile(user.Id, user.Id)
 		if err != nil {
 			helpers.HandleServiceError(w, err)
 			return
@@ -27,12 +27,16 @@ func NewGetMeHandler(getProfile service.ProfileGetter) http.HandlerFunc {
 
 func NewGetByIdHandler(profileGetter service.ProfileGetter) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user, ok := helpers.GetUserOrAddUnauthorized(w, r)
+		if !ok {
+			return
+		}
 		id := chi.URLParam(r, "id")
 		if id == "" {
 			helpers.ThrowClientError(w, client_errors.IdNotProvided)
 			return
 		}
-		profile, err := profileGetter(id)
+		profile, err := profileGetter(id, user.Id)
 		if err != nil {
 			helpers.HandleServiceError(w, err)
 			return

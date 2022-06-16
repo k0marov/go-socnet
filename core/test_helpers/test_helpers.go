@@ -140,6 +140,13 @@ func RandomProfile() profile_entities.Profile {
 	}
 }
 
+func RandomContextedProfile() profile_entities.ContextedProfile {
+	return profile_entities.ContextedProfile{
+		Profile:            RandomProfile(),
+		IsFollowedByCaller: RandomBool(),
+	}
+}
+
 func RandomNewProfile() values.NewProfile {
 	return values.NewProfile{
 		Id:         RandomString(),

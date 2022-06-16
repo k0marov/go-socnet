@@ -121,35 +121,57 @@ func TestFollowToggler(t *testing.T) {
 }
 
 func TestProfileGetter(t *testing.T) {
-	userId := RandomString()
+	targetId := RandomString()
+	callerId := RandomString()
 	t.Run("happy case", func(t *testing.T) {
 		randomProfile := RandomProfile()
+		isFollowed := RandomBool()
+		wantContextedProfile := entities.ContextedProfile{
+			Profile:            randomProfile,
+			IsFollowedByCaller: isFollowed,
+		}
 		storeProfileGetter := func(gotUserId core_values.UserId) (entities.Profile, error) {
-			if gotUserId == userId {
+			if gotUserId == targetId {
 				return randomProfile, nil
 			}
 			panic("called with unexpected arguments")
 		}
-		sut := service.NewProfileGetter(storeProfileGetter)
+		storeFollowsChecker := func(target, follower core_values.UserId) (bool, error) {
+			if target == targetId && follower == callerId {
+				return isFollowed, nil
+			}
+			panic("unexpected args")
+		}
+		sut := service.NewProfileGetter(storeProfileGetter, storeFollowsChecker)
 
-		gotProfile, err := sut(userId)
+		gotProfile, err := sut(targetId, callerId)
 		AssertNoError(t, err)
-		Assert(t, gotProfile, randomProfile, "returned profile")
+		Assert(t, gotProfile, wantContextedProfile, "returned profile")
 	})
 	t.Run("error case - store returns NotFoundErr", func(t *testing.T) {
 		storeProfileGetter := func(core_values.UserId) (entities.Profile, error) {
 			return entities.Profile{}, core_errors.ErrNotFound
 		}
-		sut := service.NewProfileGetter(storeProfileGetter)
-		_, err := sut(userId)
+		sut := service.NewProfileGetter(storeProfileGetter, nil)
+		_, err := sut(targetId, callerId)
 		AssertError(t, err, client_errors.NotFound)
 	})
 	t.Run("error case - store returns some other error", func(t *testing.T) {
 		storeProfileGetter := func(core_values.UserId) (entities.Profile, error) {
 			return entities.Profile{}, RandomError()
 		}
-		sut := service.NewProfileGetter(storeProfileGetter)
-		_, err := sut(userId)
+		sut := service.NewProfileGetter(storeProfileGetter, nil)
+		_, err := sut(targetId, callerId)
+		AssertSomeError(t, err)
+	})
+	t.Run("error case - store returns error when getting FollowsChecker", func(t *testing.T) {
+		storeProfileGetter := func(core_values.UserId) (entities.Profile, error) {
+			return entities.Profile{}, nil
+		}
+		storeFollowsChecker := func(core_values.UserId, core_values.UserId) (bool, error) {
+			return false, RandomError()
+		}
+		_, err := service.NewProfileGetter(storeProfileGetter, storeFollowsChecker)(targetId, callerId)
 		AssertSomeError(t, err)
 	})
 }

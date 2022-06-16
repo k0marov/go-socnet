@@ -13,7 +13,7 @@ import (
 )
 
 type (
-	ProfileGetter  func(core_values.UserId) (entities.Profile, error)
+	ProfileGetter  func(id, caller core_values.UserId) (entities.ContextedProfile, error)
 	FollowsGetter  func(core_values.UserId) ([]entities.Profile, error)
 	FollowToggler  func(target, follower core_values.UserId) error
 	ProfileUpdater func(core_entities.User, values.ProfileUpdateData) (entities.Profile, error)
@@ -21,16 +21,21 @@ type (
 	ProfileCreator func(core_entities.User) (entities.Profile, error)
 )
 
-func NewProfileGetter(storeProfileGetter store.StoreProfileGetter) ProfileGetter {
-	return func(id core_values.UserId) (entities.Profile, error) {
-		profile, err := storeProfileGetter(id)
+func NewProfileGetter(getProfile store.StoreProfileGetter, isFollowed store.StoreFollowChecker) ProfileGetter {
+	return func(id core_values.UserId, caller core_values.UserId) (entities.ContextedProfile, error) {
+		profile, err := getProfile(id)
 		if err != nil {
 			if err == core_errors.ErrNotFound {
-				return entities.Profile{}, client_errors.NotFound
+				return entities.ContextedProfile{}, client_errors.NotFound
 			}
-			return entities.Profile{}, fmt.Errorf("while getting profile in a service: %w", err)
+			return entities.ContextedProfile{}, fmt.Errorf("while getting profile in a service: %w", err)
 		}
-		return profile, nil
+		followedByCaller, err := isFollowed(id, caller)
+		if err != nil {
+			return entities.ContextedProfile{}, fmt.Errorf("while checking if profile is followed by caller: %w", err)
+		}
+		contextedProfile := entities.ContextedProfile{Profile: profile, IsFollowedByCaller: followedByCaller}
+		return contextedProfile, nil
 	}
 }
 

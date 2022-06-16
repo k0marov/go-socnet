@@ -11,3 +11,8 @@ type Profile struct {
 	Followers  int
 	// IsFollowedByCaller bool
 }
+
+type ContextedProfile struct {
+	Profile
+	IsFollowedByCaller bool
+}

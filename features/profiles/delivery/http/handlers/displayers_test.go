@@ -25,9 +25,9 @@ func TestGetMeHandler(t *testing.T) {
 	}
 	helpers.BaseTest401(t, handlers.NewGetMeHandler(nil))
 	t.Run("should return 200 and a profile if authentication details are provided via context", func(t *testing.T) {
-		wantedProfile := RandomProfile()
-		getter := func(gotUser core_values.UserId) (entities.Profile, error) {
-			if gotUser == user.Id {
+		wantedProfile := RandomContextedProfile()
+		getter := func(gotUser, caller core_values.UserId) (entities.ContextedProfile, error) {
+			if gotUser == user.Id && caller == user.Id {
 				return wantedProfile, nil
 			}
 			panic(fmt.Sprintf("called with user=%v", gotUser))
@@ -39,8 +39,8 @@ func TestGetMeHandler(t *testing.T) {
 		AssertJSONData(t, response, wantedProfile)
 	})
 	helpers.BaseTestServiceErrorHandling(t, func(wantErr error, response *httptest.ResponseRecorder) {
-		getter := func(core_values.UserId) (entities.Profile, error) {
-			return entities.Profile{}, wantErr
+		getter := func(core_values.UserId, core_values.UserId) (entities.ContextedProfile, error) {
+			return entities.ContextedProfile{}, wantErr
 		}
 		handlers.NewGetMeHandler(getter).ServeHTTP(response, createRequestWithAuth())
 	})
@@ -54,17 +54,19 @@ func createRequestWithId(userId core_values.UserId) *http.Request {
 }
 
 func TestGetByIdHandler(t *testing.T) {
+	helpers.BaseTest401(t, handlers.NewGetByIdHandler(nil))
 	t.Run("happy case", func(t *testing.T) {
-		randomId := RandomString()
-		randomProfile := RandomProfile()
-		profileGetter := func(userId core_values.UserId) (entities.Profile, error) {
-			if userId == randomId {
+		targetId := RandomString()
+		caller := RandomAuthUser()
+		randomProfile := RandomContextedProfile()
+		profileGetter := func(target, callerId core_values.UserId) (entities.ContextedProfile, error) {
+			if target == targetId && callerId == caller.Id {
 				return randomProfile, nil
 			}
 			panic("called with unexpected arguments")
 		}
 
-		request := createRequestWithId(randomId)
+		request := helpers.AddAuthDataToRequest(createRequestWithId(targetId), caller)
 		response := httptest.NewRecorder()
 
 		handlers.NewGetByIdHandler(profileGetter).ServeHTTP(response, request)
@@ -72,14 +74,16 @@ func TestGetByIdHandler(t *testing.T) {
 	})
 	t.Run("error case - id is not provided", func(t *testing.T) {
 		response := httptest.NewRecorder()
-		handlers.NewGetByIdHandler(nil).ServeHTTP(response, helpers.CreateRequest(nil)) // getter is nil, since it shouldn't be called
+		request := helpers.AddAuthDataToRequest(helpers.CreateRequest(nil), RandomAuthUser())
+		handlers.NewGetByIdHandler(nil).ServeHTTP(response, request)
 		AssertClientError(t, response, client_errors.IdNotProvided)
 	})
 	helpers.BaseTestServiceErrorHandling(t, func(err error, rr *httptest.ResponseRecorder) {
-		getter := func(userId core_values.UserId) (entities.Profile, error) {
-			return entities.Profile{}, err
+		getter := func(target, caller core_values.UserId) (entities.ContextedProfile, error) {
+			return entities.ContextedProfile{}, err
 		}
-		handlers.NewGetByIdHandler(getter).ServeHTTP(rr, createRequestWithId("42"))
+		request := helpers.AddAuthDataToRequest(createRequestWithId(RandomString()), RandomAuthUser())
+		handlers.NewGetByIdHandler(getter).ServeHTTP(rr, request)
 	})
 }
 
