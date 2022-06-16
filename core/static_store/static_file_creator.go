@@ -1,4 +1,4 @@
-package static_file_creator
+package static_store
 
 import (
 	"fmt"
@@ -8,10 +8,6 @@ import (
 
 	"github.com/k0marov/socnet/core/ref"
 )
-
-type StaticFileCreator = func(data ref.Ref[[]byte], dir, filename string) (string, error)
-
-const StaticDir = "static/"
 
 // RecursiveDirCreator os.MkdirAll implements this
 type RecursiveDirCreator = func(path string, perm fs.FileMode) error

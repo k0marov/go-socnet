@@ -14,7 +14,7 @@ import (
 
 	"github.com/k0marov/socnet/core/entities"
 	"github.com/k0marov/socnet/core/image_decoder"
-	"github.com/k0marov/socnet/core/static_file_creator"
+	"github.com/k0marov/socnet/core/static_store"
 
 	"github.com/go-chi/chi/v5"
 	auth "github.com/k0marov/golang-auth"
@@ -42,7 +42,7 @@ func NewProfilesRouterImpl(db *sql.DB) func(chi.Router) {
 		log.Fatalf("Error while opening sql db as a db for profiles: %v", err)
 	}
 	// file storage
-	avatarFileCreator := file_storage.NewAvatarFileCreator(static_file_creator.NewStaticFileCreatorImpl())
+	avatarFileCreator := file_storage.NewAvatarFileCreator(static_store.NewStaticFileCreatorImpl())
 	// store
 	storeProfileUpdater := store.NewStoreProfileUpdater(sqlDB.UpdateProfile, sqlDB.GetProfile)
 	storeAvatarUpdater := store.NewStoreAvatarUpdater(avatarFileCreator, sqlDB.UpdateProfile)
