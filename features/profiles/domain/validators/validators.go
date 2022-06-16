@@ -25,7 +25,7 @@ func NewAvatarValidator(imageDecoder image_decoder.ImageDecoder) AvatarValidator
 	return func(avatar values.AvatarData) (client_errors.ClientError, bool) {
 		imageDimensions, err := imageDecoder(avatar.Data.Value())
 		if err != nil {
-			return client_errors.NonImageAvatar, false
+			return client_errors.InvalidImage, false
 		}
 		if imageDimensions.Height != imageDimensions.Width {
 			return client_errors.NonSquareAvatar, false

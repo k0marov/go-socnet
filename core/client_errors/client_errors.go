@@ -48,7 +48,7 @@ var AboutTooLong = ClientError{
 	HTTPCode:       http.StatusBadRequest,
 }
 
-var NonImageAvatar = ClientError{
+var InvalidImage = ClientError{
 	DetailCode:     "avatar-non-image",
 	ReadableDetail: "The provided avatar is not in one of supported image codecs.",
 	HTTPCode:       http.StatusBadRequest,
@@ -81,5 +81,11 @@ var InsufficientPermissions = ClientError{
 var LikingYourself = ClientError{
 	DetailCode:     "liking-yourself",
 	ReadableDetail: "You cannot like your own content",
+	HTTPCode:       http.StatusBadRequest,
+}
+
+var TextTooLong = ClientError{
+	DetailCode:     "long-text",
+	ReadableDetail: "The provided text is too long.",
 	HTTPCode:       http.StatusBadRequest,
 }

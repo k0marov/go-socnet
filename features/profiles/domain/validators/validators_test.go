@@ -67,7 +67,7 @@ func TestAvatarValidator(t *testing.T) {
 	}{
 		{values.AvatarData{Data: makeRefWithoutCheck(&goodAvatar)}, true, client_errors.ClientError{}},
 		{values.AvatarData{Data: makeRefWithoutCheck(&nonSquareAvatar)}, false, client_errors.NonSquareAvatar},
-		{values.AvatarData{Data: makeRefWithoutCheck(&jsInjectionAvatar)}, false, client_errors.NonImageAvatar},
+		{values.AvatarData{Data: makeRefWithoutCheck(&jsInjectionAvatar)}, false, client_errors.InvalidImage},
 	}
 
 	for _, c := range cases {
