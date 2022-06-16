@@ -3,6 +3,9 @@ package test_helpers
 import (
 	"encoding/json"
 	"errors"
+	"github.com/k0marov/socnet/core/core_values"
+	"github.com/k0marov/socnet/core/ref"
+	post_values "github.com/k0marov/socnet/features/posts/domain/values"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
@@ -159,6 +162,19 @@ func RandomNewProfile() values.NewProfile {
 
 func RandomPost() post_entities.Post {
 	return post_entities.Post{}
+}
+func RandomNewPostData() post_values.NewPostData {
+	return post_values.NewPostData{
+		Text:   RandomString(),
+		Author: RandomString(),
+		Images: []core_values.FileData{RandomFileData(), RandomFileData()},
+	}
+}
+
+func RandomFileData() core_values.FileData {
+	data := []byte(RandomString())
+	ref, _ := ref.NewRef(&data)
+	return ref
 }
 
 func RandomClientError() client_errors.ClientError {

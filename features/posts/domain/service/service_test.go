@@ -1,7 +1,9 @@
 package service_test
 
 import (
+	"reflect"
 	"testing"
+	"time"
 
 	"github.com/k0marov/socnet/features/posts/domain/entities"
 	"github.com/k0marov/socnet/features/posts/domain/service"
@@ -190,13 +192,39 @@ func TestPostLikeToggler(t *testing.T) {
 }
 
 func TestPostCreator(t *testing.T) {
+	tNewPost := RandomNewPostData()
 	t.Run("happy case", func(t *testing.T) {
-
+		validator := func(newPost values.NewPostData) (client_errors.ClientError, bool) {
+			if reflect.DeepEqual(newPost, tNewPost) {
+				return client_errors.ClientError{}, true
+			}
+			panic("unexpected args")
+		}
+		storeCreator := func(newPost values.NewPostData, createdAt time.Time) error {
+			if reflect.DeepEqual(newPost, tNewPost) && time.Since(createdAt).Minutes() < 1 {
+				return nil
+			}
+			panic("unexpected args")
+		}
+		err := service.NewPostCreator(validator, storeCreator)(tNewPost)
+		AssertNoError(t, err)
 	})
 	t.Run("error case - validation fails", func(t *testing.T) {
-
+		wantErr := RandomClientError()
+		validator := func(values.NewPostData) (client_errors.ClientError, bool) {
+			return wantErr, false
+		}
+		err := service.NewPostCreator(validator, nil)(tNewPost)
+		AssertError(t, err, wantErr)
 	})
 	t.Run("error case - store returns error", func(t *testing.T) {
-
+		validator := func(values.NewPostData) (client_errors.ClientError, bool) {
+			return client_errors.ClientError{}, true
+		}
+		storeCreator := func(values.NewPostData, time.Time) error {
+			return RandomError()
+		}
+		err := service.NewPostCreator(validator, storeCreator)(tNewPost)
+		AssertSomeError(t, err)
 	})
 }

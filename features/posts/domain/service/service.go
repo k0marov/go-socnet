@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"github.com/k0marov/socnet/features/posts/domain/validators"
+	"time"
 
 	"github.com/k0marov/socnet/features/posts/domain/entities"
 
@@ -70,9 +71,17 @@ func NewPostLikeToggler(getAuthor store.StoreAuthorGetter, isLiked store.StoreLi
 	}
 }
 
-func NewPostCreator(postValidator validators.PostValidator, postCreator store.StorePostCreator) PostCreator {
+func NewPostCreator(validate validators.PostValidator, createPost store.StorePostCreator) PostCreator {
 	return func(newPost values.NewPostData) error {
-		panic("unimplemented")
+		clientError, ok := validate(newPost)
+		if !ok {
+			return clientError
+		}
+		err := createPost(newPost, time.Now())
+		if err != nil {
+			return fmt.Errorf("while creating a post in store: %w", err)
+		}
+		return nil
 	}
 }
 

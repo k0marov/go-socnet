@@ -18,7 +18,6 @@ import (
 	"github.com/k0marov/socnet/core/client_errors"
 	"github.com/k0marov/socnet/core/core_values"
 	helpers "github.com/k0marov/socnet/core/http_test_helpers"
-	"github.com/k0marov/socnet/core/ref"
 	. "github.com/k0marov/socnet/core/test_helpers"
 
 	"github.com/go-chi/chi/v5"
@@ -127,31 +126,22 @@ func TestCreatePost_Parsing(t *testing.T) {
 
 		return request
 	}
-	convertImages := func(images []string) []core_values.FileData {
-		var files []core_values.FileData
-		for _, image := range images {
-			imageBytes := []byte(image)
-			ref, _ := ref.NewRef(&imageBytes)
-			files = append(files, ref)
-		}
-		return files
-	}
 
 	cases := []values.NewPostData{
 		{
 			Text:   "0 Images",
 			Author: "42",
-			Images: convertImages([]string{}),
+			Images: []core_values.FileData{},
 		},
 		{
 			Text:   "2 Images",
 			Author: "77",
-			Images: convertImages([]string{"Cat Image", "Sky Image"}),
+			Images: []core_values.FileData{RandomFileData(), RandomFileData()},
 		},
 		{
 			Text:   "5 images",
 			Author: "33",
-			Images: convertImages([]string{"1", "2", "3", "4", "5"}),
+			Images: []core_values.FileData{RandomFileData(), RandomFileData(), RandomFileData(), RandomFileData(), RandomFileData()},
 		},
 	}
 
