@@ -98,8 +98,7 @@ func TestProfiles(t *testing.T) {
 		checkProfileFromServer(t, profile2)
 
 		// update avatar for first user
-		wantAvatarPathStr := filepath.Join("static", "user_"+user1.Id, "avatar")
-		wantAvatarPath := values.AvatarPath{Path: wantAvatarPathStr}
+		wantAvatarPath := filepath.Join("static", "user_"+user1.Id, "avatar")
 		avatar := readFixture(t, "test_avatar.jpg")
 
 		body, contentType := createMultipartBody(avatar)
@@ -115,14 +114,14 @@ func TestProfiles(t *testing.T) {
 			Id:         user1.Id,
 			Username:   user1.Username,
 			About:      "",
-			AvatarPath: wantAvatarPathStr,
+			AvatarPath: wantAvatarPath,
 			Follows:    0,
 			Followers:  0,
 		}
 		checkProfileFromServer(t, wantUpdatedProfile1)
 
 		// assert avatar was stored
-		Assert(t, readFile(t, wantAvatarPathStr), avatar, "the stored avatar file")
+		Assert(t, readFile(t, wantAvatarPath), avatar, "the stored avatar file")
 
 		// update profile for second user
 		upd := values.ProfileUpdateData{About: RandomString()}

@@ -276,8 +276,8 @@ func TestAvatarUpdater(t *testing.T) {
 	}
 
 	t.Run("happy case", func(t *testing.T) {
-		wantURL := values.AvatarPath{Path: RandomString()}
-		storeAvatar := func(userId string, avatarData values.AvatarData) (values.AvatarPath, error) {
+		wantURL := RandomString()
+		storeAvatar := func(userId string, avatarData values.AvatarData) (core_values.ImageUrl, error) {
 			if userId == user.Id && avatarData == testAvatarData {
 				return wantURL, nil
 			}
@@ -303,8 +303,8 @@ func TestAvatarUpdater(t *testing.T) {
 		AssertError(t, err, clientError)
 	})
 	t.Run("store throws an error", func(t *testing.T) {
-		storeAvatar := func(string, values.AvatarData) (values.AvatarPath, error) {
-			return values.AvatarPath{}, RandomError()
+		storeAvatar := func(string, values.AvatarData) (core_values.ImageUrl, error) {
+			return "", RandomError()
 		}
 		sut := service.NewAvatarUpdater(silentValidator, storeAvatar)
 

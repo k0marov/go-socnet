@@ -86,14 +86,13 @@ func TestStoreAvatarUpdater(t *testing.T) {
 
 			t.Run("should store avatarPath in DB", func(t *testing.T) {
 				t.Run("happy case", func(t *testing.T) {
-					wantAvatarURL := values.AvatarPath{Path: wantPath}
 					updateProfile := func(string, store.DBUpdateData) error {
 						return nil
 					}
 					sut := store.NewStoreAvatarUpdater(storeFile, updateProfile)
 					gotAvatarUrl, err := sut(userId, avatar)
 					AssertNoError(t, err)
-					Assert(t, gotAvatarUrl, wantAvatarURL, "returned avatar url")
+					Assert(t, gotAvatarUrl, wantPath, "returned avatar url")
 				})
 				t.Run("error case - db returns an error", func(t *testing.T) {
 					wantUpdData := store.DBUpdateData{AvatarPath: wantPath}

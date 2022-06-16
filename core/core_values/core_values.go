@@ -5,3 +5,5 @@ import "github.com/k0marov/socnet/core/ref"
 type UserId = string
 
 type FileData = ref.Ref[[]byte]
+
+type ImageUrl = string

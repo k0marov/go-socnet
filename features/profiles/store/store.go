@@ -16,20 +16,19 @@ type DBUpdateData struct {
 }
 
 func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBProfile DBProfileUpdater) store.StoreAvatarUpdater {
-	return func(userId core_values.UserId, avatar values.AvatarData) (values.AvatarPath, error) {
-		path, err := createFile(avatar.Data, userId)
+	return func(userId core_values.UserId, avatar values.AvatarData) (core_values.ImageUrl, error) {
+		avatarUrl, err := createFile(avatar.Data, userId)
 		if err != nil {
-			return values.AvatarPath{}, fmt.Errorf("error while storing avatar file: %w", err)
+			return "", fmt.Errorf("error while storing avatar file: %w", err)
 		}
-		avatarPath := values.AvatarPath{Path: path}
 		updateData := DBUpdateData{
-			AvatarPath: avatarPath.Path,
+			AvatarPath: avatarUrl,
 		}
 		err = updateDBProfile(userId, updateData)
 		if err != nil {
-			return values.AvatarPath{}, fmt.Errorf("error while updating avatar path in DB: %w", err)
+			return "", fmt.Errorf("error while updating avatar path in DB: %w", err)
 		}
-		return avatarPath, nil
+		return avatarUrl, nil
 	}
 }
 

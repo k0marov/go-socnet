@@ -19,7 +19,7 @@ type (
 	FollowsGetter  func(core_values.UserId) ([]core_values.UserId, error)
 	FollowToggler  func(target, follower core_values.UserId) error
 	ProfileUpdater func(core_entities.User, values.ProfileUpdateData) (entities.Profile, error)
-	AvatarUpdater  func(core_entities.User, values.AvatarData) (values.AvatarPath, error)
+	AvatarUpdater  func(core_entities.User, values.AvatarData) (core_values.ImageUrl, error)
 	ProfileCreator func(core_entities.User) (entities.Profile, error)
 )
 
@@ -123,14 +123,14 @@ func NewProfileCreator(storeProfileCreator store.StoreProfileCreator) ProfileCre
 }
 
 func NewAvatarUpdater(validator validators.AvatarValidator, storeAvatar store.StoreAvatarUpdater) AvatarUpdater {
-	return func(user core_entities.User, avatar values.AvatarData) (values.AvatarPath, error) {
+	return func(user core_entities.User, avatar values.AvatarData) (core_values.ImageUrl, error) {
 		if clientError, ok := validator(avatar); !ok {
-			return values.AvatarPath{}, clientError
+			return "", clientError
 		}
 
 		avatarURL, err := storeAvatar(user.Id, avatar)
 		if err != nil {
-			return values.AvatarPath{}, fmt.Errorf("got an error while storing updated avatar: %w", err)
+			return "", fmt.Errorf("got an error while storing updated avatar: %w", err)
 		}
 
 		return avatarURL, nil
