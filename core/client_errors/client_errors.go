@@ -77,3 +77,9 @@ var InsufficientPermissions = ClientError{
 	ReadableDetail: "You are not authorized to perform this action.",
 	HTTPCode:       http.StatusUnauthorized,
 }
+
+var LikingYourself = ClientError{
+	DetailCode:     "liking-yourself",
+	ReadableDetail: "You cannot like your own content",
+	HTTPCode:       http.StatusBadRequest,
+}

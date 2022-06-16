@@ -39,8 +39,31 @@ func NewPostDeleter(getAuthor store.StoreAuthorGetter, deletePost store.StorePos
 }
 
 func NewPostLikeToggler(getAuthor store.StoreAuthorGetter, isLiked store.StoreLikeChecker, like store.StoreLiker, unlike store.StoreUnliker) PostLikeToggler {
-	return func(postId values.PostId, userId core_values.UserId) error {
-		panic("unimplemented")
+	return func(postId values.PostId, caller core_values.UserId) error {
+		author, err := getAuthor(postId)
+		if err == core_errors.ErrNotFound {
+			return client_errors.NotFound
+		}
+		if err != nil {
+			return fmt.Errorf("while getting post author: %w", err)
+		}
+		if author == caller {
+			return client_errors.LikingYourself
+		}
+
+		alreadyLiked, err := isLiked(postId, caller)
+		if err != nil {
+			return fmt.Errorf("error while checking if post is liked: %w", err)
+		}
+		if alreadyLiked {
+			err = unlike(postId, caller)
+		} else {
+			err = like(postId, caller)
+		}
+		if err != nil {
+			return fmt.Errorf("while liking/unliking a post: %w", err)
+		}
+		return nil
 	}
 }
 

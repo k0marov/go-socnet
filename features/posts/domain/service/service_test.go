@@ -96,16 +96,94 @@ func TestPostDeleter(t *testing.T) {
 }
 
 func TestPostLikeToggler(t *testing.T) {
-	// post := RandomString()
-	// caller := RandomString()
-	t.Run("liking your own post", func(t *testing.T) {
-		// sut := service.NewPostLikeToggler(nil, nil, nil)(post, caller)
-	})
-	t.Run("post not liked - like it", func(t *testing.T) {
-		// likeChecker := func()
-	})
-	t.Run("post already liked - unlike it", func(t *testing.T) {
+	post := RandomString()
+	caller := RandomString()
+	t.Run("checking author", func(t *testing.T) {
 
+		t.Run("error case - liking your own post", func(t *testing.T) {
+			getAuthor := func(postId values.PostId) (core_values.UserId, error) {
+				if postId == post {
+					return caller, nil
+				}
+				panic("unexpected args")
+			}
+			err := service.NewPostLikeToggler(getAuthor, nil, nil, nil)(post, caller)
+			AssertError(t, err, client_errors.LikingYourself)
+		})
+		t.Run("error case - post does not exist", func(t *testing.T) {
+			getAuthor := func(postId values.PostId) (core_values.UserId, error) {
+				return "", core_errors.ErrNotFound
+			}
+			err := service.NewPostLikeToggler(getAuthor, nil, nil, nil)(post, caller)
+			AssertError(t, err, client_errors.NotFound)
+		})
+		t.Run("error case - checking author throws", func(t *testing.T) {
+			getAuthor := func(values.PostId) (core_values.UserId, error) {
+				return "", RandomError()
+			}
+			err := service.NewPostLikeToggler(getAuthor, nil, nil, nil)(post, caller)
+			AssertSomeError(t, err)
+		})
+	})
+
+	t.Run("liking/unliking, since author is not caller", func(t *testing.T) {
+		getAuthor := func(values.PostId) (core_values.UserId, error) {
+			return RandomString(), nil
+		}
+		t.Run("error case - checking if post is liked throws", func(t *testing.T) {
+			likeChecker := func(postId values.PostId, callerId core_values.UserId) (bool, error) {
+				if postId == post && callerId == caller {
+					return false, RandomError()
+				}
+				panic("unexpected args")
+			}
+			err := service.NewPostLikeToggler(getAuthor, likeChecker, nil, nil)(post, caller)
+			AssertSomeError(t, err)
+		})
+		t.Run("post not liked - like it", func(t *testing.T) {
+			likeChecker := func(postId values.PostId, callerId core_values.UserId) (bool, error) {
+				return false, nil
+			}
+			t.Run("happy case", func(t *testing.T) {
+				liker := func(postId values.PostId, liker core_values.UserId) error {
+					if postId == post && liker == caller {
+						return nil
+					}
+					panic("unexpected args")
+				}
+				err := service.NewPostLikeToggler(getAuthor, likeChecker, liker, nil)(post, caller)
+				AssertNoError(t, err)
+			})
+			t.Run("error case - store throws", func(t *testing.T) {
+				liker := func(values.PostId, core_values.UserId) error {
+					return RandomError()
+				}
+				err := service.NewPostLikeToggler(getAuthor, likeChecker, liker, nil)(post, caller)
+				AssertSomeError(t, err)
+			})
+		})
+		t.Run("post already liked - unlike it", func(t *testing.T) {
+			likeChecker := func(values.PostId, core_values.UserId) (bool, error) {
+				return true, nil
+			}
+			t.Run("happy case", func(t *testing.T) {
+				unliker := func(postId values.PostId, unliker core_values.UserId) error {
+					if postId == post && unliker == caller {
+						return nil
+					}
+					panic("unexpected args")
+				}
+				err := service.NewPostLikeToggler(getAuthor, likeChecker, nil, unliker)(post, caller)
+				AssertNoError(t, err)
+			})
+			t.Run("error case - store throws", func(t *testing.T) {
+				unliker := func(values.PostId, core_values.UserId) error {
+					return RandomError()
+				}
+				err := service.NewPostLikeToggler(getAuthor, likeChecker, nil, unliker)(post, caller)
+				AssertSomeError(t, err)
+			})
+		})
 	})
 }
 
