@@ -71,3 +71,9 @@ var FollowingYourself = ClientError{
 	ReadableDetail: "You cannot follow yourself.",
 	HTTPCode:       http.StatusBadRequest,
 }
+
+var InsufficientPermissions = ClientError{
+	DetailCode:     "insufficient-permissions",
+	ReadableDetail: "You are not authorized to perform this action.",
+	HTTPCode:       http.StatusUnauthorized,
+}

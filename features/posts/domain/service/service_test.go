@@ -1,10 +1,13 @@
 package service_test
 
 import (
+	"core/client_errors"
+	"core/core_errors"
 	"core/core_values"
 	. "core/test_helpers"
 	"posts/domain/entities"
 	"posts/domain/service"
+	"posts/domain/values"
 	"testing"
 )
 
@@ -34,25 +37,78 @@ func TestPostsGetter(t *testing.T) {
 
 func TestPostDeleter(t *testing.T) {
 	t.Run("happy case", func(t *testing.T) {
-		// authorGetter := func(postId values.PostId) (core_values.UserId, error) {
-
-		// }
+		post := RandomString()
+		caller := RandomString()
+		postAuthor := caller
+		authorGetter := func(postId values.PostId) (core_values.UserId, error) {
+			if postId == post {
+				return postAuthor, nil
+			}
+			panic("unexpected args")
+		}
+		deleted := false
+		postDeleter := func(postId values.PostId) error {
+			if postId == post {
+				deleted = true
+				return nil
+			}
+			panic("unexpected args")
+		}
+		sut := service.NewPostDeleter(authorGetter, postDeleter)
+		err := sut(post, caller)
+		AssertNoError(t, err)
+		Assert(t, deleted, true, "post was deleted")
 	})
 	t.Run("error case - the calling user is not the post author", func(t *testing.T) {
-
+		getAuthor := func(values.PostId) (core_values.UserId, error) {
+			return RandomString(), nil
+		}
+		sut := service.NewPostDeleter(getAuthor, nil)
+		err := sut(RandomString(), RandomString())
+		AssertError(t, err, client_errors.InsufficientPermissions)
 	})
-	t.Run("error case - store returns 404", func(t *testing.T) {
-
+	t.Run("error case - getting author returns post not found", func(t *testing.T) {
+		getAuthor := func(values.PostId) (core_values.UserId, error) {
+			return "", core_errors.ErrNotFound
+		}
+		sut := service.NewPostDeleter(getAuthor, nil)
+		err := sut(RandomString(), RandomString())
+		AssertError(t, err, client_errors.NotFound)
 	})
-	t.Run("error case - store returns some other error", func(t *testing.T) {
+	t.Run("error case - getting author returns some other error", func(t *testing.T) {
+		getAuthor := func(values.PostId) (core_values.UserId, error) {
+			return "", RandomError()
+		}
+		err := service.NewPostDeleter(getAuthor, nil)(RandomString(), RandomString())
+		AssertSomeError(t, err)
+	})
+	t.Run("error case - deleting post returns error", func(t *testing.T) {
+		caller := "42"
+		getAuthor := func(values.PostId) (core_values.UserId, error) {
+			return caller, nil
+		}
+		deletePost := func(values.PostId) error {
+			return RandomError()
+		}
+		err := service.NewPostDeleter(getAuthor, deletePost)("33", caller)
+		AssertSomeError(t, err)
+	})
+}
+
+func TestPostLikeToggler(t *testing.T) {
+	// post := RandomString()
+	// caller := RandomString()
+	t.Run("liking your own post", func(t *testing.T) {
+		// sut := service.NewPostLikeToggler(nil, nil, nil)(post, caller)
+	})
+	t.Run("post not liked - like it", func(t *testing.T) {
+		// likeChecker := func()
+	})
+	t.Run("post already liked - unlike it", func(t *testing.T) {
 
 	})
 }
 
 func TestPostCreator(t *testing.T) {
-
-}
-
-func TestPostLikeToggler(t *testing.T) {
 
 }
