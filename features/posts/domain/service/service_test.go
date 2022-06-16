@@ -51,8 +51,8 @@ func TestPostDeleter(t *testing.T) {
 			panic("unexpected args")
 		}
 		deleted := false
-		postDeleter := func(postId values.PostId) error {
-			if postId == post {
+		postDeleter := func(postId values.PostId, authorId core_values.UserId) error {
+			if postId == post && authorId == postAuthor {
 				deleted = true
 				return nil
 			}
@@ -91,7 +91,7 @@ func TestPostDeleter(t *testing.T) {
 		getAuthor := func(values.PostId) (core_values.UserId, error) {
 			return caller, nil
 		}
-		deletePost := func(values.PostId) error {
+		deletePost := func(values.PostId, core_values.UserId) error {
 			return RandomError()
 		}
 		err := service.NewPostDeleter(getAuthor, deletePost)("33", caller)

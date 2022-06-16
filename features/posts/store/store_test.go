@@ -65,5 +65,38 @@ func TestStorePostCreator(t *testing.T) {
 }
 
 func TestStorePostDeleter(t *testing.T) {
+	post := RandomString()
+	author := RandomString()
+	deletePost := func(postId values.PostId) error {
+		if postId == post {
+			return nil
+		}
+		panic("unexpected args")
+	}
+	t.Run("error case - delete post returns an error", func(t *testing.T) {
+		deletePost := func(values.PostId) error {
+			return RandomError()
+		}
+		sut := store.NewStorePostDeleter(deletePost, nil)
+		err := sut(post, author)
+		AssertSomeError(t, err)
+	})
+	deleteFiles := func(postId values.PostId, userId core_values.UserId) error {
+		if postId == post && userId == author {
+			return nil
+		}
+		panic("unexpected args")
+	}
+	t.Run("error case - delete files returns an error", func(t *testing.T) {
+		deleteFiles := func(values.PostId, core_values.UserId) error {
+			return RandomError()
+		}
+		sut := store.NewStorePostDeleter(deletePost, deleteFiles)
+		err := sut(post, author)
+		AssertSomeError(t, err)
+	})
 
+	sut := store.NewStorePostDeleter(deletePost, deleteFiles)
+	err := sut(post, author)
+	AssertNoError(t, err)
 }

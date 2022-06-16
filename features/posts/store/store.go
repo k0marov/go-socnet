@@ -20,9 +20,10 @@ type (
 
 	DBPostCreator     func(newPost models.PostToCreate) (values.PostId, error)
 	DBPostImagesAdder func(values.PostId, []core_values.StaticFilePath) error
+	DBPostDeleter     func(values.PostId) error
 )
 
-func NewStorePostCreator(createPost DBPostCreator, storeImages file_storage.PostImageFilesCreator, addImages DBPostImagesAdder) store.StorePostCreator {
+func NewStorePostCreator(createPost DBPostCreator, storeImages file_storage.PostImageFilesCreator, addImages DBPostImagesAdder) store.PostCreator {
 	return func(post values.NewPostData, createdAt time.Time) error {
 		postToCreate := models.PostToCreate{
 			Author:    post.Author,
@@ -45,27 +46,35 @@ func NewStorePostCreator(createPost DBPostCreator, storeImages file_storage.Post
 	}
 }
 
-func NewStorePostDeleter() store.StorePostDeleter {
-	return func(postId values.PostId) error {
-		panic("unimplemented")
+func NewStorePostDeleter(deletePost DBPostDeleter, deleteFiles file_storage.PostFilesDeleter) store.PostDeleter {
+	return func(post values.PostId, author core_values.UserId) error {
+		err := deletePost(post)
+		if err != nil {
+			return fmt.Errorf("error while deleting post from db: %w", err)
+		}
+		err = deleteFiles(post, author)
+		if err != nil {
+			return fmt.Errorf("error while deleting post files: %w", err)
+		}
+		return nil
 	}
 }
 
-func NewStorePostsGetter(getter DBPostsGetter) store.StorePostsGetter {
-	return store.StorePostsGetter(getter)
+func NewStorePostsGetter(getter DBPostsGetter) store.PostsGetter {
+	return store.PostsGetter(getter)
 }
 
-func NewStoreLiker(liker DBLiker) store.StoreLiker {
-	return store.StoreLiker(liker)
+func NewStoreLiker(liker DBLiker) store.Liker {
+	return store.Liker(liker)
 }
 
-func NewStoreLikeChecker(likeChecker DBLikeChecker) store.StoreLikeChecker {
-	return store.StoreLikeChecker(likeChecker)
+func NewStoreLikeChecker(likeChecker DBLikeChecker) store.LikeChecker {
+	return store.LikeChecker(likeChecker)
 }
-func NewStoreUnliker(unliker DBUnliker) store.StoreUnliker {
-	return store.StoreUnliker(unliker)
+func NewStoreUnliker(unliker DBUnliker) store.Unliker {
+	return store.Unliker(unliker)
 }
 
-func NewStoreAuthorGetter(authorGetter DBAuthorGetter) store.StoreAuthorGetter {
-	return store.StoreAuthorGetter(authorGetter)
+func NewStoreAuthorGetter(authorGetter DBAuthorGetter) store.AuthorGetter {
+	return store.AuthorGetter(authorGetter)
 }

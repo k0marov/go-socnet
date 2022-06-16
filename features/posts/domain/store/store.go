@@ -8,10 +8,10 @@ import (
 	"github.com/k0marov/socnet/core/core_values"
 )
 
-type StorePostsGetter func(authorId core_values.UserId) ([]entities.Post, error)
-type StoreAuthorGetter func(postId values.PostId) (core_values.UserId, error)
-type StorePostDeleter func(postId values.PostId) error
-type StoreLikeChecker func(postId values.PostId, liker core_values.UserId) (bool, error)
-type StoreLiker func(postId values.PostId, liker core_values.UserId) error
-type StoreUnliker func(postId values.PostId, unliker core_values.UserId) error
-type StorePostCreator func(post values.NewPostData, createdAt time.Time) error
+type PostsGetter func(authorId core_values.UserId) ([]entities.Post, error)
+type AuthorGetter func(postId values.PostId) (core_values.UserId, error)
+type PostDeleter func(postId values.PostId, authorId core_values.UserId) error
+type LikeChecker func(postId values.PostId, liker core_values.UserId) (bool, error)
+type Liker func(postId values.PostId, liker core_values.UserId) error
+type Unliker func(postId values.PostId, unliker core_values.UserId) error
+type PostCreator func(post values.NewPostData, createdAt time.Time) error

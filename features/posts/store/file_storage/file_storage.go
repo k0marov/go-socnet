@@ -6,3 +6,4 @@ import (
 )
 
 type PostImageFilesCreator = func(values.PostId, core_values.UserId, []core_values.FileData) ([]core_values.StaticFilePath, error)
+type PostFilesDeleter = func(values.PostId, core_values.UserId) error

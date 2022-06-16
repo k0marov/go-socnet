@@ -22,7 +22,7 @@ type (
 	PostsGetter     func(authorId core_values.UserId) ([]entities.Post, error)
 )
 
-func NewPostDeleter(getAuthor store.StoreAuthorGetter, deletePost store.StorePostDeleter) PostDeleter {
+func NewPostDeleter(getAuthor store.AuthorGetter, deletePost store.PostDeleter) PostDeleter {
 	return func(post values.PostId, caller core_values.UserId) error {
 		author, err := getAuthor(post)
 		if err == core_errors.ErrNotFound {
@@ -34,7 +34,7 @@ func NewPostDeleter(getAuthor store.StoreAuthorGetter, deletePost store.StorePos
 		if author != caller {
 			return client_errors.InsufficientPermissions
 		}
-		err = deletePost(post)
+		err = deletePost(post, author)
 		if err != nil {
 			return fmt.Errorf("while deleting post: %w", err)
 		}
@@ -42,7 +42,7 @@ func NewPostDeleter(getAuthor store.StoreAuthorGetter, deletePost store.StorePos
 	}
 }
 
-func NewPostLikeToggler(getAuthor store.StoreAuthorGetter, isLiked store.StoreLikeChecker, like store.StoreLiker, unlike store.StoreUnliker) PostLikeToggler {
+func NewPostLikeToggler(getAuthor store.AuthorGetter, isLiked store.LikeChecker, like store.Liker, unlike store.Unliker) PostLikeToggler {
 	return func(postId values.PostId, caller core_values.UserId) error {
 		author, err := getAuthor(postId)
 		if err == core_errors.ErrNotFound {
@@ -71,7 +71,7 @@ func NewPostLikeToggler(getAuthor store.StoreAuthorGetter, isLiked store.StoreLi
 	}
 }
 
-func NewPostCreator(validate validators.PostValidator, createPost store.StorePostCreator) PostCreator {
+func NewPostCreator(validate validators.PostValidator, createPost store.PostCreator) PostCreator {
 	return func(newPost values.NewPostData) error {
 		clientError, ok := validate(newPost)
 		if !ok {
@@ -85,7 +85,7 @@ func NewPostCreator(validate validators.PostValidator, createPost store.StorePos
 	}
 }
 
-func NewPostsGetter(getPosts store.StorePostsGetter) PostsGetter {
+func NewPostsGetter(getPosts store.PostsGetter) PostsGetter {
 	return func(authorId core_values.UserId) ([]entities.Post, error) {
 		posts, err := getPosts(authorId)
 		if err != nil {
