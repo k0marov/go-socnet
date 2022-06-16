@@ -190,5 +190,13 @@ func TestPostLikeToggler(t *testing.T) {
 }
 
 func TestPostCreator(t *testing.T) {
+	t.Run("happy case", func(t *testing.T) {
 
+	})
+	t.Run("error case - validation fails", func(t *testing.T) {
+
+	})
+	t.Run("error case - store returns error", func(t *testing.T) {
+
+	})
 }

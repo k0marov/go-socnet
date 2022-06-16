@@ -3,6 +3,7 @@ package store
 import (
 	"github.com/k0marov/socnet/features/posts/domain/entities"
 	"github.com/k0marov/socnet/features/posts/domain/values"
+	"time"
 
 	"github.com/k0marov/socnet/core/core_values"
 )
@@ -13,3 +14,4 @@ type StorePostDeleter func(postId values.PostId) error
 type StoreLikeChecker func(postId values.PostId, liker core_values.UserId) (bool, error)
 type StoreLiker func(postId values.PostId, liker core_values.UserId) error
 type StoreUnliker func(postId values.PostId, unliker core_values.UserId) error
+type StorePostCreator func(post values.NewPostData, createdAt time.Time) error

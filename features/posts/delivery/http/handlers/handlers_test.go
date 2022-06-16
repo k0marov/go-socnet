@@ -101,8 +101,8 @@ func TestToggleLike(t *testing.T) {
 func TestCreatePost_ErrorHandling(t *testing.T) {
 	helpers.BaseTest401(t, handlers.NewCreateHandler(nil))
 	helpers.BaseTestServiceErrorHandling(t, func(err error, rr *httptest.ResponseRecorder) {
-		creator := func(values.NewPostData) (entities.Post, error) {
-			return entities.Post{}, err
+		creator := func(values.NewPostData) error {
+			return err
 		}
 		request := helpers.AddAuthDataToRequest(helpers.CreateRequest(nil), RandomAuthUser())
 		handlers.NewCreateHandler(creator).ServeHTTP(rr, request)
@@ -128,7 +128,7 @@ func TestCreatePost_Parsing(t *testing.T) {
 		return request
 	}
 	convertImages := func(images []string) []core_values.FileData {
-		files := []core_values.FileData{}
+		var files []core_values.FileData
 		for _, image := range images {
 			imageBytes := []byte(image)
 			ref, _ := ref.NewRef(&imageBytes)
@@ -157,10 +157,9 @@ func TestCreatePost_Parsing(t *testing.T) {
 
 	for _, testNewPost := range cases {
 		t.Run(testNewPost.Text, func(t *testing.T) {
-			randomPost := RandomPost()
-			creator := func(newPost values.NewPostData) (entities.Post, error) {
+			creator := func(newPost values.NewPostData) error {
 				if reflect.DeepEqual(newPost, testNewPost) {
-					return randomPost, nil
+					return nil
 				}
 				panic(fmt.Sprintf("enexpected args: newPost = %+v", newPost))
 			}
@@ -168,7 +167,6 @@ func TestCreatePost_Parsing(t *testing.T) {
 			handlers.NewCreateHandler(creator).ServeHTTP(response, createRequest(testNewPost))
 
 			AssertStatusCode(t, response, http.StatusOK)
-			AssertJSONData(t, response, randomPost)
 		})
 	}
 }

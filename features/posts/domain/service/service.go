@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/k0marov/socnet/features/posts/domain/validators"
 
 	"github.com/k0marov/socnet/features/posts/domain/entities"
 
@@ -16,7 +17,7 @@ import (
 type (
 	PostDeleter     func(post values.PostId, caller core_values.UserId) error
 	PostLikeToggler func(values.PostId, core_values.UserId) error
-	PostCreator     func(values.NewPostData) (entities.Post, error)
+	PostCreator     func(values.NewPostData) error
 	PostsGetter     func(authorId core_values.UserId) ([]entities.Post, error)
 )
 
@@ -69,8 +70,8 @@ func NewPostLikeToggler(getAuthor store.StoreAuthorGetter, isLiked store.StoreLi
 	}
 }
 
-func NewPostCreator() PostCreator {
-	return func(newPost values.NewPostData) (entities.Post, error) {
+func NewPostCreator(postValidator validators.PostValidator, postCreator store.StorePostCreator) PostCreator {
+	return func(newPost values.NewPostData) error {
 		panic("unimplemented")
 	}
 }
