@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strconv"
 	"testing"
 	"time"
 
@@ -96,21 +97,21 @@ func RandomError() error {
 
 func RandomUser() core_entities.User {
 	return core_entities.User{
-		Id:       RandomString(),
+		Id:       strconv.Itoa(RandomInt()),
 		Username: RandomString(),
 	}
 }
 
 func RandomAuthUser() auth.User {
 	return auth.User{
-		Id:       RandomString(),
+		Id:       strconv.Itoa(RandomInt()),
 		Username: RandomString(),
 	}
 }
 
 func RandomProfile() profile_entities.Profile {
 	return profile_entities.Profile{
-		Id:         RandomString(),
+		Id:         strconv.Itoa(RandomInt()),
 		Username:   RandomString(),
 		About:      RandomString(),
 		AvatarPath: RandomString(),
@@ -128,21 +129,34 @@ func RandomContextedProfile() profile_entities.ContextedProfile {
 
 func RandomNewProfile() values.NewProfile {
 	return values.NewProfile{
-		Id:         RandomString(),
+		Id:         strconv.Itoa(RandomInt()),
 		Username:   RandomString(),
 		About:      RandomString(),
 		AvatarPath: RandomString(),
 	}
 }
 
+func RandomFiles() []core_values.FileData {
+	return []core_values.FileData{RandomFileData(), RandomFileData(), RandomFileData()}
+}
+func RandomUrls() []core_values.FileURL {
+	return []core_values.FileURL{RandomString(), RandomString(), RandomString()}
+}
+
 func RandomPost() post_entities.Post {
-	return post_entities.Post{}
+	return post_entities.Post{
+		Id:        strconv.Itoa(RandomInt()),
+		Author:    RandomContextedProfile(),
+		Text:      RandomString(),
+		Images:    RandomUrls(),
+		CreatedAt: time.Now(),
+	}
 }
 func RandomNewPostData() post_values.NewPostData {
 	return post_values.NewPostData{
 		Text:   RandomString(),
 		Author: RandomString(),
-		Images: []core_values.FileData{RandomFileData(), RandomFileData()},
+		Images: RandomFiles(),
 	}
 }
 

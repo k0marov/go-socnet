@@ -121,7 +121,7 @@ func TestUpdateAvatarHandler(t *testing.T) {
 	t.Run("should update avatar using service", func(t *testing.T) {
 		t.Run("happy case", func(t *testing.T) {
 			avatarURL := RandomString()
-			updateAvatar := func(u core_entities.User, avatar values.AvatarData) (core_values.ImageUrl, error) {
+			updateAvatar := func(u core_entities.User, avatar values.AvatarData) (core_values.FileURL, error) {
 				if u == user && reflect.DeepEqual(avatar.Data.Value(), tAvatar) {
 					return avatarURL, nil
 				}
@@ -144,7 +144,7 @@ func TestUpdateAvatarHandler(t *testing.T) {
 		})
 	})
 	helpers.BaseTestServiceErrorHandling(t, func(err error, w *httptest.ResponseRecorder) {
-		updateAvatar := func(core_entities.User, values.AvatarData) (core_values.ImageUrl, error) {
+		updateAvatar := func(core_entities.User, values.AvatarData) (core_values.FileURL, error) {
 			return "", err
 		}
 		handlers.NewUpdateAvatarHandler(updateAvatar).ServeHTTP(w, createRequestWithAuth())

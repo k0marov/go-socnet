@@ -16,7 +16,7 @@ type DBUpdateData struct {
 }
 
 func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBProfile DBProfileUpdater) store.StoreAvatarUpdater {
-	return func(userId core_values.UserId, avatar values.AvatarData) (core_values.ImageUrl, error) {
+	return func(userId core_values.UserId, avatar values.AvatarData) (core_values.FileURL, error) {
 		avatarUrl, err := createFile(avatar.Data, userId)
 		if err != nil {
 			return "", fmt.Errorf("error while storing avatar file: %w", err)

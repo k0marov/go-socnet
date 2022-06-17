@@ -19,7 +19,7 @@ type (
 	FollowsGetter  func(core_values.UserId) ([]core_values.UserId, error)
 	FollowToggler  func(target, follower core_values.UserId) error
 	ProfileUpdater func(core_entities.User, values.ProfileUpdateData) (entities.Profile, error)
-	AvatarUpdater  func(core_entities.User, values.AvatarData) (core_values.ImageUrl, error)
+	AvatarUpdater  func(core_entities.User, values.AvatarData) (core_values.FileURL, error)
 	ProfileCreator func(core_entities.User) (entities.Profile, error)
 )
 
@@ -123,7 +123,7 @@ func NewProfileCreator(storeProfileCreator store.StoreProfileCreator) ProfileCre
 }
 
 func NewAvatarUpdater(validator validators.AvatarValidator, storeAvatar store.StoreAvatarUpdater) AvatarUpdater {
-	return func(user core_entities.User, avatar values.AvatarData) (core_values.ImageUrl, error) {
+	return func(user core_entities.User, avatar values.AvatarData) (core_values.FileURL, error) {
 		if clientError, ok := validator(avatar); !ok {
 			return "", clientError
 		}
