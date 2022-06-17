@@ -35,7 +35,7 @@ func TestGetListById(t *testing.T) {
 	t.Run("happy case", func(t *testing.T) {
 		randomProfile := RandomString()
 		randomPosts := handlers.PostsResponse{
-			Posts: []entities.Post{RandomPost(), RandomPost()},
+			Posts: []entities.Post{RandomContextedPost(), RandomContextedPost()},
 		}
 		getter := func(profileId core_values.UserId) ([]entities.Post, error) {
 			if profileId == randomProfile {

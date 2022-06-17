@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"github.com/k0marov/socnet/features/posts/domain/validators"
+	profile_service "github.com/k0marov/socnet/features/profiles/domain/service"
 	"time"
 
 	"github.com/k0marov/socnet/features/posts/domain/entities"
@@ -19,7 +20,7 @@ type (
 	PostDeleter     func(post values.PostId, caller core_values.UserId) error
 	PostLikeToggler func(values.PostId, core_values.UserId) error
 	PostCreator     func(values.NewPostData) error
-	PostsGetter     func(authorId core_values.UserId) ([]entities.Post, error)
+	PostsGetter     func(fromAuthor, caller core_values.UserId) ([]entities.ContextedPost, error)
 )
 
 func NewPostDeleter(getAuthor store.AuthorGetter, deletePost store.PostDeleter) PostDeleter {
@@ -85,12 +86,35 @@ func NewPostCreator(validate validators.PostValidator, createPost store.PostCrea
 	}
 }
 
-func NewPostsGetter(getPosts store.PostsGetter) PostsGetter {
-	return func(authorId core_values.UserId) ([]entities.Post, error) {
-		posts, err := getPosts(authorId)
-		if err != nil {
-			return []entities.Post{}, fmt.Errorf("while getting posts from store: %w", err)
+func NewPostsGetter(getProfile profile_service.ProfileGetter, getPosts store.PostsGetter, checkLiked store.LikeChecker) PostsGetter {
+	return func(authorId, caller core_values.UserId) (posts []entities.ContextedPost, err error) {
+		author, err := getProfile(authorId, caller)
+		if err == core_errors.ErrNotFound {
+			return []entities.ContextedPost{}, client_errors.NotFound
 		}
-		return posts, nil
+		if err != nil {
+			return []entities.ContextedPost{}, fmt.Errorf("while getting the posts author: %w", err)
+		}
+		postModels, err := getPosts(authorId)
+		if err != nil {
+			return []entities.ContextedPost{}, fmt.Errorf("while getting posts from store: %w", err)
+		}
+		for _, postModel := range postModels {
+			isLiked, err := checkLiked(postModel.Id, caller)
+			if err != nil {
+				return []entities.ContextedPost{}, fmt.Errorf("while checking if one of the posts is liked: %w", err)
+			}
+			post := entities.ContextedPost{
+				Id:        postModel.Id,
+				Author:    author,
+				Text:      postModel.Text,
+				Images:    postModel.Images,
+				CreatedAt: postModel.CreatedAt,
+				IsLiked:   isLiked,
+				IsMine:    authorId == caller,
+			}
+			posts = append(posts, post)
+		}
+		return
 	}
 }

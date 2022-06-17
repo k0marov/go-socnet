@@ -34,7 +34,7 @@ func NewDeleteHandler(deletePost service.PostDeleter) http.HandlerFunc {
 }
 
 type PostsResponse struct {
-	Posts []entities.Post
+	Posts []entities.ContextedPost
 }
 
 func NewGetListByIdHandler(getPosts service.PostsGetter) http.HandlerFunc {

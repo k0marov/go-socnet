@@ -3,7 +3,6 @@ package store
 import (
 	"fmt"
 	"github.com/k0marov/socnet/core/core_values"
-	"github.com/k0marov/socnet/features/posts/domain/entities"
 	"github.com/k0marov/socnet/features/posts/domain/store"
 	"github.com/k0marov/socnet/features/posts/domain/values"
 	"github.com/k0marov/socnet/features/posts/store/file_storage"
@@ -12,7 +11,7 @@ import (
 )
 
 type (
-	DBPostsGetter  func(core_values.UserId) ([]entities.Post, error)
+	DBPostsGetter  func(core_values.UserId) ([]models.PostModel, error)
 	DBLiker        func(values.PostId, core_values.UserId) error
 	DBUnliker      func(values.PostId, core_values.UserId) error
 	DBLikeChecker  func(values.PostId, core_values.UserId) (bool, error)

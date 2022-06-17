@@ -7,8 +7,9 @@ import (
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/core/ref"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
+	"github.com/k0marov/socnet/features/posts/store/models"
 	"math"
-	"math/rand"
+	random "math/rand"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
@@ -26,6 +27,8 @@ import (
 
 	auth "github.com/k0marov/golang-auth"
 )
+
+var rand = random.New(random.NewSource(time.Now().UnixNano()))
 
 func AssertStatusCode(t testing.TB, got *httptest.ResponseRecorder, want int) {
 	t.Helper()
@@ -150,13 +153,15 @@ func RandomPostImages() []post_values.PostImage {
 	}
 }
 
-func RandomPost() post_entities.Post {
-	return post_entities.Post{
-		Id:     strconv.Itoa(RandomInt()),
-		Author: RandomContextedProfile(),
-		Text:   RandomString(),
-		Images: RandomUrls(),
-		//CreatedAt: time.Now(), // it breaks comparisons
+func RandomContextedPost() post_entities.ContextedPost {
+	return post_entities.ContextedPost{
+		Id:        strconv.Itoa(RandomInt()),
+		Author:    RandomContextedProfile(),
+		Text:      RandomString(),
+		Images:    RandomPostImages(),
+		CreatedAt: RandomTime(),
+		IsMine:    RandomBool(),
+		IsLiked:   RandomBool(),
 	}
 }
 func RandomNewPostData() post_values.NewPostData {
@@ -164,6 +169,20 @@ func RandomNewPostData() post_values.NewPostData {
 		Text:   RandomString(),
 		Author: RandomString(),
 		Images: []post_values.PostImageFile{{RandomFileData(), 1}, {RandomFileData(), 2}},
+	}
+}
+
+func RandomTime() time.Time {
+	return time.Date(2022, 6, 17, 16, 53, 42, 0, time.UTC)
+}
+
+func RandomPostModel() models.PostModel {
+	return models.PostModel{
+		Id:        RandomString(),
+		Author:    RandomString(),
+		Text:      RandomString(),
+		CreatedAt: RandomTime(),
+		Images:    RandomPostImages(),
 	}
 }
 
