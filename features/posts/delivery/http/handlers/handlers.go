@@ -39,12 +39,16 @@ type PostsResponse struct {
 
 func NewGetListByIdHandler(getPosts service.PostsGetter) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user, ok := helpers.GetUserOrAddUnauthorized(w, r)
+		if !ok {
+			return
+		}
 		profileId := chi.URLParam(r, "profile_id")
 		if profileId == "" {
 			helpers.ThrowClientError(w, client_errors.IdNotProvided)
 			return
 		}
-		posts, err := getPosts(profileId)
+		posts, err := getPosts(profileId, user.Id)
 		if err != nil {
 			helpers.HandleServiceError(w, err)
 			return

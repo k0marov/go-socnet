@@ -32,33 +32,35 @@ func createRequestWithProfileId(profileId core_values.UserId) *http.Request {
 }
 
 func TestGetListById(t *testing.T) {
+	caller := RandomAuthUser()
+	helpers.BaseTest401(t, handlers.NewGetListByIdHandler(nil))
 	t.Run("happy case", func(t *testing.T) {
 		randomProfile := RandomString()
 		randomPosts := handlers.PostsResponse{
-			Posts: []entities.Post{RandomContextedPost(), RandomContextedPost()},
+			Posts: []entities.ContextedPost{RandomContextedPost(), RandomContextedPost()},
 		}
-		getter := func(profileId core_values.UserId) ([]entities.Post, error) {
-			if profileId == randomProfile {
+		getter := func(profileId, callerId core_values.UserId) ([]entities.ContextedPost, error) {
+			if profileId == randomProfile && callerId == caller.Id {
 				return randomPosts.Posts, nil
 			}
 			panic("unexpected args")
 		}
-		request := createRequestWithProfileId(randomProfile)
+		request := helpers.AddAuthDataToRequest(createRequestWithProfileId(randomProfile), caller)
 		response := httptest.NewRecorder()
 		handlers.NewGetListByIdHandler(getter).ServeHTTP(response, request)
 		AssertJSONData(t, response, randomPosts)
 	})
 	t.Run("error case - profile id is not provided", func(t *testing.T) {
-		request := helpers.CreateRequest(nil)
+		request := helpers.AddAuthDataToRequest(helpers.CreateRequest(nil), caller)
 		response := httptest.NewRecorder()
 		handlers.NewGetListByIdHandler(nil).ServeHTTP(response, request)
 		AssertClientError(t, response, client_errors.IdNotProvided)
 	})
 	helpers.BaseTestServiceErrorHandling(t, func(err error, rr *httptest.ResponseRecorder) {
-		getter := func(core_values.UserId) ([]entities.Post, error) {
-			return []entities.Post{}, err
+		getter := func(profile, caller core_values.UserId) ([]entities.ContextedPost, error) {
+			return []entities.ContextedPost{}, err
 		}
-		request := createRequestWithProfileId("42")
+		request := helpers.AddAuthDataToRequest(createRequestWithProfileId("42"), caller)
 		handlers.NewGetListByIdHandler(getter).ServeHTTP(rr, request)
 	})
 }
