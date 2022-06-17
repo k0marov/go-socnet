@@ -65,7 +65,10 @@ func (db *SqlDB) GetPosts(author core_values.UserId) (posts []models.PostModel, 
 			return []models.PostModel{}, fmt.Errorf("while scanning a post: %w", err)
 		}
 		post.CreatedAt = time.Unix(createdAt, 0)
-		post.Images, _ = db.getImages(post.Id)
+		post.Images, err = db.getImages(post.Id)
+		if err != nil {
+			return []models.PostModel{}, err
+		}
 		posts = append(posts, post)
 	}
 	return posts, nil
@@ -106,7 +109,10 @@ func (db *SqlDB) CreatePost(newPost models.PostToCreate) (values.PostId, error) 
 }
 func (db *SqlDB) AddPostImages(post values.PostId, images []values.PostImage) error {
 	for _, image := range images {
-		db.addImage(post, image)
+		err := db.addImage(post, image)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -115,23 +121,28 @@ func (db *SqlDB) DeletePost(post values.PostId) error {
 }
 
 func (db *SqlDB) addImage(post values.PostId, image values.PostImage) error {
-	db.sql.Exec(`
+	_, err := db.sql.Exec(`
 		INSERT INTO PostImage(post_id, path, ind) VALUES (?, ?, ?)
    `, post, image.Path, image.Index)
-	//if err != nil {
-	//	return fmt.Errorf("while inserting a post image: %w", err)
-	//}
+	if err != nil {
+		return fmt.Errorf("while inserting a post image: %w", err)
+	}
 	return nil
 }
-func (db *SqlDB) getImages(post values.PostId) ([]values.PostImage, error) {
-	rows, _ := db.sql.Query(`
+func (db *SqlDB) getImages(post values.PostId) (images []values.PostImage, err error) {
+	rows, err := db.sql.Query(`
 		SELECT path, ind FROM PostImage WHERE post_id = ?
     `, post)
+	if err != nil {
+		return []values.PostImage{}, fmt.Errorf("while SELECTing post images: %w", err)
+	}
 	defer rows.Close()
-	var images []values.PostImage
 	for rows.Next() {
 		image := values.PostImage{}
-		rows.Scan(&image.Path, &image.Index)
+		err := rows.Scan(&image.Path, &image.Index)
+		if err != nil {
+			return []values.PostImage{}, fmt.Errorf("while scanning an image: %w", err)
+		}
 		images = append(images, image)
 	}
 	return images, nil
