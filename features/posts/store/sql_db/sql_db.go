@@ -117,7 +117,10 @@ func (db *SqlDB) AddPostImages(post values.PostId, images []values.PostImage) er
 	return nil
 }
 func (db *SqlDB) DeletePost(post values.PostId) error {
-	panic("unimplemented")
+	db.sql.Exec(`
+		DELETE FROM Post WHERE id = ?
+    `, post)
+	return nil
 }
 
 func (db *SqlDB) addImage(post values.PostId, image values.PostImage) error {
