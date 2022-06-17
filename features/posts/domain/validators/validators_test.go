@@ -2,7 +2,6 @@ package validators_test
 
 import (
 	"github.com/k0marov/socnet/core/client_errors"
-	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/core/image_decoder"
 	. "github.com/k0marov/socnet/core/test_helpers"
 	"github.com/k0marov/socnet/features/posts/domain/validators"
@@ -30,7 +29,7 @@ func TestPostValidator(t *testing.T) {
 				newPost := values.NewPostData{
 					Author: RandomString(),
 					Text:   testCase.text,
-					Images: []core_values.FileData{},
+					Images: nil,
 				}
 				gotErr, ok := validators.NewPostValidator(decoder)(newPost)
 				if testCase.expectedErr == nil {
@@ -47,11 +46,11 @@ func TestPostValidator(t *testing.T) {
 		newPost := values.NewPostData{
 			Author: RandomString(),
 			Text:   "",
-			Images: []core_values.FileData{RandomFileData(), RandomFileData(), RandomFileData()},
+			Images: []values.PostImageFile{{RandomFileData(), 1}, {RandomFileData(), 2}},
 		}
 		isCorrectImage := func(image []byte) bool {
 			for _, postImage := range newPost.Images {
-				if reflect.DeepEqual(postImage.Value(), image) {
+				if reflect.DeepEqual(postImage.File.Value(), image) {
 					return true
 				}
 			}

@@ -12,7 +12,7 @@ import (
 	"github.com/k0marov/socnet/features/profiles/store/file_storage"
 	"github.com/k0marov/socnet/features/profiles/store/sql_db"
 
-	"github.com/k0marov/socnet/core/entities"
+	"github.com/k0marov/socnet/core/core_entities"
 	"github.com/k0marov/socnet/core/image_decoder"
 	"github.com/k0marov/socnet/core/static_store"
 
@@ -31,7 +31,7 @@ func NewRegisterCallback(db *sql.DB) func(auth.User) {
 	// domain
 	createProfile := service.NewProfileCreator(storeProfileCreator)
 	return func(u auth.User) {
-		createProfile(entities.UserFromAuth(u))
+		createProfile(core_entities.UserFromAuth(u))
 	}
 }
 

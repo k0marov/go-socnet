@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/k0marov/socnet/core/static_store"
 
 	"github.com/k0marov/socnet/features/profiles/domain/entities"
 	"github.com/k0marov/socnet/features/profiles/domain/store"
@@ -9,9 +10,9 @@ import (
 	"github.com/k0marov/socnet/features/profiles/domain/values"
 
 	"github.com/k0marov/socnet/core/client_errors"
+	core_entities "github.com/k0marov/socnet/core/core_entities"
 	"github.com/k0marov/socnet/core/core_errors"
 	"github.com/k0marov/socnet/core/core_values"
-	core_entities "github.com/k0marov/socnet/core/entities"
 )
 
 type (
@@ -128,11 +129,11 @@ func NewAvatarUpdater(validator validators.AvatarValidator, storeAvatar store.St
 			return "", clientError
 		}
 
-		avatarURL, err := storeAvatar(user.Id, avatar)
+		avatarPath, err := storeAvatar(user.Id, avatar)
 		if err != nil {
 			return "", fmt.Errorf("got an error while storing updated avatar: %w", err)
 		}
 
-		return avatarURL, nil
+		return static_store.PathToURL(avatarPath), nil
 	}
 }

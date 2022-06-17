@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"github.com/k0marov/socnet/core/static_store"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -18,8 +19,8 @@ import (
 	"github.com/k0marov/socnet/features/profiles/domain/entities"
 	"github.com/k0marov/socnet/features/profiles/domain/values"
 
+	core_entities "github.com/k0marov/socnet/core/core_entities"
 	"github.com/k0marov/socnet/core/core_values"
-	core_entities "github.com/k0marov/socnet/core/entities"
 	. "github.com/k0marov/socnet/core/test_helpers"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -98,7 +99,8 @@ func TestProfiles(t *testing.T) {
 		checkProfileFromServer(t, profile2)
 
 		// update avatar for first user
-		wantAvatarPath := filepath.Join("static", "profile_"+user1.Id, "avatar")
+		wantAvatarPath := filepath.Join("profile_"+user1.Id, "avatar")
+		wantAvatarURL := static_store.StaticHost + "/" + wantAvatarPath
 		avatar := readFixture(t, "test_avatar.jpg")
 
 		body, contentType := createMultipartBody(avatar)
@@ -107,7 +109,7 @@ func TestProfiles(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		r.ServeHTTP(response, request)
-		AssertJSONData(t, response, wantAvatarPath)
+		AssertJSONData(t, response, wantAvatarURL)
 
 		// assert that it was updated
 		wantUpdatedProfile1 := entities.Profile{
@@ -121,7 +123,7 @@ func TestProfiles(t *testing.T) {
 		checkProfileFromServer(t, wantUpdatedProfile1)
 
 		// assert avatar was stored
-		Assert(t, readFile(t, wantAvatarPath), avatar, "the stored avatar file")
+		Assert(t, readFile(t, filepath.Join(static_store.StaticDir, wantAvatarPath)), avatar, "the stored avatar file")
 
 		// update profile for second user
 		upd := values.ProfileUpdateData{About: RandomString()}

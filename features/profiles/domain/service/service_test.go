@@ -2,6 +2,7 @@ package service_test
 
 import (
 	"fmt"
+	"github.com/k0marov/socnet/core/static_store"
 	"testing"
 
 	"github.com/k0marov/socnet/features/profiles/domain/entities"
@@ -276,10 +277,11 @@ func TestAvatarUpdater(t *testing.T) {
 	}
 
 	t.Run("happy case", func(t *testing.T) {
-		wantURL := RandomString()
+		path := RandomString()
+		wantURL := static_store.PathToURL(path)
 		storeAvatar := func(userId string, avatarData values.AvatarData) (core_values.FileURL, error) {
 			if userId == user.Id && avatarData == testAvatarData {
-				return wantURL, nil
+				return path, nil
 			}
 			panic(fmt.Sprintf("StoreAvatar called with unexpected arguments: userId=%v and avatarData=%v", userId, avatarData))
 		}

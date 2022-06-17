@@ -9,7 +9,6 @@ import (
 	"github.com/k0marov/socnet/features/posts/domain/values"
 
 	"github.com/k0marov/socnet/core/client_errors"
-	"github.com/k0marov/socnet/core/core_values"
 	helpers "github.com/k0marov/socnet/core/http_helpers"
 
 	"github.com/go-chi/chi/v5"
@@ -91,13 +90,14 @@ func NewCreateHandler(createPost service.PostCreator) http.HandlerFunc {
 	})
 }
 
-func parseImages(r *http.Request) []core_values.FileData {
-	images := []core_values.FileData{}
+func parseImages(r *http.Request) []values.PostImageFile {
+	images := []values.PostImageFile{}
 	for i := 1; ; i++ {
-		image, ok := helpers.ParseFile(r, "image_"+strconv.Itoa(i))
+		file, ok := helpers.ParseFile(r, "image_"+strconv.Itoa(i))
 		if !ok {
 			return images
 		}
+		image := values.PostImageFile{File: file, Index: i}
 		images = append(images, image)
 	}
 }

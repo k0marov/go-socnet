@@ -17,7 +17,8 @@ func TestStaticFileCreator(t *testing.T) {
 	tDir := RandomString()
 	tFilename := RandomString()
 	wantDir := filepath.Join(static_store.StaticDir, tDir)
-	wantPath := filepath.Join(wantDir, tFilename)
+	wantFullPath := filepath.Join(wantDir, tFilename)
+	wantPath := filepath.Join(tDir, tFilename)
 
 	t.Run("should create directory", func(t *testing.T) {
 		recursiveDirCreator := func(path string, perm fs.FileMode) error {
@@ -29,7 +30,7 @@ func TestStaticFileCreator(t *testing.T) {
 		t.Run("happy case, should write to the file", func(t *testing.T) {
 			t.Run("happy case", func(t *testing.T) {
 				writeFile := func(path string, data []byte, perm fs.FileMode) error {
-					if path == wantPath && reflect.DeepEqual(data, tData) && perm == 0777 {
+					if path == wantFullPath && reflect.DeepEqual(data, tData) && perm == 0777 {
 						return nil
 					}
 					panic("called with unexpected arguments")

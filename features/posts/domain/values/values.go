@@ -9,7 +9,12 @@ type PostId = string
 type NewPostData struct {
 	Author core_values.UserId
 	Text   string
-	Images []core_values.FileData
+	Images []PostImageFile
+}
+
+type PostImageFile struct {
+	File  core_values.FileData
+	Index int
 }
 
 type PostImage struct {

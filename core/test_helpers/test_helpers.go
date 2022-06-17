@@ -22,7 +22,7 @@ import (
 	post_entities "github.com/k0marov/socnet/features/posts/domain/entities"
 
 	"github.com/k0marov/socnet/core/client_errors"
-	core_entities "github.com/k0marov/socnet/core/entities"
+	core_entities "github.com/k0marov/socnet/core/core_entities"
 
 	auth "github.com/k0marov/golang-auth"
 )
@@ -152,18 +152,18 @@ func RandomPostImages() []post_values.PostImage {
 
 func RandomPost() post_entities.Post {
 	return post_entities.Post{
-		Id:        strconv.Itoa(RandomInt()),
-		Author:    RandomContextedProfile(),
-		Text:      RandomString(),
-		Images:    RandomUrls(),
-		CreatedAt: time.Now(),
+		Id:     strconv.Itoa(RandomInt()),
+		Author: RandomContextedProfile(),
+		Text:   RandomString(),
+		Images: RandomUrls(),
+		//CreatedAt: time.Now(), // it breaks comparisons
 	}
 }
 func RandomNewPostData() post_values.NewPostData {
 	return post_values.NewPostData{
 		Text:   RandomString(),
 		Author: RandomString(),
-		Images: RandomFiles(),
+		Images: []post_values.PostImageFile{{RandomFileData(), 1}, {RandomFileData(), 2}},
 	}
 }
 

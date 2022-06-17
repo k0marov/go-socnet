@@ -1,4 +1,4 @@
-package entities
+package core_entities
 
 import auth "github.com/k0marov/golang-auth"
 

@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
-	"strconv"
 	"testing"
 
 	"github.com/k0marov/socnet/features/posts/delivery/http/handlers"
@@ -36,7 +35,7 @@ func TestGetListById(t *testing.T) {
 	t.Run("happy case", func(t *testing.T) {
 		randomProfile := RandomString()
 		randomPosts := handlers.PostsResponse{
-			Posts: []entities.Post{RandomPost(), RandomPost(), RandomPost()},
+			Posts: []entities.Post{RandomPost(), RandomPost()},
 		}
 		getter := func(profileId core_values.UserId) ([]entities.Post, error) {
 			if profileId == randomProfile {
@@ -115,9 +114,9 @@ func TestCreatePost_Parsing(t *testing.T) {
 		defer writer.Close()
 
 		writer.WriteField("text", postData.Text)
-		for i, image := range postData.Images {
-			fw, _ := writer.CreateFormFile("image_"+strconv.Itoa(i+1), RandomString())
-			fw.Write(image.Value())
+		for _, image := range postData.Images {
+			fw, _ := writer.CreateFormFile(fmt.Sprintf("image_%d", image.Index), RandomString())
+			fw.Write(image.File.Value())
 		}
 
 		user := auth.User{Id: postData.Author, Username: RandomString()}
@@ -131,17 +130,17 @@ func TestCreatePost_Parsing(t *testing.T) {
 		{
 			Text:   "0 Images",
 			Author: "42",
-			Images: []core_values.FileData{},
+			Images: []values.PostImageFile{},
 		},
 		{
 			Text:   "2 Images",
 			Author: "77",
-			Images: []core_values.FileData{RandomFileData(), RandomFileData()},
+			Images: []values.PostImageFile{{RandomFileData(), 1}, {RandomFileData(), 2}},
 		},
 		{
-			Text:   "5 images",
+			Text:   "3 images",
 			Author: "33",
-			Images: []core_values.FileData{RandomFileData(), RandomFileData(), RandomFileData(), RandomFileData(), RandomFileData()},
+			Images: []values.PostImageFile{{RandomFileData(), 1}, {RandomFileData(), 2}, {RandomFileData(), 3}},
 		},
 	}
 

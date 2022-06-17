@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	"github.com/k0marov/socnet/core/client_errors"
+	core_entities "github.com/k0marov/socnet/core/core_entities"
 	"github.com/k0marov/socnet/core/core_values"
-	core_entities "github.com/k0marov/socnet/core/entities"
 	"github.com/k0marov/socnet/core/ref"
 
 	auth "github.com/k0marov/golang-auth"

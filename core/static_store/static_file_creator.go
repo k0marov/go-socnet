@@ -22,11 +22,12 @@ func NewStaticFileCreator(mkdirAll RecursiveDirCreator, writeFile FileCreator) S
 		if err != nil {
 			return "", fmt.Errorf("error while creating a new directory: %w", err)
 		}
-		path := filepath.Join(fullDir, filename)
-		err = writeFile(path, data.Value(), 0777)
+		fullPath := filepath.Join(fullDir, filename)
+		err = writeFile(fullPath, data.Value(), 0777)
 		if err != nil {
 			return "", fmt.Errorf("error while writing to a file: %w", err)
 		}
+		path := filepath.Join(dir, filename)
 		return path, nil
 	}
 }

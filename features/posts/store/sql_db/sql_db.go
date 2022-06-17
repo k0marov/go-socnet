@@ -117,9 +117,12 @@ func (db *SqlDB) AddPostImages(post values.PostId, images []values.PostImage) er
 	return nil
 }
 func (db *SqlDB) DeletePost(post values.PostId) error {
-	db.sql.Exec(`
+	_, err := db.sql.Exec(`
 		DELETE FROM Post WHERE id = ?
     `, post)
+	if err != nil {
+		return fmt.Errorf("while DELETEing a post by id: %w", err)
+	}
 	return nil
 }
 

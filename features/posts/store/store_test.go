@@ -31,14 +31,14 @@ func TestStorePostCreator(t *testing.T) {
 		err := sut(tNewPost, createdAt)
 		AssertSomeError(t, err)
 	})
-	storeImages := func(post values.PostId, author core_values.UserId, images []core_values.FileData) ([]core_values.StaticFilePath, error) {
+	storeImages := func(post values.PostId, author core_values.UserId, images []values.PostImageFile) ([]core_values.StaticFilePath, error) {
 		if post == postId && author == tNewPost.Author && reflect.DeepEqual(images, tNewPost.Images) {
 			return imagePaths, nil
 		}
 		panic("unexpected args")
 	}
 	t.Run("error case - storeImages returns an error", func(t *testing.T) {
-		storeImages := func(values.PostId, core_values.UserId, []core_values.FileData) ([]core_values.StaticFilePath, error) {
+		storeImages := func(values.PostId, core_values.UserId, []values.PostImageFile) ([]core_values.StaticFilePath, error) {
 			return []core_values.StaticFilePath{}, RandomError()
 		}
 		sut := store.NewStorePostCreator(createPost, storeImages, nil)

@@ -33,6 +33,10 @@ func TestSqlDB_ErrorHandling(t *testing.T) {
 		err := sut.AddPostImages(RandomString(), RandomPostImages())
 		AssertSomeError(t, err)
 	})
+	t.Run("DeletePost", func(t *testing.T) {
+		err := sut.DeletePost(RandomString())
+		AssertSomeError(t, err)
+	})
 }
 
 func TestSqlDB(t *testing.T) {

@@ -14,15 +14,15 @@ import (
 const PostPrefix = "post_"
 const ImagePrefix = "image_"
 
-type PostImageFilesCreator = func(values.PostId, core_values.UserId, []core_values.FileData) ([]core_values.StaticFilePath, error)
+type PostImageFilesCreator = func(values.PostId, core_values.UserId, []values.PostImageFile) ([]core_values.StaticFilePath, error)
 type PostFilesDeleter = func(values.PostId, core_values.UserId) error
 
 func NewPostImageFilesCreator(createFile static_store.StaticFileCreator) PostImageFilesCreator {
-	return func(post values.PostId, author core_values.UserId, images []core_values.FileData) (paths []core_values.StaticFilePath, err error) {
+	return func(post values.PostId, author core_values.UserId, images []values.PostImageFile) (paths []core_values.StaticFilePath, err error) {
 		dir := filepath.Join(profiles.ProfilePrefix+author, PostPrefix+post)
-		for i, image := range images {
-			filename := ImagePrefix + strconv.Itoa(i+1)
-			path, err := createFile(image, dir, filename)
+		for _, image := range images {
+			filename := ImagePrefix + strconv.Itoa(image.Index)
+			path, err := createFile(image.File, dir, filename)
 			if err != nil {
 				return paths, fmt.Errorf("while storing a file: %w", err)
 			}

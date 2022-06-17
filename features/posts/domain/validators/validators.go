@@ -16,7 +16,7 @@ func NewPostValidator(decodeImg image_decoder.ImageDecoder) PostValidator {
 			return client_errors.TextTooLong, false
 		}
 		for _, image := range newPost.Images {
-			_, err := decodeImg(image.Value())
+			_, err := decodeImg(image.File.Value())
 			if err != nil {
 				return client_errors.InvalidImage, false
 			}

@@ -3,9 +3,11 @@ package file_storage_test
 import (
 	"github.com/k0marov/socnet/core/core_values"
 	. "github.com/k0marov/socnet/core/test_helpers"
+	"github.com/k0marov/socnet/features/posts/domain/values"
 	"github.com/k0marov/socnet/features/posts/store/file_storage"
 	profiles "github.com/k0marov/socnet/features/profiles/store/file_storage"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"testing"
 )
@@ -13,23 +15,23 @@ import (
 func TestPostImageFilesCreator(t *testing.T) {
 	post := RandomString()
 	author := RandomString()
-	images := []core_values.FileData{RandomFileData(), RandomFileData(), RandomFileData()}
-	paths := []core_values.StaticFilePath{RandomString(), RandomString(), RandomString()}
+	images := []values.PostImageFile{{RandomFileData(), 1}, {RandomFileData(), 2}}
+	paths := []core_values.StaticFilePath{RandomString(), RandomString()}
 	t.Run("happy case", func(t *testing.T) {
-		var calledWithImages []core_values.FileData
 		wantDir := filepath.Join(profiles.ProfilePrefix+author, file_storage.PostPrefix+post)
+		filesStored := 0
 		createFile := func(file core_values.FileData, dir string, filename string) (core_values.StaticFilePath, error) {
-			if filename == file_storage.ImagePrefix+strconv.Itoa(len(calledWithImages)+1) &&
-				dir == wantDir {
-				calledWithImages = append(calledWithImages, file)
-				return paths[len(calledWithImages)-1], nil
+			wantFilename := file_storage.ImagePrefix + strconv.Itoa(filesStored+1)
+			if filename == wantFilename && dir == wantDir && reflect.DeepEqual(file, images[filesStored].File) {
+				filesStored++
+				return paths[filesStored-1], nil
 			}
 			panic("unexpected args")
 		}
 		gotPaths, err := file_storage.NewPostImageFilesCreator(createFile)(post, author, images)
 		AssertNoError(t, err)
 		Assert(t, gotPaths, paths, "returned paths")
-		Assert(t, calledWithImages, images, "fileData args to createFile")
+		Assert(t, filesStored, len(images), "number of stored files")
 	})
 	t.Run("error case", func(t *testing.T) {
 		createFile := func(core_values.FileData, string, string) (core_values.StaticFilePath, error) {
