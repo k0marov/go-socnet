@@ -45,6 +45,14 @@ func initSQL(sql *sql.DB) error {
 	if err != nil {
 		return fmt.Errorf("while creating PostImage table: %w", err)
 	}
+	_, err = sql.Exec(`
+		CREATE TABLE IF NOT EXISTS PostLike(
+		    post_id INT NOT NULL,
+			profile_id INT NOT NULL,
+		   	FOREIGN KEY(post_id) REFERENCES Post(id) ON DELETE CASCADE, 
+		   	FOREIGN KEY(profile_id) REFERENCES Profile(id) ON DELETE CASCADE 
+		)	
+    `)
 	return nil
 }
 
@@ -74,13 +82,33 @@ func (db *SqlDB) GetPosts(author core_values.UserId) (posts []models.PostModel, 
 	return posts, nil
 }
 func (db *SqlDB) LikePost(post values.PostId, fromUser core_values.UserId) error {
-	panic("unimplemented")
+	_, err := db.sql.Exec(`
+		INSERT INTO PostLike(post_id, profile_id) VALUES(?, ?)
+    `, post, fromUser)
+	if err != nil {
+		return fmt.Errorf("while INSERTing a new PostLike: %w", err)
+	}
+	return nil
 }
 func (db *SqlDB) UnlikePost(post values.PostId, fromUser core_values.UserId) error {
-	panic("unimplemented")
+	_, err := db.sql.Exec(`
+		DELETE FROM PostLike WHERE post_id = ? AND profile_id = ?
+    `, post, fromUser)
+	if err != nil {
+		return fmt.Errorf("while DELETEing a PostLike: %w", err)
+	}
+	return nil
 }
-func (db *SqlDB) IsLiked(post values.PostId, byUser core_values.UserId) error {
-	panic("unimplemented")
+func (db *SqlDB) IsLiked(post values.PostId, byUser core_values.UserId) (bool, error) {
+	row := db.sql.QueryRow(`
+		SELECT EXISTS(SELECT 1 FROM PostLike WHERE post_id = ? AND profile_id = ?)
+    `, post, byUser)
+	isLiked := 0
+	err := row.Scan(&isLiked)
+	if err != nil {
+		return false, fmt.Errorf("while SELECTing is post liked: %w", err)
+	}
+	return isLiked == 1, nil
 }
 func (db *SqlDB) GetAuthor(post values.PostId) (core_values.UserId, error) {
 	row := db.sql.QueryRow(`
