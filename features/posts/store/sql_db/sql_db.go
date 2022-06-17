@@ -34,6 +34,17 @@ func initSQL(sql *sql.DB) error {
 	if err != nil {
 		return fmt.Errorf("while creating Post table: %w", err)
 	}
+	_, err = sql.Exec(`
+		CREATE TABLE IF NOT EXISTS PostImage(
+		    post_id INT NOT NULL, 
+		    path VARCHAR(255), 
+		    ind INT,
+		    FOREIGN KEY(post_id) REFERENCES Post(id) ON DELETE CASCADE
+		)	
+	`)
+	if err != nil {
+		return fmt.Errorf("while creating PostImage table: %w", err)
+	}
 	return nil
 }
 
@@ -54,7 +65,7 @@ func (db *SqlDB) GetPosts(author core_values.UserId) (posts []models.PostModel, 
 			return []models.PostModel{}, fmt.Errorf("while scanning a post: %w", err)
 		}
 		post.CreatedAt = time.Unix(createdAt, 0)
-		post.Images = []core_values.FileURL{}
+		post.Images, _ = db.getImages(post.Id)
 		posts = append(posts, post)
 	}
 	return posts, nil
@@ -93,9 +104,35 @@ func (db *SqlDB) CreatePost(newPost models.PostToCreate) (values.PostId, error) 
 	}
 	return fmt.Sprintf("%d", id), nil
 }
-func (db *SqlDB) AddPostImages(post values.PostId, imagePaths []core_values.StaticFilePath) error {
-	panic("unimplemented")
+func (db *SqlDB) AddPostImages(post values.PostId, images []values.PostImage) error {
+	for _, image := range images {
+		db.addImage(post, image)
+	}
+	return nil
 }
 func (db *SqlDB) DeletePost(post values.PostId) error {
 	panic("unimplemented")
+}
+
+func (db *SqlDB) addImage(post values.PostId, image values.PostImage) error {
+	db.sql.Exec(`
+		INSERT INTO PostImage(post_id, path, ind) VALUES (?, ?, ?)
+   `, post, image.Path, image.Index)
+	//if err != nil {
+	//	return fmt.Errorf("while inserting a post image: %w", err)
+	//}
+	return nil
+}
+func (db *SqlDB) getImages(post values.PostId) ([]values.PostImage, error) {
+	rows, _ := db.sql.Query(`
+		SELECT path, ind FROM PostImage WHERE post_id = ?
+    `, post)
+	defer rows.Close()
+	var images []values.PostImage
+	for rows.Next() {
+		image := values.PostImage{}
+		rows.Scan(&image.Path, &image.Index)
+		images = append(images, image)
+	}
+	return images, nil
 }

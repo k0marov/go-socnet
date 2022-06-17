@@ -53,19 +53,18 @@ func TestSqlDB(t *testing.T) {
 				Author:    author,
 				Text:      post.Text,
 				CreatedAt: post.CreatedAt,
-				Images:    []core_values.FileURL{},
+				Images:    nil,
 			}
 		}
-
 		assertPosts := func(t testing.TB, author core_values.UserId, posts []models.PostModel) {
 			t.Helper()
 			gotPosts, err := sut.GetPosts(author)
 			AssertNoError(t, err)
 			Assert(t, gotPosts, posts, "the stored posts")
 		}
-		assertAuthor := func(t testing.TB, post_id values.PostId, author core_values.UserId) {
+		assertAuthor := func(t testing.TB, postId values.PostId, author core_values.UserId) {
 			t.Helper()
-			gotAuthor, err := sut.GetAuthor(post_id)
+			gotAuthor, err := sut.GetAuthor(postId)
 			AssertNoError(t, err)
 			Assert(t, gotAuthor, author, "the stored post author")
 		}
@@ -78,5 +77,11 @@ func TestSqlDB(t *testing.T) {
 		wantPost1 := createRandomPost(t, user1.Id)
 		assertAuthor(t, wantPost1.Id, user1.Id)
 		assertPosts(t, user1.Id, []models.PostModel{wantPost1})
+
+		wantPost1.Images = RandomPostImages()
+		err = sut.AddPostImages(wantPost1.Id, wantPost1.Images)
+		AssertNoError(t, err)
+		assertPosts(t, user1.Id, []models.PostModel{wantPost1})
+
 	})
 }

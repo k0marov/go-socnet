@@ -17,5 +17,5 @@ type PostModel struct {
 	Author    core_values.UserId
 	Text      string
 	CreatedAt time.Time
-	Images    []core_values.FileURL
+	Images    []values.PostImage
 }

@@ -44,7 +44,7 @@ func Assert[T any](t testing.TB, got, want T, description string) bool {
 func AssertNoError(t testing.TB, got error) {
 	t.Helper()
 	if got != nil {
-		t.Errorf("expected no error but got %v", got)
+		t.Fatalf("expected no error but got %v", got)
 	}
 }
 func AssertError(t testing.TB, got error, want error) {
@@ -141,6 +141,13 @@ func RandomFiles() []core_values.FileData {
 }
 func RandomUrls() []core_values.FileURL {
 	return []core_values.FileURL{RandomString(), RandomString(), RandomString()}
+}
+func RandomPostImages() []post_values.PostImage {
+	return []post_values.PostImage{
+		{Path: RandomString(), Index: 1},
+		{Path: RandomString(), Index: 2},
+		{Path: RandomString(), Index: 3},
+	}
 }
 
 func RandomPost() post_entities.Post {

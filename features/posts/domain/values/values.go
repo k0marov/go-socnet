@@ -11,3 +11,8 @@ type NewPostData struct {
 	Text   string
 	Images []core_values.FileData
 }
+
+type PostImage struct {
+	Path  core_values.FileURL
+	Index int
+}
