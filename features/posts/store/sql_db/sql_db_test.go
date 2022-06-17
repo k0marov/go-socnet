@@ -72,20 +72,31 @@ func TestSqlDB(t *testing.T) {
 			AssertNoError(t, err)
 			Assert(t, gotAuthor, author, "the stored post author")
 		}
-
+		// create two profiles
 		user1 := RandomNewProfile()
 		user2 := RandomNewProfile()
 		profiles.CreateProfile(user1)
 		profiles.CreateProfile(user2)
 
+		// create a post for the first profile
 		wantPost1 := createRandomPost(t, user1.Id)
 		assertAuthor(t, wantPost1.Id, user1.Id)
 		assertPosts(t, user1.Id, []models.PostModel{wantPost1})
-
+		// add images to that post
 		wantPost1.Images = RandomPostImages()
 		err = sut.AddPostImages(wantPost1.Id, wantPost1.Images)
 		AssertNoError(t, err)
 		assertPosts(t, user1.Id, []models.PostModel{wantPost1})
+		// create two posts for the second profile
+		user2Posts := []models.PostModel{createRandomPost(t, user2.Id), createRandomPost(t, user2.Id)}
+		assertAuthor(t, user2Posts[0].Id, user2.Id)
+		assertAuthor(t, user2Posts[1].Id, user2.Id)
+		assertPosts(t, user2.Id, user2Posts)
 
+		// delete the second post
+		err = sut.DeletePost(user2Posts[1].Id)
+		AssertNoError(t, err)
+		// assert it was deleted
+		assertPosts(t, user2.Id, user2Posts[:1])
 	})
 }
