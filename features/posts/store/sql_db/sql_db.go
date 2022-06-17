@@ -72,7 +72,7 @@ func (db *SqlDB) GetPosts(author core_values.UserId) (posts []models.PostModel, 
 		if err != nil {
 			return []models.PostModel{}, fmt.Errorf("while scanning a post: %w", err)
 		}
-		post.CreatedAt = time.Unix(createdAt, 0)
+		post.CreatedAt = time.Unix(createdAt, 0).UTC()
 		post.Images, err = db.getImages(post.Id)
 		if err != nil {
 			return []models.PostModel{}, err
