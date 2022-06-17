@@ -27,7 +27,7 @@ func TestStorePostCreator(t *testing.T) {
 		createPost := func(models.PostToCreate) (values.PostId, error) {
 			return "", RandomError()
 		}
-		sut := store.NewStorePostCreator(createPost, nil, nil)
+		sut := store.NewStorePostCreator(createPost, nil, nil, nil, nil)
 		err := sut(tNewPost, createdAt)
 		AssertSomeError(t, err)
 	})
@@ -41,9 +41,18 @@ func TestStorePostCreator(t *testing.T) {
 		storeImages := func(values.PostId, core_values.UserId, []values.PostImageFile) ([]core_values.StaticFilePath, error) {
 			return []core_values.StaticFilePath{}, RandomError()
 		}
-		sut := store.NewStorePostCreator(createPost, storeImages, nil)
+		postDeleted := false
+		deletePost := func(post values.PostId) error {
+			if post == postId {
+				postDeleted = true
+				return nil
+			}
+			panic("unexpected args")
+		}
+		sut := store.NewStorePostCreator(createPost, storeImages, nil, deletePost, nil)
 		err := sut(tNewPost, createdAt)
 		AssertSomeError(t, err)
+		Assert(t, postDeleted, true, "post was deleted")
 	})
 	addImages := func(post values.PostId, images []core_values.StaticFilePath) error {
 		if post == postId && reflect.DeepEqual(images, imagePaths) {
@@ -55,13 +64,33 @@ func TestStorePostCreator(t *testing.T) {
 		addImages := func(values.PostId, []core_values.StaticFilePath) error {
 			return RandomError()
 		}
-		sut := store.NewStorePostCreator(createPost, storeImages, addImages)
+		postDeleted := false
+		imagesDeleted := false
+		deletePost := func(post values.PostId) error {
+			if post == postId {
+				postDeleted = true
+				return nil
+			}
+			panic("unexpected args")
+		}
+		deleteImages := func(post values.PostId, author core_values.UserId) error {
+			if post == postId && author == tNewPost.Author {
+				imagesDeleted = true
+				return nil
+			}
+			panic("unexpected args")
+		}
+		sut := store.NewStorePostCreator(createPost, storeImages, addImages, deletePost, deleteImages)
 		err := sut(tNewPost, createdAt)
 		AssertSomeError(t, err)
+		Assert(t, postDeleted, true, "post was deleted")
+		Assert(t, imagesDeleted, true, "images were deleted")
 	})
-	sut := store.NewStorePostCreator(createPost, storeImages, addImages)
-	err := sut(tNewPost, createdAt)
-	AssertNoError(t, err)
+	t.Run("happy case", func(t *testing.T) {
+		sut := store.NewStorePostCreator(createPost, storeImages, addImages, nil, nil)
+		err := sut(tNewPost, createdAt)
+		AssertNoError(t, err)
+	})
 }
 
 func TestStorePostDeleter(t *testing.T) {

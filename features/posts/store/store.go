@@ -22,7 +22,9 @@ type (
 	DBPostDeleter     func(values.PostId) error
 )
 
-func NewStorePostCreator(createPost DBPostCreator, storeImages file_storage.PostImageFilesCreator, addImages DBPostImagesAdder) store.PostCreator {
+func NewStorePostCreator(
+	createPost DBPostCreator, storeImages file_storage.PostImageFilesCreator, addImages DBPostImagesAdder,
+	deletePost DBPostDeleter, deleteImages file_storage.PostFilesDeleter) store.PostCreator {
 	return func(post values.NewPostData, createdAt time.Time) error {
 		postToCreate := models.PostToCreate{
 			Author:    post.Author,
@@ -35,10 +37,13 @@ func NewStorePostCreator(createPost DBPostCreator, storeImages file_storage.Post
 		}
 		imagePaths, err := storeImages(postId, post.Author, post.Images)
 		if err != nil {
+			deletePost(postId)
 			return fmt.Errorf("while storing image files: %w", err)
 		}
 		err = addImages(postId, imagePaths)
 		if err != nil {
+			deletePost(postId)
+			deleteImages(postId, post.Author)
 			return fmt.Errorf("while adding image paths to db: %w", err)
 		}
 		return nil
