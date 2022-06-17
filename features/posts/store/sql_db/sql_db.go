@@ -42,11 +42,17 @@ func (db *SqlDB) GetPosts(author core_values.UserId) (posts []models.PostModel, 
 		SELECT id, author_id, textContent, createdAt FROM Post 
 		WHERE author_id = ?
 	`, author)
+	if err != nil {
+		return []models.PostModel{}, fmt.Errorf("while getting posts from db: %w", err)
+	}
 	defer rows.Close()
 	for rows.Next() {
 		post := models.PostModel{}
 		var createdAt int64
 		err = rows.Scan(&post.Id, &post.Author, &post.Text, &createdAt)
+		if err != nil {
+			return []models.PostModel{}, fmt.Errorf("while scanning a post: %w", err)
+		}
 		post.CreatedAt = time.Unix(createdAt, 0)
 		post.Images = []core_values.FileURL{}
 		posts = append(posts, post)
@@ -68,14 +74,23 @@ func (db *SqlDB) GetAuthor(post values.PostId) (core_values.UserId, error) {
 		WHERE id = ?
     `, post)
 	var authorId int
-	row.Scan(&authorId)
+	err := row.Scan(&authorId)
+	if err != nil {
+		return "", fmt.Errorf("while SELECTing a post author: %w", err)
+	}
 	return fmt.Sprintf("%d", authorId), nil
 }
 func (db *SqlDB) CreatePost(newPost models.PostToCreate) (values.PostId, error) {
-	res, _ := db.sql.Exec(`
+	res, err := db.sql.Exec(`
 		INSERT INTO Post(author_id, textContent, createdAt) VALUES (?, ?, ?)
 	`, newPost.Author, newPost.Text, newPost.CreatedAt.Unix())
-	id, _ := res.LastInsertId()
+	if err != nil {
+		return "", fmt.Errorf("while inserting a post: %w", err)
+	}
+	id, err := res.LastInsertId()
+	if err != nil {
+		return "", fmt.Errorf("while getting the inserted post id: %w", err)
+	}
 	return fmt.Sprintf("%d", id), nil
 }
 func (db *SqlDB) AddPostImages(post values.PostId, imagePaths []core_values.StaticFilePath) error {

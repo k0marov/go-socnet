@@ -21,7 +21,14 @@ func TestSqlDB_ErrorHandling(t *testing.T) {
 		_, err := sut.GetPosts(RandomString())
 		AssertSomeError(t, err)
 	})
-
+	t.Run("CreatePost", func(t *testing.T) {
+		_, err := sut.CreatePost(models.PostToCreate{})
+		AssertSomeError(t, err)
+	})
+	t.Run("GetAuthor", func(t *testing.T) {
+		_, err := sut.GetAuthor(RandomString())
+		AssertSomeError(t, err)
+	})
 }
 
 func TestSqlDB(t *testing.T) {
