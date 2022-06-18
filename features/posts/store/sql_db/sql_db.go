@@ -60,6 +60,7 @@ func (db *SqlDB) GetPosts(author core_values.UserId) (posts []models.PostModel, 
 	rows, err := db.sql.Query(`
 		SELECT id, author_id, textContent, createdAt FROM Post 
 		WHERE author_id = ?
+		ORDER BY createdAt DESC
 	`, author)
 	if err != nil {
 		return []models.PostModel{}, fmt.Errorf("while getting posts from db: %w", err)
