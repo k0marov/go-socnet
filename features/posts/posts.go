@@ -6,5 +6,7 @@ import (
 )
 
 func NewPostsRouterImpl(db *sql.DB) func(chi.Router) {
+	//
+	//return router.NewPostsRouter(createPost, getPost, deletePost, toggleLike)
 	panic("unimplemented")
 }
