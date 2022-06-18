@@ -14,11 +14,11 @@ import (
 const PostPrefix = "post_"
 const ImagePrefix = "image_"
 
-type PostImageFilesCreator = func(values.PostId, core_values.UserId, []values.PostImageFile) ([]core_values.StaticFilePath, error)
+type PostImageFilesCreator = func(values.PostId, core_values.UserId, []values.PostImageFile) ([]core_values.StaticPath, error)
 type PostFilesDeleter = func(values.PostId, core_values.UserId) error
 
 func NewPostImageFilesCreator(createFile static_store.StaticFileCreator) PostImageFilesCreator {
-	return func(post values.PostId, author core_values.UserId, images []values.PostImageFile) (paths []core_values.StaticFilePath, err error) {
+	return func(post values.PostId, author core_values.UserId, images []values.PostImageFile) (paths []core_values.StaticPath, err error) {
 		dir := filepath.Join(profiles.ProfilePrefix+author, PostPrefix+post)
 		for _, image := range images {
 			filename := ImagePrefix + strconv.Itoa(image.Index)

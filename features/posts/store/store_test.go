@@ -15,7 +15,7 @@ func TestStorePostCreator(t *testing.T) {
 	tNewPost := RandomNewPostData()
 	postId := RandomString()
 	createdAt := time.Now()
-	var imagePaths []core_values.StaticFilePath
+	var imagePaths []core_values.StaticPath
 	var wantPostImages []values.PostImage
 	for _, img := range tNewPost.Images {
 		path := RandomString()
@@ -37,15 +37,15 @@ func TestStorePostCreator(t *testing.T) {
 		err := sut(tNewPost, createdAt)
 		AssertSomeError(t, err)
 	})
-	storeImages := func(post values.PostId, author core_values.UserId, images []values.PostImageFile) ([]core_values.StaticFilePath, error) {
+	storeImages := func(post values.PostId, author core_values.UserId, images []values.PostImageFile) ([]core_values.StaticPath, error) {
 		if post == postId && author == tNewPost.Author && reflect.DeepEqual(images, tNewPost.Images) {
 			return imagePaths, nil
 		}
 		panic("unexpected args")
 	}
 	t.Run("error case - storeImages returns an error", func(t *testing.T) {
-		storeImages := func(values.PostId, core_values.UserId, []values.PostImageFile) ([]core_values.StaticFilePath, error) {
-			return []core_values.StaticFilePath{}, RandomError()
+		storeImages := func(values.PostId, core_values.UserId, []values.PostImageFile) ([]core_values.StaticPath, error) {
+			return []core_values.StaticPath{}, RandomError()
 		}
 		postDeleted := false
 		deletePost := func(post values.PostId) error {

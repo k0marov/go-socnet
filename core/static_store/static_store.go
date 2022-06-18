@@ -6,13 +6,13 @@ import (
 )
 
 type (
-	StaticFileCreator = func(data ref.Ref[[]byte], dir, filename string) (core_values.StaticFilePath, error)
-	StaticDirDeleter  = func(dir string) error
+	StaticFileCreator = func(data ref.Ref[[]byte], dir, filename string) (core_values.StaticPath, error)
+	StaticDirDeleter  = func(dir core_values.StaticPath) error
 )
 
 const StaticDir = "static/"
 const StaticHost = "static.example.com"
 
-func PathToURL(path core_values.StaticFilePath) core_values.FileURL {
+func PathToURL(path core_values.StaticPath) core_values.FileURL {
 	return StaticHost + "/" + path
 }

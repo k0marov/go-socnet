@@ -16,11 +16,11 @@ func TestPostImageFilesCreator(t *testing.T) {
 	post := RandomString()
 	author := RandomString()
 	images := []values.PostImageFile{{RandomFileData(), 1}, {RandomFileData(), 2}}
-	paths := []core_values.StaticFilePath{RandomString(), RandomString()}
+	paths := []core_values.StaticPath{RandomString(), RandomString()}
 	t.Run("happy case", func(t *testing.T) {
 		wantDir := filepath.Join(profiles.ProfilePrefix+author, file_storage.PostPrefix+post)
 		filesStored := 0
-		createFile := func(file core_values.FileData, dir string, filename string) (core_values.StaticFilePath, error) {
+		createFile := func(file core_values.FileData, dir string, filename string) (core_values.StaticPath, error) {
 			wantFilename := file_storage.ImagePrefix + strconv.Itoa(filesStored+1)
 			if filename == wantFilename && dir == wantDir && reflect.DeepEqual(file, images[filesStored].File) {
 				filesStored++
@@ -34,7 +34,7 @@ func TestPostImageFilesCreator(t *testing.T) {
 		Assert(t, filesStored, len(images), "number of stored files")
 	})
 	t.Run("error case", func(t *testing.T) {
-		createFile := func(core_values.FileData, string, string) (core_values.StaticFilePath, error) {
+		createFile := func(core_values.FileData, string, string) (core_values.StaticPath, error) {
 			return "", RandomError()
 		}
 		_, err := file_storage.NewPostImageFilesCreator(createFile)(post, author, images)
