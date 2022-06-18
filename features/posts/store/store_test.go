@@ -15,7 +15,13 @@ func TestStorePostCreator(t *testing.T) {
 	tNewPost := RandomNewPostData()
 	postId := RandomString()
 	createdAt := time.Now()
-	imagePaths := []core_values.StaticFilePath{RandomString(), RandomString()}
+	var imagePaths []core_values.StaticFilePath
+	var wantPostImages []values.PostImage
+	for _, img := range tNewPost.Images {
+		path := RandomString()
+		imagePaths = append(imagePaths, path)
+		wantPostImages = append(wantPostImages, values.PostImage{Path: path, Index: img.Index})
+	}
 
 	createPost := func(newPost models.PostToCreate) (values.PostId, error) {
 		if newPost.Author == tNewPost.Author && newPost.Text == tNewPost.Text && TimeAlmostEqual(newPost.CreatedAt, createdAt) {
@@ -54,14 +60,14 @@ func TestStorePostCreator(t *testing.T) {
 		AssertSomeError(t, err)
 		Assert(t, postDeleted, true, "post was deleted")
 	})
-	addImages := func(post values.PostId, images []core_values.StaticFilePath) error {
-		if post == postId && reflect.DeepEqual(images, imagePaths) {
+	addImages := func(post values.PostId, images []values.PostImage) error {
+		if post == postId && reflect.DeepEqual(images, wantPostImages) {
 			return nil
 		}
 		panic("unimplemented")
 	}
 	t.Run("error case - addImages returns an error", func(t *testing.T) {
-		addImages := func(values.PostId, []core_values.StaticFilePath) error {
+		addImages := func(values.PostId, []values.PostImage) error {
 			return RandomError()
 		}
 		postDeleted := false

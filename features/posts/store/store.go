@@ -18,7 +18,7 @@ type (
 	DBAuthorGetter func(values.PostId) (core_values.UserId, error)
 
 	DBPostCreator     func(newPost models.PostToCreate) (values.PostId, error)
-	DBPostImagesAdder func(values.PostId, []core_values.StaticFilePath) error
+	DBPostImagesAdder func(values.PostId, []values.PostImage) error
 	DBPostDeleter     func(values.PostId) error
 )
 
@@ -36,11 +36,18 @@ func NewStorePostCreator(
 			return fmt.Errorf("while creating a post in db: %w", err)
 		}
 		imagePaths, err := storeImages(postId, post.Author, post.Images)
-		if err != nil {
+		if err != nil || len(imagePaths) != len(post.Images) {
 			deletePost(postId)
 			return fmt.Errorf("while storing image files: %w", err)
 		}
-		err = addImages(postId, imagePaths)
+		var postImages []values.PostImage
+		for i, path := range imagePaths {
+			postImages = append(postImages, values.PostImage{
+				Path:  path,
+				Index: post.Images[i].Index,
+			})
+		}
+		err = addImages(postId, postImages)
 		if err != nil {
 			deletePost(postId)
 			deleteImages(postId, post.Author)
