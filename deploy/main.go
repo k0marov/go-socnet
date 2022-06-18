@@ -2,26 +2,33 @@ package main
 
 import (
 	"database/sql"
+	"github.com/go-chi/chi/v5"
+	"github.com/k0marov/socnet/features/posts"
+	"github.com/k0marov/socnet/features/profiles"
 	"log"
 	"net/http"
-	"profiles"
 
 	_ "github.com/mattn/go-sqlite3"
 
-	"github.com/go-chi/chi/v5"
 	auth "github.com/k0marov/golang-auth"
 )
 
 const AuthHashCost = 8
 
 func main() {
-	// profiles
+	// db
 	sql, err := sql.Open("sqlite3", "db.sqlite3")
 	if err != nil {
 		log.Fatalf("error while opening sql db: %v", err)
 	}
+
+	// profiles
 	onNewRegister := profiles.NewRegisterCallback(sql)
+	profileGetter := profiles.NewProfileGetterImpl(sql)
 	profilesRouter := profiles.NewProfilesRouterImpl(sql)
+
+	// posts
+	postsRouter := posts.NewPostsRouterImpl(sql, profileGetter)
 
 	// auth
 	authStore, err := auth.NewStoreImpl("auth.db.csv")
@@ -42,6 +49,7 @@ func main() {
 	r.Route("/api", func(r chi.Router) {
 		r.Use(authMiddleware)
 		r.Route("/profiles", profilesRouter)
+		r.Route("/posts", postsRouter)
 	})
 
 	http.ListenAndServe(":4242", r)

@@ -35,6 +35,16 @@ func NewRegisterCallback(db *sql.DB) func(auth.User) {
 	}
 }
 
+func NewProfileGetterImpl(db *sql.DB) service.ProfileGetter {
+	sqlDB, err := sql_db.NewSqlDB(db)
+	if err != nil {
+		log.Fatalf("Error while opening sql db as a db for profiles: %v", err)
+	}
+	getProfile := store.NewStoreProfileGetter(sqlDB.GetProfile)
+	isFollowed := store.NewStoreFollowChecker(sqlDB.IsFollowing)
+	return service.NewProfileGetter(getProfile, isFollowed)
+}
+
 func NewProfilesRouterImpl(db *sql.DB) func(chi.Router) {
 	// db
 	sqlDB, err := sql_db.NewSqlDB(db)
