@@ -43,7 +43,7 @@ func NewStorePostCreator(
 		var postImages []values.PostImage
 		for i, path := range imagePaths {
 			postImages = append(postImages, values.PostImage{
-				Path:  path,
+				URL:   path,
 				Index: post.Images[i].Index,
 			})
 		}

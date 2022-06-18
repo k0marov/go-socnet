@@ -147,9 +147,9 @@ func RandomUrls() []core_values.FileURL {
 }
 func RandomPostImages() []post_values.PostImage {
 	return []post_values.PostImage{
-		{Path: RandomString(), Index: 1},
-		{Path: RandomString(), Index: 2},
-		{Path: RandomString(), Index: 3},
+		{URL: RandomString(), Index: 1},
+		{URL: RandomString(), Index: 2},
+		{URL: RandomString(), Index: 3},
 	}
 }
 

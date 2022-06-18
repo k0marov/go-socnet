@@ -18,6 +18,6 @@ type PostImageFile struct {
 }
 
 type PostImage struct {
-	Path  core_values.FileURL
+	URL   core_values.FileURL
 	Index int
 }

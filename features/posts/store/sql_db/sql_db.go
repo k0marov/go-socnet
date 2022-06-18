@@ -158,7 +158,7 @@ func (db *SqlDB) DeletePost(post values.PostId) error {
 func (db *SqlDB) addImage(post values.PostId, image values.PostImage) error {
 	_, err := db.sql.Exec(`
 		INSERT INTO PostImage(post_id, path, ind) VALUES (?, ?, ?)
-   `, post, image.Path, image.Index)
+   `, post, image.URL, image.Index)
 	if err != nil {
 		return fmt.Errorf("while inserting a post image: %w", err)
 	}
@@ -174,7 +174,7 @@ func (db *SqlDB) getImages(post values.PostId) (images []values.PostImage, err e
 	defer rows.Close()
 	for rows.Next() {
 		image := values.PostImage{}
-		err := rows.Scan(&image.Path, &image.Index)
+		err := rows.Scan(&image.URL, &image.Index)
 		if err != nil {
 			return []values.PostImage{}, fmt.Errorf("while scanning an image: %w", err)
 		}

@@ -20,7 +20,7 @@ func TestStorePostCreator(t *testing.T) {
 	for _, img := range tNewPost.Images {
 		path := RandomString()
 		imagePaths = append(imagePaths, path)
-		wantPostImages = append(wantPostImages, values.PostImage{Path: path, Index: img.Index})
+		wantPostImages = append(wantPostImages, values.PostImage{URL: path, Index: img.Index})
 	}
 
 	createPost := func(newPost models.PostToCreate) (values.PostId, error) {
