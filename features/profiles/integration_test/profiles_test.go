@@ -220,6 +220,7 @@ func readFixture(t testing.TB, filename string) []byte {
 }
 
 func readFile(t testing.TB, filepath string) []byte {
+	t.Helper()
 	data, err := os.ReadFile(filepath)
 	if err != nil {
 		t.Fatalf("error while reading file %s: %v", filepath, err)
