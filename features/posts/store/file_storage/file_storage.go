@@ -34,11 +34,14 @@ func NewPostImageFilesCreator(createFile static_store.StaticFileCreator) PostIma
 
 func NewPostFilesDeleter(deleteDir static_store.StaticDirDeleter) PostFilesDeleter {
 	return func(post values.PostId, author core_values.UserId) error {
-		dir := filepath.Join(profiles.ProfilePrefix+author, PostPrefix+post)
-		err := deleteDir(dir)
+		err := deleteDir(GetPostDir(post, author))
 		if err != nil {
 			return fmt.Errorf("while deleting the post directory: %w", err)
 		}
 		return nil
 	}
+}
+
+func GetPostDir(post values.PostId, author core_values.UserId) string {
+	return filepath.Join(profiles.GetProfileDir(author), PostPrefix+post)
 }

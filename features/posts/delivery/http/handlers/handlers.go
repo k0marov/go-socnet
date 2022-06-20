@@ -43,7 +43,7 @@ func NewGetListByIdHandler(getPosts service.PostsGetter) http.HandlerFunc {
 		if !ok {
 			return
 		}
-		profileId := chi.URLParam(r, "profile_id")
+		profileId := r.URL.Query().Get("profile_id")
 		if profileId == "" {
 			helpers.ThrowClientError(w, client_errors.IdNotProvided)
 			return

@@ -23,14 +23,6 @@ import (
 	auth "github.com/k0marov/golang-auth"
 )
 
-func createRequestWithProfileId(profileId core_values.UserId) *http.Request {
-	request := helpers.CreateRequest(nil)
-	ctx := chi.NewRouteContext()
-	ctx.URLParams.Add("profile_id", profileId)
-	request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, ctx))
-	return request
-}
-
 func TestGetListById(t *testing.T) {
 	caller := RandomAuthUser()
 	helpers.BaseTest401(t, handlers.NewGetListByIdHandler(nil))
@@ -45,7 +37,7 @@ func TestGetListById(t *testing.T) {
 			}
 			panic("unexpected args")
 		}
-		request := helpers.AddAuthDataToRequest(createRequestWithProfileId(randomProfile), caller)
+		request := helpers.AddAuthDataToRequest(httptest.NewRequest(http.MethodGet, "/handler-should-not-care?profile_id="+randomProfile, nil), caller)
 		response := httptest.NewRecorder()
 		handlers.NewGetListByIdHandler(getter).ServeHTTP(response, request)
 		AssertJSONData(t, response, randomPosts)
@@ -60,7 +52,7 @@ func TestGetListById(t *testing.T) {
 		getter := func(profile, caller core_values.UserId) ([]entities.ContextedPost, error) {
 			return []entities.ContextedPost{}, err
 		}
-		request := helpers.AddAuthDataToRequest(createRequestWithProfileId("42"), caller)
+		request := helpers.AddAuthDataToRequest(httptest.NewRequest(http.MethodGet, "/handler-should-not-care?profile_id=42", nil), caller)
 		handlers.NewGetListByIdHandler(getter).ServeHTTP(rr, request)
 	})
 }

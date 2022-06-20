@@ -46,7 +46,7 @@ func TestPostFilesDeleter(t *testing.T) {
 	post := RandomString()
 	author := RandomString()
 	t.Run("happy case", func(t *testing.T) {
-		wantDir := filepath.Join(profiles.ProfilePrefix+author, file_storage.PostPrefix+post)
+		wantDir := filepath.Join(profiles.GetProfileDir(author), file_storage.PostPrefix+post)
 		deleteDir := func(dir string) error {
 			if dir == wantDir {
 				return nil

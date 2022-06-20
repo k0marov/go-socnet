@@ -16,3 +16,7 @@ func NewAvatarFileCreator(createFile static_store.StaticFileCreator) store.Avata
 		return createFile(data, ProfilePrefix+belongsToUser, AvatarFileName)
 	}
 }
+
+func GetProfileDir(user core_values.UserId) core_values.StaticPath {
+	return ProfilePrefix + user
+}
