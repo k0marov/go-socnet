@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/core/ref"
+	comment_entities "github.com/k0marov/socnet/features/comments/domain/entities"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
 	"github.com/k0marov/socnet/features/posts/store/models"
 	"math"
@@ -215,6 +216,13 @@ func RandomClientError() client_errors.ClientError {
 		ReadableDetail: RandomString(),
 		HTTPCode:       RandomInt() + 400,
 	}
+}
+
+func RandomComment() comment_entities.Comment {
+	return comment_entities.Comment{}
+}
+func RandomComments() []comment_entities.Comment {
+	return []comment_entities.Comment{RandomComment(), RandomComment(), RandomComment()}
 }
 
 func RandomBool() bool {

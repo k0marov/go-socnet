@@ -8,7 +8,7 @@ import (
 )
 
 type (
-	GetPostComments func(post post_values.PostId) ([]entities.Comment, error)
-	AddComment      func(post post_values.PostId, newComment values.NewCommentValue) (entities.Comment, error)
-	ToggleLike      func(values.CommentId, core_values.UserId) error
+	PostCommentsGetter func(post post_values.PostId) ([]entities.Comment, error)
+	CommentAdder       func(post post_values.PostId, newComment values.NewCommentValue) (entities.Comment, error)
+	CommentLikeToggler func(values.CommentId, core_values.UserId) error
 )
