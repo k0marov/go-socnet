@@ -19,6 +19,7 @@ import (
 	"github.com/k0marov/socnet/features/profiles"
 	profile_entities "github.com/k0marov/socnet/features/profiles/domain/entities"
 	_ "github.com/mattn/go-sqlite3"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -55,13 +56,13 @@ func TestPosts(t *testing.T) {
 		t.Helper()
 		body := bytes.NewBuffer(nil)
 		writer := multipart.NewWriter(body)
-		defer writer.Close()
 
 		writer.WriteField("text", text)
 		for i, image := range images {
 			fw, _ := writer.CreateFormFile(fmt.Sprintf("image_%d", i+1), RandomString())
 			fw.Write(image)
 		}
+		writer.Close()
 		request := helpers.AddAuthDataToRequest(httptest.NewRequest(http.MethodPost, "/posts", body), author)
 		request.Header.Set("Content-Type", writer.FormDataContentType())
 
@@ -100,7 +101,7 @@ func TestPosts(t *testing.T) {
 	}
 	toggleLike := func(t testing.TB, postId values.PostId, caller auth.User) {
 		t.Helper()
-		request := helpers.AddAuthDataToRequest(httptest.NewRequest("/posts/"+postId+"/toggle-like", http.MethodPost, nil), caller)
+		request := helpers.AddAuthDataToRequest(httptest.NewRequest(http.MethodPost, "/posts/"+postId+"/toggle-like", nil), caller)
 		response := httptest.NewRecorder()
 		r.ServeHTTP(response, request)
 		AssertStatusCode(t, response, http.StatusOK)
@@ -121,20 +122,23 @@ func TestPosts(t *testing.T) {
 	registerProfile(user2)
 
 	t.Run("creating, reading and deleting posts", func(t *testing.T) {
+
+		// create post (without images) belonging to 2-nd profile
+		text1 := "Hello, World!"
+		createPost(t, user2, [][]byte{}, text1)
+
 		// create post (with images) belonging to 2-nd profile
 		text2 := "Hello, World with Images!"
 		image1 := readFixture(t, "test_image.jpg")
 		image2 := readFixture(t, "test_image.jpg")
 		createPost(t, user2, [][]byte{image1, image2}, text2)
 
-		// create post (without images) belonging to 2-nd profile
-		text1 := "Hello, World!"
-		createPost(t, user2, [][]byte{}, text1)
-
 		// assert they were created
 		posts := getPosts(t, user2.Id, user2)
 
 		AssertFatal(t, len(posts), 2, "number of created posts")
+
+		log.Print(fmt.Sprintf("first:  %+v, \nsecond: %+v", posts[0], posts[1]))
 
 		Assert(t, posts[0].Text, text1, "the first post's text")
 		Assert(t, posts[0].Author.Id, user2.Id, "first post's author")
@@ -149,8 +153,8 @@ func TestPosts(t *testing.T) {
 		deletePost(t, posts[0].Id, user2)
 		deletePost(t, posts[1].Id, user2)
 		// assert they were deleted
-		posts = getPosts(t, user2.Id, user2)
-		Assert(t, len(posts), 0, "number of posts after deletion")
+		nowPosts := getPosts(t, user2.Id, user2)
+		Assert(t, len(nowPosts), 0, "number of posts after deletion")
 		assertPostFilesDeleted(t, posts[0].Id, user2.Id)
 		assertPostFilesDeleted(t, posts[1].Id, user2.Id)
 	})

@@ -105,13 +105,13 @@ func TestCreatePost_Parsing(t *testing.T) {
 	createRequest := func(postData values.NewPostData) *http.Request {
 		body := bytes.NewBuffer(nil)
 		writer := multipart.NewWriter(body)
-		defer writer.Close()
 
 		writer.WriteField("text", postData.Text)
 		for _, image := range postData.Images {
 			fw, _ := writer.CreateFormFile(fmt.Sprintf("image_%d", image.Index), RandomString())
 			fw.Write(image.File.Value())
 		}
+		writer.Close()
 
 		user := auth.User{Id: postData.Author, Username: RandomString()}
 		request := helpers.AddAuthDataToRequest(helpers.CreateRequest(body), user)

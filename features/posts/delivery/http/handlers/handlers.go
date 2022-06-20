@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 
@@ -86,6 +87,7 @@ func NewCreateHandler(createPost service.PostCreator) http.HandlerFunc {
 			Text:   r.FormValue("text"),
 			Images: parseImages(r),
 		}
+		log.Printf("%+v", newPost)
 		err := createPost(newPost)
 		if err != nil {
 			helpers.HandleServiceError(w, err)
