@@ -9,6 +9,6 @@ import (
 
 type (
 	PostCommentsGetter func(post post_values.PostId) ([]entities.Comment, error)
-	CommentAdder       func(post post_values.PostId, newComment values.NewCommentValue) (entities.Comment, error)
+	CommentCreator     func(newComment values.NewCommentValue) (entities.Comment, error)
 	CommentLikeToggler func(values.CommentId, core_values.UserId) error
 )

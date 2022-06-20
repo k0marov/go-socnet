@@ -1,7 +1,9 @@
 package handlers_test
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	auth "github.com/k0marov/golang-auth"
 	"github.com/k0marov/socnet/core/client_errors"
@@ -12,15 +14,17 @@ import (
 	"github.com/k0marov/socnet/features/comments/domain/entities"
 	"github.com/k0marov/socnet/features/comments/domain/values"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
+func createRequestWithPostId(id post_values.PostId, body io.Reader) *http.Request {
+	return httptest.NewRequest(http.MethodOptions, "/handler-should-not-care?post_id="+id, body)
+}
+
 func TestNewGetCommentsHandler(t *testing.T) {
-	createRequestWithPostId := func(id post_values.PostId) *http.Request {
-		return httptest.NewRequest(http.MethodOptions, "/handler-should-not-care?post_id="+id, nil)
-	}
 	post := RandomString()
 	comments := RandomComments()
 	t.Run("happy case", func(t *testing.T) {
@@ -31,7 +35,7 @@ func TestNewGetCommentsHandler(t *testing.T) {
 			panic("unexpected args")
 		}
 		response := httptest.NewRecorder()
-		handlers.NewGetCommentsHandler(getter).ServeHTTP(response, createRequestWithPostId(post))
+		handlers.NewGetCommentsHandler(getter).ServeHTTP(response, createRequestWithPostId(post, nil))
 		AssertJSONData(t, response, handlers.CommentsResponse{Comments: comments})
 	})
 	t.Run("error case - post_id is not provided", func(t *testing.T) {
@@ -43,11 +47,47 @@ func TestNewGetCommentsHandler(t *testing.T) {
 		getter := func(id post_values.PostId) ([]entities.Comment, error) {
 			return []entities.Comment{}, err
 		}
-		handlers.NewGetCommentsHandler(getter).ServeHTTP(response, createRequestWithPostId(post))
+		handlers.NewGetCommentsHandler(getter).ServeHTTP(response, createRequestWithPostId(post, nil))
 	})
 }
 
-func TestNewAddCommentHandler(t *testing.T) {
+func TestNewCreateCommentHandler(t *testing.T) {
+	helpers.BaseTest401(t, handlers.NewCreateCommentHandler(nil))
+	user := RandomAuthUser()
+	post := RandomString()
+	wantNewComment := values.NewCommentValue{
+		Author: user.Id,
+		Text:   RandomString(),
+		Post:   post,
+	}
+	createdComment := RandomComment()
+	t.Run("happy case", func(t *testing.T) {
+		creator := func(newComment values.NewCommentValue) (entities.Comment, error) {
+			if newComment == wantNewComment {
+				return createdComment, nil
+			}
+			panic("unexpected args")
+		}
+		response := httptest.NewRecorder()
+		body := bytes.NewBuffer(nil)
+		json.NewEncoder(body).Encode(handlers.NewCommentRequest{Text: wantNewComment.Text})
+		request := helpers.AddAuthDataToRequest(createRequestWithPostId(post, body), user)
+		handlers.NewCreateCommentHandler(creator).ServeHTTP(response, request)
+		AssertJSONData(t, response, createdComment)
+	})
+	t.Run("error case - post id is not provided", func(t *testing.T) {
+		request := helpers.AddAuthDataToRequest(helpers.CreateRequest(nil), user)
+		response := httptest.NewRecorder()
+		handlers.NewCreateCommentHandler(nil).ServeHTTP(response, request)
+		AssertClientError(t, response, client_errors.IdNotProvided)
+	})
+	helpers.BaseTestServiceErrorHandling(t, func(err error, response *httptest.ResponseRecorder) {
+		creator := func(values.NewCommentValue) (entities.Comment, error) {
+			return entities.Comment{}, err
+		}
+		request := helpers.AddAuthDataToRequest(createRequestWithPostId(post, nil), user)
+		handlers.NewCreateCommentHandler(creator).ServeHTTP(response, request)
+	})
 }
 
 func TestNewToggleLikeCommentHandler(t *testing.T) {
