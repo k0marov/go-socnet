@@ -7,6 +7,7 @@ import (
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/core/ref"
 	comment_entities "github.com/k0marov/socnet/features/comments/domain/entities"
+	comment_values "github.com/k0marov/socnet/features/comments/domain/values"
 	comment_models "github.com/k0marov/socnet/features/comments/store/models"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
 	"github.com/k0marov/socnet/features/posts/store/models"
@@ -233,6 +234,14 @@ func RandomComments() []comment_entities.Comment {
 
 func RandomCommentModel() comment_models.CommentModel {
 	return comment_models.CommentModel{}
+}
+
+func RandomNewComment() comment_values.NewCommentValue {
+	return comment_values.NewCommentValue{
+		Author: RandomId(),
+		Post:   RandomId(),
+		Text:   RandomString(),
+	}
 }
 
 func RandomBool() bool {

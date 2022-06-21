@@ -14,7 +14,49 @@ import (
 )
 
 func TestCommentCreator(t *testing.T) {
-
+	newComment := RandomNewComment()
+	createdCommentModel := RandomCommentModel()
+	createdComment := entities.Comment{Id: createdCommentModel.Id}
+	validator := func(gotComment values.NewCommentValue) (client_errors.ClientError, bool) {
+		if gotComment == newComment {
+			return client_errors.ClientError{}, true
+		}
+		panic("unexpected args")
+	}
+	t.Run("validator throws a client error", func(t *testing.T) {
+		clientErr := RandomClientError()
+		validator := func(value values.NewCommentValue) (client_errors.ClientError, bool) {
+			return clientErr, false
+		}
+		_, err := service.NewCommentCreator(validator, nil)(newComment)
+		AssertError(t, err, clientErr)
+	})
+	creator := func(gotComment values.NewCommentValue) (models.CommentModel, error) {
+		if gotComment == newComment {
+			return createdCommentModel, nil
+		}
+		panic("unexpected args")
+	}
+	t.Run("creator throws ...", func(t *testing.T) {
+		t.Run("not found error", func(t *testing.T) {
+			creator := func(values.NewCommentValue) (models.CommentModel, error) {
+				return models.CommentModel{}, core_errors.ErrNotFound
+			}
+			_, err := service.NewCommentCreator(validator, creator)(newComment)
+			AssertError(t, err, client_errors.NotFound)
+		})
+		t.Run("some other error", func(t *testing.T) {
+			creator := func(values.NewCommentValue) (models.CommentModel, error) {
+				return models.CommentModel{}, RandomError()
+			}
+			_, err := service.NewCommentCreator(validator, creator)(newComment)
+			AssertSomeError(t, err)
+		})
+	})
+	sut := service.NewCommentCreator(validator, creator)
+	gotCreated, err := sut(newComment)
+	AssertNoError(t, err)
+	Assert(t, gotCreated, createdComment, "the returned created comment")
 }
 
 func TestCommentLikeToggler(t *testing.T) {

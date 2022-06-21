@@ -7,7 +7,9 @@ import (
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/features/comments/domain/entities"
 	"github.com/k0marov/socnet/features/comments/domain/store"
+	"github.com/k0marov/socnet/features/comments/domain/validators"
 	"github.com/k0marov/socnet/features/comments/domain/values"
+	"github.com/k0marov/socnet/features/comments/store/models"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
 )
 
@@ -25,16 +27,27 @@ func NewPostCommentsGetter(getComments store.CommentsGetter) PostCommentsGetter 
 		}
 		var comments []entities.Comment
 		for _, model := range models {
-			comment := entities.Comment{Id: model.Id}
-			comments = append(comments, comment)
+			comments = append(comments, modelToEntity(model))
 		}
 		return comments, nil
 	}
 }
 
-func NewCommentCreator() CommentCreator {
+func NewCommentCreator(validate validators.CommentValidator, createComment store.Creator) CommentCreator {
 	return func(newComment values.NewCommentValue) (entities.Comment, error) {
-		panic("unimplemented")
+		clientErr, isValid := validate(newComment)
+		if !isValid {
+			return entities.Comment{}, clientErr
+		}
+		commentModel, err := createComment(newComment)
+		if err != nil {
+			if err == core_errors.ErrNotFound {
+				return entities.Comment{}, client_errors.NotFound
+			}
+			return entities.Comment{}, fmt.Errorf("while creating new comment: %w", err)
+		}
+		comment := modelToEntity(commentModel)
+		return comment, nil
 	}
 }
 
@@ -60,4 +73,8 @@ func NewCommentLikeToggler(checkLiked store.LikeChecker, like store.Liker, unlik
 		}
 		return nil
 	}
+}
+
+func modelToEntity(model models.CommentModel) entities.Comment {
+	return entities.Comment{Id: model.Id}
 }
