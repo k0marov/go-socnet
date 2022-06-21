@@ -89,3 +89,9 @@ var TextTooLong = ClientError{
 	ReadableDetail: "The provided text is too long.",
 	HTTPCode:       http.StatusBadRequest,
 }
+
+var EmptyText = ClientError{
+	DetailCode:     "empty-text",
+	ReadableDetail: "Text cannot be empty.",
+	HTTPCode:       http.StatusBadRequest,
+}
