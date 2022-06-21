@@ -40,14 +40,14 @@ func NewCommentCreator(validate validators.CommentValidator, createComment store
 		if !isValid {
 			return entities.Comment{}, clientErr
 		}
-		commentModel, err := createComment(newComment, time.Now())
+		newId, err := createComment(newComment, time.Now())
 		if err != nil {
 			if err == core_errors.ErrNotFound {
 				return entities.Comment{}, client_errors.NotFound
 			}
 			return entities.Comment{}, fmt.Errorf("while creating new comment: %w", err)
 		}
-		comment := modelToEntity(commentModel)
+		comment := entities.Comment{Id: newId}
 		return comment, nil
 	}
 }

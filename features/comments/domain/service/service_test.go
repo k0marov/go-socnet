@@ -16,8 +16,8 @@ import (
 
 func TestCommentCreator(t *testing.T) {
 	newComment := RandomNewComment()
-	createdCommentModel := RandomCommentModel()
-	createdComment := entities.Comment{Id: createdCommentModel.Id}
+	createdId := RandomString()
+	createdComment := entities.Comment{Id: createdId}
 	validator := func(gotComment values.NewCommentValue) (client_errors.ClientError, bool) {
 		if gotComment == newComment {
 			return client_errors.ClientError{}, true
@@ -32,23 +32,23 @@ func TestCommentCreator(t *testing.T) {
 		_, err := service.NewCommentCreator(validator, nil)(newComment)
 		AssertError(t, err, clientErr)
 	})
-	creator := func(gotComment values.NewCommentValue, createdAt time.Time) (models.CommentModel, error) {
+	creator := func(gotComment values.NewCommentValue, createdAt time.Time) (values.CommentId, error) {
 		if gotComment == newComment && TimeAlmostNow(createdAt) {
-			return createdCommentModel, nil
+			return createdId, nil
 		}
 		panic("unexpected args")
 	}
 	t.Run("creator throws ", func(t *testing.T) {
 		t.Run("not found error", func(t *testing.T) {
-			creator := func(values.NewCommentValue, time.Time) (models.CommentModel, error) {
-				return models.CommentModel{}, core_errors.ErrNotFound
+			creator := func(values.NewCommentValue, time.Time) (values.CommentId, error) {
+				return "", core_errors.ErrNotFound
 			}
 			_, err := service.NewCommentCreator(validator, creator)(newComment)
 			AssertError(t, err, client_errors.NotFound)
 		})
 		t.Run("some other error", func(t *testing.T) {
-			creator := func(values.NewCommentValue, time.Time) (models.CommentModel, error) {
-				return models.CommentModel{}, RandomError()
+			creator := func(values.NewCommentValue, time.Time) (values.CommentId, error) {
+				return "", RandomError()
 			}
 			_, err := service.NewCommentCreator(validator, creator)(newComment)
 			AssertSomeError(t, err)
