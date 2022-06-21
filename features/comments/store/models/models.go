@@ -1,7 +1,7 @@
-package entities
+package models
 
 import "github.com/k0marov/socnet/features/comments/domain/values"
 
-type Comment struct {
+type CommentModel struct {
 	Id values.CommentId
 }
