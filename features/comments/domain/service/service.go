@@ -2,6 +2,8 @@ package service
 
 import (
 	"fmt"
+	"github.com/k0marov/socnet/core/client_errors"
+	"github.com/k0marov/socnet/core/core_errors"
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/features/comments/domain/entities"
 	"github.com/k0marov/socnet/features/comments/domain/store"
@@ -36,8 +38,26 @@ func NewCommentCreator() CommentCreator {
 	}
 }
 
-func NewCommentLikeToggler() CommentLikeToggler {
+func NewCommentLikeToggler(checkLiked store.LikeChecker, like store.Liker, unlike store.Unliker) CommentLikeToggler {
 	return func(comment values.CommentId, caller core_values.UserId) error {
-		panic("unimplemented")
+		isLiked, err := checkLiked(comment, caller)
+		if err != nil {
+			if err == core_errors.ErrNotFound {
+				return client_errors.NotFound
+			}
+			return fmt.Errorf("while checking if comment is liked: %w", err)
+		}
+		if isLiked {
+			err = unlike(comment, caller)
+			if err != nil {
+				return fmt.Errorf("while unliking a comment: %w", err)
+			}
+		} else {
+			err = like(comment, caller)
+			if err != nil {
+				return fmt.Errorf("while liking a comment: %w", err)
+			}
+		}
+		return nil
 	}
 }
