@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/features/posts/domain/values"
-	"github.com/k0marov/socnet/features/posts/store/models"
+	"github.com/k0marov/socnet/features/posts/store/post_models"
 	"time"
 )
 
@@ -56,27 +56,27 @@ func initSQL(sql *sql.DB) error {
 	return nil
 }
 
-func (db *SqlDB) GetPosts(author core_values.UserId) (posts []models.PostModel, err error) {
+func (db *SqlDB) GetPosts(author core_values.UserId) (posts []post_models.PostModel, err error) {
 	rows, err := db.sql.Query(`
 		SELECT id, author_id, textContent, createdAt FROM Post 
 		WHERE author_id = ?
 		ORDER BY createdAt DESC
 	`, author)
 	if err != nil {
-		return []models.PostModel{}, fmt.Errorf("while getting posts from db: %w", err)
+		return []post_models.PostModel{}, fmt.Errorf("while getting posts from db: %w", err)
 	}
 	defer rows.Close()
 	for rows.Next() {
-		post := models.PostModel{}
+		post := post_models.PostModel{}
 		var createdAt int64
 		err = rows.Scan(&post.Id, &post.Author, &post.Text, &createdAt)
 		if err != nil {
-			return []models.PostModel{}, fmt.Errorf("while scanning a post: %w", err)
+			return []post_models.PostModel{}, fmt.Errorf("while scanning a post: %w", err)
 		}
 		post.CreatedAt = time.Unix(createdAt, 0).UTC()
 		post.Images, err = db.getImages(post.Id)
 		if err != nil {
-			return []models.PostModel{}, err
+			return []post_models.PostModel{}, err
 		}
 		posts = append(posts, post)
 	}
@@ -123,7 +123,7 @@ func (db *SqlDB) GetAuthor(post values.PostId) (core_values.UserId, error) {
 	}
 	return fmt.Sprintf("%d", authorId), nil
 }
-func (db *SqlDB) CreatePost(newPost models.PostToCreate) (values.PostId, error) {
+func (db *SqlDB) CreatePost(newPost post_models.PostToCreate) (values.PostId, error) {
 	res, err := db.sql.Exec(`
 		INSERT INTO Post(author_id, textContent, createdAt) VALUES (?, ?, ?)
 	`, newPost.Author, newPost.Text, newPost.CreatedAt.Unix())

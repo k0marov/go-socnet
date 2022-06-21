@@ -4,7 +4,7 @@ import (
 	"github.com/k0marov/socnet/core/core_values"
 	. "github.com/k0marov/socnet/core/test_helpers"
 	"github.com/k0marov/socnet/features/posts/domain/values"
-	"github.com/k0marov/socnet/features/posts/store/models"
+	"github.com/k0marov/socnet/features/posts/store/post_models"
 	"github.com/k0marov/socnet/features/posts/store/sql_db"
 	profiles_db "github.com/k0marov/socnet/features/profiles/store/sql_db"
 	_ "github.com/mattn/go-sqlite3"
@@ -22,7 +22,7 @@ func TestSqlDB_ErrorHandling(t *testing.T) {
 		AssertSomeError(t, err)
 	})
 	t.Run("CreatePost", func(t *testing.T) {
-		_, err := sut.CreatePost(models.PostToCreate{})
+		_, err := sut.CreatePost(post_models.PostToCreate{})
 		AssertSomeError(t, err)
 	})
 	t.Run("GetAuthor", func(t *testing.T) {
@@ -52,15 +52,15 @@ func TestSqlDB_ErrorHandling(t *testing.T) {
 }
 
 func TestSqlDB(t *testing.T) {
-	createRandomPostWithTime := func(t testing.TB, sut *sql_db.SqlDB, author core_values.UserId, createdAt time.Time) models.PostModel {
-		post := models.PostToCreate{
+	createRandomPostWithTime := func(t testing.TB, sut *sql_db.SqlDB, author core_values.UserId, createdAt time.Time) post_models.PostModel {
+		post := post_models.PostToCreate{
 			Author:    author,
 			Text:      RandomString(),
 			CreatedAt: createdAt,
 		}
 		post1Id, err := sut.CreatePost(post)
 		AssertNoError(t, err)
-		return models.PostModel{
+		return post_models.PostModel{
 			Id:        post1Id,
 			Author:    author,
 			Text:      post.Text,
@@ -68,10 +68,10 @@ func TestSqlDB(t *testing.T) {
 			Images:    nil,
 		}
 	}
-	createRandomPost := func(t testing.TB, sut *sql_db.SqlDB, author core_values.UserId) models.PostModel {
+	createRandomPost := func(t testing.TB, sut *sql_db.SqlDB, author core_values.UserId) post_models.PostModel {
 		return createRandomPostWithTime(t, sut, author, RandomTime())
 	}
-	assertPosts := func(t testing.TB, sut *sql_db.SqlDB, author core_values.UserId, posts []models.PostModel) {
+	assertPosts := func(t testing.TB, sut *sql_db.SqlDB, author core_values.UserId, posts []post_models.PostModel) {
 		t.Helper()
 		gotPosts, err := sut.GetPosts(author)
 		AssertNoError(t, err)
@@ -100,14 +100,14 @@ func TestSqlDB(t *testing.T) {
 		// create a post for the first profile
 		wantPost1 := createRandomPost(t, sut, user1.Id)
 		assertAuthor(t, wantPost1.Id, user1.Id)
-		assertPosts(t, sut, user1.Id, []models.PostModel{wantPost1})
+		assertPosts(t, sut, user1.Id, []post_models.PostModel{wantPost1})
 		// add images to that post
 		wantPost1.Images = RandomPostImages()
 		err = sut.AddPostImages(wantPost1.Id, wantPost1.Images)
 		AssertNoError(t, err)
-		assertPosts(t, sut, user1.Id, []models.PostModel{wantPost1})
+		assertPosts(t, sut, user1.Id, []post_models.PostModel{wantPost1})
 		// create two posts for the second profile
-		user2Posts := []models.PostModel{
+		user2Posts := []post_models.PostModel{
 			createRandomPost(t, sut, user2.Id),
 			createRandomPost(t, sut, user2.Id),
 		}
@@ -191,6 +191,6 @@ func TestSqlDB(t *testing.T) {
 		newest := createRandomPostWithTime(t, sut, profile.Id, timeInYear(2022))
 		middle := createRandomPostWithTime(t, sut, profile.Id, timeInYear(2006))
 		// assert they are returned in the right order
-		assertPosts(t, sut, profile.Id, []models.PostModel{newest, middle, oldest})
+		assertPosts(t, sut, profile.Id, []post_models.PostModel{newest, middle, oldest})
 	})
 }

@@ -11,4 +11,5 @@ type CommentModel struct {
 	Author    core_values.UserId
 	Text      string
 	CreatedAt time.Time
+	Likes     int
 }

@@ -6,18 +6,18 @@ import (
 	"github.com/k0marov/socnet/features/posts/domain/store"
 	"github.com/k0marov/socnet/features/posts/domain/values"
 	"github.com/k0marov/socnet/features/posts/store/file_storage"
-	"github.com/k0marov/socnet/features/posts/store/models"
+	"github.com/k0marov/socnet/features/posts/store/post_models"
 	"time"
 )
 
 type (
-	DBPostsGetter  func(core_values.UserId) ([]models.PostModel, error)
+	DBPostsGetter  func(core_values.UserId) ([]post_models.PostModel, error)
 	DBLiker        func(values.PostId, core_values.UserId) error
 	DBUnliker      func(values.PostId, core_values.UserId) error
 	DBLikeChecker  func(values.PostId, core_values.UserId) (bool, error)
 	DBAuthorGetter func(values.PostId) (core_values.UserId, error)
 
-	DBPostCreator     func(newPost models.PostToCreate) (values.PostId, error)
+	DBPostCreator     func(newPost post_models.PostToCreate) (values.PostId, error)
 	DBPostImagesAdder func(values.PostId, []values.PostImage) error
 	DBPostDeleter     func(values.PostId) error
 )
@@ -26,7 +26,7 @@ func NewStorePostCreator(
 	createPost DBPostCreator, storeImages file_storage.PostImageFilesCreator, addImages DBPostImagesAdder,
 	deletePost DBPostDeleter, deleteImages file_storage.PostFilesDeleter) store.PostCreator {
 	return func(post values.NewPostData, createdAt time.Time) error {
-		postToCreate := models.PostToCreate{
+		postToCreate := post_models.PostToCreate{
 			Author:    post.Author,
 			Text:      post.Text,
 			CreatedAt: createdAt,

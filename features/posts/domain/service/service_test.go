@@ -1,7 +1,7 @@
 package service_test
 
 import (
-	"github.com/k0marov/socnet/features/posts/store/models"
+	"github.com/k0marov/socnet/features/posts/store/post_models"
 	profile_entities "github.com/k0marov/socnet/features/profiles/domain/entities"
 	"reflect"
 	"testing"
@@ -19,7 +19,7 @@ import (
 
 func TestPostsGetter(t *testing.T) {
 	author := RandomContextedProfile()
-	modelToPost := func(model models.PostModel, isMine, isLiked bool) entities.ContextedPost {
+	modelToPost := func(model post_models.PostModel, isMine, isLiked bool) entities.ContextedPost {
 		return entities.ContextedPost{
 			model.Id,
 			author,
@@ -32,7 +32,7 @@ func TestPostsGetter(t *testing.T) {
 	}
 	caller := RandomString()
 	isLiked := RandomBool()
-	postModels := []models.PostModel{RandomPostModel()}
+	postModels := []post_models.PostModel{RandomPostModel()}
 
 	profileGetter := func(id, callerId core_values.UserId) (profile_entities.ContextedProfile, error) {
 		if id == author.Id && callerId == caller {
@@ -54,15 +54,15 @@ func TestPostsGetter(t *testing.T) {
 		_, err := service.NewPostsGetter(profileGetter, nil, nil)(author.Id, caller)
 		AssertSomeError(t, err)
 	})
-	storePostsGetter := func(authorId core_values.UserId) ([]models.PostModel, error) {
+	storePostsGetter := func(authorId core_values.UserId) ([]post_models.PostModel, error) {
 		if authorId == author.Id {
 			return postModels, nil
 		}
 		panic("unexpected args")
 	}
 	t.Run("error case - store throws an error", func(t *testing.T) {
-		storeGetter := func(core_values.UserId) ([]models.PostModel, error) {
-			return []models.PostModel{}, RandomError()
+		storeGetter := func(core_values.UserId) ([]post_models.PostModel, error) {
+			return []post_models.PostModel{}, RandomError()
 		}
 		_, err := service.NewPostsGetter(profileGetter, storeGetter, nil)(author.Id, caller)
 		AssertSomeError(t, err)

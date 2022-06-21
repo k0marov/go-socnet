@@ -10,8 +10,7 @@ import (
 	comment_values "github.com/k0marov/socnet/features/comments/domain/values"
 	comment_models "github.com/k0marov/socnet/features/comments/store/models"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
-	"github.com/k0marov/socnet/features/posts/store/models"
-	post_models "github.com/k0marov/socnet/features/posts/store/models"
+	"github.com/k0marov/socnet/features/posts/store/post_models"
 	"math"
 	random "math/rand"
 	"net/http"
@@ -184,7 +183,7 @@ func RandomTime() time.Time {
 	return time.Date(2022, 6, 17, 16, 53, 42, 0, time.UTC)
 }
 
-func RandomPostModel() models.PostModel {
+func RandomPostModel() post_models.PostModel {
 	return post_models.PostModel{
 		Id:        RandomString(),
 		Author:    RandomString(),
