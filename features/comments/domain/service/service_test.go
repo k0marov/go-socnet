@@ -11,6 +11,7 @@ import (
 	"github.com/k0marov/socnet/features/comments/store/models"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
 	"testing"
+	"time"
 )
 
 func TestCommentCreator(t *testing.T) {
@@ -31,22 +32,22 @@ func TestCommentCreator(t *testing.T) {
 		_, err := service.NewCommentCreator(validator, nil)(newComment)
 		AssertError(t, err, clientErr)
 	})
-	creator := func(gotComment values.NewCommentValue) (models.CommentModel, error) {
-		if gotComment == newComment {
+	creator := func(gotComment values.NewCommentValue, createdAt time.Time) (models.CommentModel, error) {
+		if gotComment == newComment && TimeAlmostNow(createdAt) {
 			return createdCommentModel, nil
 		}
 		panic("unexpected args")
 	}
-	t.Run("creator throws ...", func(t *testing.T) {
+	t.Run("creator throws ", func(t *testing.T) {
 		t.Run("not found error", func(t *testing.T) {
-			creator := func(values.NewCommentValue) (models.CommentModel, error) {
+			creator := func(values.NewCommentValue, time.Time) (models.CommentModel, error) {
 				return models.CommentModel{}, core_errors.ErrNotFound
 			}
 			_, err := service.NewCommentCreator(validator, creator)(newComment)
 			AssertError(t, err, client_errors.NotFound)
 		})
 		t.Run("some other error", func(t *testing.T) {
-			creator := func(values.NewCommentValue) (models.CommentModel, error) {
+			creator := func(values.NewCommentValue, time.Time) (models.CommentModel, error) {
 				return models.CommentModel{}, RandomError()
 			}
 			_, err := service.NewCommentCreator(validator, creator)(newComment)

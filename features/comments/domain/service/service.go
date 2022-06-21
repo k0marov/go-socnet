@@ -11,6 +11,7 @@ import (
 	"github.com/k0marov/socnet/features/comments/domain/values"
 	"github.com/k0marov/socnet/features/comments/store/models"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
+	"time"
 )
 
 type (
@@ -39,7 +40,7 @@ func NewCommentCreator(validate validators.CommentValidator, createComment store
 		if !isValid {
 			return entities.Comment{}, clientErr
 		}
-		commentModel, err := createComment(newComment)
+		commentModel, err := createComment(newComment, time.Now())
 		if err != nil {
 			if err == core_errors.ErrNotFound {
 				return entities.Comment{}, client_errors.NotFound

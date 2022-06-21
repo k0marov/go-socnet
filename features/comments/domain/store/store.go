@@ -5,6 +5,7 @@ import (
 	"github.com/k0marov/socnet/features/comments/domain/values"
 	"github.com/k0marov/socnet/features/comments/store/models"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
+	"time"
 )
 
 type (
@@ -12,5 +13,5 @@ type (
 	LikeChecker    func(comment values.CommentId, caller core_values.UserId) (bool, error)
 	Liker          func(comment values.CommentId, liker core_values.UserId) error
 	Unliker        func(comment values.CommentId, unliker core_values.UserId) error
-	Creator        func(newComment values.NewCommentValue) (models.CommentModel, error)
+	Creator        func(newComment values.NewCommentValue, createdAt time.Time) (models.CommentModel, error)
 )
