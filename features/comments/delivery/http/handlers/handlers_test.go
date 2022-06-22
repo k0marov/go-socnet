@@ -27,27 +27,33 @@ func createRequestWithPostId(id post_values.PostId, body io.Reader) *http.Reques
 func TestNewGetCommentsHandler(t *testing.T) {
 	post := RandomString()
 	comments := RandomContextedComments()
+	caller := RandomAuthUser()
+
+	helpers.BaseTest401(t, handlers.NewGetCommentsHandler(nil))
 	t.Run("happy case", func(t *testing.T) {
-		getter := func(postId post_values.PostId) ([]entities.ContextedComment, error) {
-			if postId == post {
+		getter := func(postId post_values.PostId, callerId core_values.UserId) ([]entities.ContextedComment, error) {
+			if postId == post && callerId == caller.Id {
 				return comments, nil
 			}
 			panic("unexpected args")
 		}
 		response := httptest.NewRecorder()
-		handlers.NewGetCommentsHandler(getter).ServeHTTP(response, createRequestWithPostId(post, nil))
+		request := helpers.AddAuthDataToRequest(createRequestWithPostId(post, nil), caller)
+		handlers.NewGetCommentsHandler(getter).ServeHTTP(response, request)
 		AssertJSONData(t, response, handlers.CommentsResponse{Comments: comments})
 	})
 	t.Run("error case - post_id is not provided", func(t *testing.T) {
 		response := httptest.NewRecorder()
-		handlers.NewGetCommentsHandler(nil).ServeHTTP(response, helpers.CreateRequest(nil))
+		request := helpers.AddAuthDataToRequest(helpers.CreateRequest(nil), caller)
+		handlers.NewGetCommentsHandler(nil).ServeHTTP(response, request)
 		AssertClientError(t, response, client_errors.IdNotProvided)
 	})
 	helpers.BaseTestServiceErrorHandling(t, func(err error, response *httptest.ResponseRecorder) {
-		getter := func(id post_values.PostId) ([]entities.ContextedComment, error) {
+		getter := func(post_values.PostId, core_values.UserId) ([]entities.ContextedComment, error) {
 			return []entities.ContextedComment{}, err
 		}
-		handlers.NewGetCommentsHandler(getter).ServeHTTP(response, createRequestWithPostId(post, nil))
+		request := helpers.AddAuthDataToRequest(createRequestWithPostId(post, nil), caller)
+		handlers.NewGetCommentsHandler(getter).ServeHTTP(response, request)
 	})
 }
 

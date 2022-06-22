@@ -20,12 +20,16 @@ type NewCommentRequest struct {
 
 func NewGetCommentsHandler(getComments service.PostCommentsGetter) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		caller, ok := http_helpers.GetUserOrAddUnauthorized(w, r)
+		if !ok {
+			return
+		}
 		postId := r.URL.Query().Get("post_id")
 		if postId == "" {
 			http_helpers.ThrowClientError(w, client_errors.IdNotProvided)
 			return
 		}
-		comments, err := getComments(postId)
+		comments, err := getComments(postId, caller.Id)
 		if err != nil {
 			http_helpers.HandleServiceError(w, err)
 			return
