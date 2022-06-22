@@ -42,6 +42,20 @@ func TestCommentCreator(t *testing.T) {
 		_, err := service.NewCommentCreator(validator, nil, nil)(newComment)
 		AssertError(t, err, clientErr)
 	})
+	profileGetter := func(target, caller core_values.UserId) (profile_entities.ContextedProfile, error) {
+		if target == newComment.Author && caller == newComment.Author {
+			return author, nil
+		}
+		panic("unexpected args")
+	}
+	t.Run("profile getter throws", func(t *testing.T) {
+		profileGetter := func(target, caller core_values.UserId) (profile_entities.ContextedProfile, error) {
+			return profile_entities.ContextedProfile{}, RandomError()
+		}
+		_, err := service.NewCommentCreator(validator, profileGetter, nil)(newComment)
+		AssertSomeError(t, err)
+	})
+
 	creator := func(gotComment values.NewCommentValue, createdAt time.Time) (values.CommentId, error) {
 		if gotComment == newComment && TimeAlmostNow(createdAt) {
 			return createdId, nil
@@ -53,31 +67,18 @@ func TestCommentCreator(t *testing.T) {
 			creator := func(values.NewCommentValue, time.Time) (values.CommentId, error) {
 				return "", core_errors.ErrNotFound
 			}
-			_, err := service.NewCommentCreator(validator, creator, nil)(newComment)
+			_, err := service.NewCommentCreator(validator, profileGetter, creator)(newComment)
 			AssertError(t, err, client_errors.NotFound)
 		})
 		t.Run("some other error", func(t *testing.T) {
 			creator := func(values.NewCommentValue, time.Time) (values.CommentId, error) {
 				return "", RandomError()
 			}
-			_, err := service.NewCommentCreator(validator, creator, nil)(newComment)
+			_, err := service.NewCommentCreator(validator, profileGetter, creator)(newComment)
 			AssertSomeError(t, err)
 		})
 	})
-	profileGetter := func(target, caller core_values.UserId) (profile_entities.ContextedProfile, error) {
-		if target == newComment.Author && caller == newComment.Author {
-			return author, nil
-		}
-		panic("unexpected args")
-	}
-	t.Run("profile getter throws", func(t *testing.T) {
-		profileGetter := func(target, caller core_values.UserId) (profile_entities.ContextedProfile, error) {
-			return profile_entities.ContextedProfile{}, RandomError()
-		}
-		_, err := service.NewCommentCreator(validator, creator, profileGetter)(newComment)
-		AssertSomeError(t, err)
-	})
-	sut := service.NewCommentCreator(validator, creator, profileGetter)
+	sut := service.NewCommentCreator(validator, profileGetter, creator)
 	gotCreated, err := sut(newComment)
 	AssertNoError(t, err)
 	Assert(t, TimeAlmostNow(gotCreated.CreatedAt), true, "createdAt is time.Now()")

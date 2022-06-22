@@ -52,7 +52,7 @@ func NewPostCommentsGetter(getComments store.CommentsGetter, getProfile profile_
 	}
 }
 
-func NewCommentCreator(validate validators.CommentValidator, createComment store.Creator, getProfile profile_service.ProfileGetter) CommentCreator {
+func NewCommentCreator(validate validators.CommentValidator, getProfile profile_service.ProfileGetter, createComment store.Creator) CommentCreator {
 	return func(newComment values.NewCommentValue) (entities.ContextedComment, error) {
 		clientErr, isValid := validate(newComment)
 		if !isValid {
