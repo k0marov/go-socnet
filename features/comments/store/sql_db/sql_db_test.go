@@ -40,6 +40,10 @@ func TestSqlDB_ErrorHandling(t *testing.T) {
 		_, err := sqlDB.Create(RandomNewComment(), RandomTime())
 		AssertSomeError(t, err)
 	})
+	t.Run("GetAuthor", func(t *testing.T) {
+		_, err := sqlDB.GetAuthor(RandomId())
+		AssertSomeError(t, err)
+	})
 }
 
 func TestSqlDB(t *testing.T) {
@@ -69,6 +73,13 @@ func TestSqlDB(t *testing.T) {
 	}
 
 	t.Run("creating and reading comments", func(t *testing.T) {
+		assertAuthor := func(t testing.TB, db *sql_db.SqlDB, comment values.CommentId, author core_values.UserId) {
+			t.Helper()
+			gotAuthor, err := db.GetAuthor(comment)
+			AssertNoError(t, err)
+			Assert(t, gotAuthor, author, "author")
+		}
+
 		db := OpenSqliteDB(t)
 		sqlDB, err := sql_db.NewSqlDB(db)
 		AssertNoError(t, err)
@@ -97,6 +108,7 @@ func TestSqlDB(t *testing.T) {
 		comments := getComments(t, sqlDB, postId)
 		AssertFatal(t, len(comments), 1, "number of post comments")
 		Assert(t, comments[0], firstComment, "the created comment")
+		assertAuthor(t, sqlDB, comments[0].Id, commenter.Id)
 
 		// create the second comment
 		secondComment := createComment(t, sqlDB, postId, commenter.Id, 2022)
@@ -104,6 +116,7 @@ func TestSqlDB(t *testing.T) {
 		// assert it was created (and comments are returned ordered by createdAt)
 		comments = getComments(t, sqlDB, postId)
 		AssertFatal(t, len(comments), 2, "number of post comments")
+		assertAuthor(t, sqlDB, comments[1].Id, commenter.Id)
 		Assert(t, comments[0], secondComment, "the second created comment")
 		Assert(t, comments[1], firstComment, "the first created comment")
 	})

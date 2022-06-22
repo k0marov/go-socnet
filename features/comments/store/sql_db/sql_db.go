@@ -107,6 +107,18 @@ func (db *SqlDB) GetComments(post post_values.PostId) ([]models.CommentModel, er
 	return comments, nil
 }
 
+func (db *SqlDB) GetAuthor(comment values.CommentId) (core_values.UserId, error) {
+	row := db.sql.QueryRow(`
+		SELECT author_id FROM Comment WHERE id = ?
+    `, comment)
+	var authorId core_values.UserId
+	err := row.Scan(&authorId)
+	if err != nil {
+		return "", fmt.Errorf("while scanning the SELECTed author_id: %w", err)
+	}
+	return authorId, nil
+}
+
 func (db *SqlDB) Create(newComment values.NewCommentValue, createdAt time.Time) (values.CommentId, error) {
 	res, err := db.sql.Exec(`
 		INSERT INTO Comment(post_id, author_id, textContent, createdAt) 
