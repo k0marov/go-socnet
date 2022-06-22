@@ -10,6 +10,7 @@ import (
 
 type (
 	CommentsGetter func(post post_values.PostId) ([]models.CommentModel, error)
+	AuthorGetter   func(comment values.CommentId) (core_values.UserId, error)
 	LikeChecker    func(comment values.CommentId, caller core_values.UserId) (bool, error)
 	Liker          func(comment values.CommentId, liker core_values.UserId) error
 	Unliker        func(comment values.CommentId, unliker core_values.UserId) error

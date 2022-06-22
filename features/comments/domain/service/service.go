@@ -85,8 +85,15 @@ func NewCommentCreator(validate validators.CommentValidator, getProfile profile_
 	}
 }
 
-func NewCommentLikeToggler(checkLiked store.LikeChecker, like store.Liker, unlike store.Unliker) CommentLikeToggler {
+func NewCommentLikeToggler(getAuthor store.AuthorGetter, checkLiked store.LikeChecker, like store.Liker, unlike store.Unliker) CommentLikeToggler {
 	return func(comment values.CommentId, caller core_values.UserId) error {
+		author, err := getAuthor(comment)
+		if err != nil {
+			return fmt.Errorf("while checking comment author: %w", err)
+		}
+		if author == caller {
+			return client_errors.LikingYourself
+		}
 		isLiked, err := checkLiked(comment, caller)
 		if err != nil {
 			if err == core_errors.ErrNotFound {

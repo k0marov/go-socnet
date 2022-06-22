@@ -87,9 +87,28 @@ func TestCommentCreator(t *testing.T) {
 }
 
 func TestCommentLikeToggler(t *testing.T) {
-	// TODO liking yourself
 	comment := RandomString()
 	caller := RandomString()
+	t.Run("error case - liking yourself", func(t *testing.T) {
+		authorGetter := func(commentId values.CommentId) (core_values.UserId, error) {
+			if commentId == comment {
+				return caller, nil
+			}
+			panic("unexpected args")
+		}
+		err := service.NewCommentLikeToggler(authorGetter, nil, nil, nil)(comment, caller)
+		AssertError(t, err, client_errors.LikingYourself)
+	})
+	t.Run("error case - getting author throws", func(t *testing.T) {
+		authorGetter := func(values.CommentId) (core_values.UserId, error) {
+			return "", RandomError()
+		}
+		err := service.NewCommentLikeToggler(authorGetter, nil, nil, nil)(comment, caller)
+		AssertSomeError(t, err)
+	})
+	authorGetter := func(values.CommentId) (core_values.UserId, error) {
+		return RandomId(), nil
+	}
 	t.Run("comment is already liked - unlike it", func(t *testing.T) {
 		likeChecker := func(commentId values.CommentId, callerId core_values.UserId) (bool, error) {
 			if comment == commentId && caller == callerId {
@@ -107,10 +126,10 @@ func TestCommentLikeToggler(t *testing.T) {
 			unliker := func(values.CommentId, core_values.UserId) error {
 				return RandomError()
 			}
-			err := service.NewCommentLikeToggler(likeChecker, nil, unliker)(comment, caller)
+			err := service.NewCommentLikeToggler(authorGetter, likeChecker, nil, unliker)(comment, caller)
 			AssertSomeError(t, err)
 		})
-		err := service.NewCommentLikeToggler(likeChecker, nil, unliker)(comment, caller)
+		err := service.NewCommentLikeToggler(authorGetter, likeChecker, nil, unliker)(comment, caller)
 		AssertNoError(t, err)
 	})
 	t.Run("comment is not already liked - like it", func(t *testing.T) {
@@ -130,10 +149,10 @@ func TestCommentLikeToggler(t *testing.T) {
 			liker := func(values.CommentId, core_values.UserId) error {
 				return RandomError()
 			}
-			err := service.NewCommentLikeToggler(likeChecker, liker, nil)(comment, caller)
+			err := service.NewCommentLikeToggler(authorGetter, likeChecker, liker, nil)(comment, caller)
 			AssertSomeError(t, err)
 		})
-		err := service.NewCommentLikeToggler(likeChecker, liker, nil)(comment, caller)
+		err := service.NewCommentLikeToggler(authorGetter, likeChecker, liker, nil)(comment, caller)
 		AssertNoError(t, err)
 	})
 	t.Run("error case - like checker throws an error", func(t *testing.T) {
@@ -141,14 +160,14 @@ func TestCommentLikeToggler(t *testing.T) {
 			likeChecker := func(values.CommentId, core_values.UserId) (bool, error) {
 				return false, core_errors.ErrNotFound
 			}
-			err := service.NewCommentLikeToggler(likeChecker, nil, nil)(comment, caller)
+			err := service.NewCommentLikeToggler(authorGetter, likeChecker, nil, nil)(comment, caller)
 			AssertError(t, err, client_errors.NotFound)
 		})
 		t.Run("it is some other error", func(t *testing.T) {
 			likeChecker := func(values.CommentId, core_values.UserId) (bool, error) {
 				return false, RandomError()
 			}
-			err := service.NewCommentLikeToggler(likeChecker, nil, nil)(comment, caller)
+			err := service.NewCommentLikeToggler(authorGetter, likeChecker, nil, nil)(comment, caller)
 			AssertSomeError(t, err)
 		})
 	})
