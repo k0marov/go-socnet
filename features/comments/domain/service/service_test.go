@@ -62,21 +62,12 @@ func TestCommentCreator(t *testing.T) {
 		}
 		panic("unexpected args")
 	}
-	t.Run("creator throws ", func(t *testing.T) {
-		t.Run("not found error", func(t *testing.T) {
-			creator := func(values.NewCommentValue, time.Time) (values.CommentId, error) {
-				return "", core_errors.ErrNotFound
-			}
-			_, err := service.NewCommentCreator(validator, profileGetter, creator)(newComment)
-			AssertError(t, err, client_errors.NotFound)
-		})
-		t.Run("some other error", func(t *testing.T) {
-			creator := func(values.NewCommentValue, time.Time) (values.CommentId, error) {
-				return "", RandomError()
-			}
-			_, err := service.NewCommentCreator(validator, profileGetter, creator)(newComment)
-			AssertSomeError(t, err)
-		})
+	t.Run("creator throws", func(t *testing.T) {
+		creator := func(values.NewCommentValue, time.Time) (values.CommentId, error) {
+			return "", RandomError()
+		}
+		_, err := service.NewCommentCreator(validator, profileGetter, creator)(newComment)
+		AssertSomeError(t, err)
 	})
 	sut := service.NewCommentCreator(validator, profileGetter, creator)
 	gotCreated, err := sut(newComment)
@@ -100,11 +91,20 @@ func TestCommentLikeToggler(t *testing.T) {
 		AssertError(t, err, client_errors.LikingYourself)
 	})
 	t.Run("error case - getting author throws", func(t *testing.T) {
-		authorGetter := func(values.CommentId) (core_values.UserId, error) {
-			return "", RandomError()
-		}
-		err := service.NewCommentLikeToggler(authorGetter, nil, nil, nil)(comment, caller)
-		AssertSomeError(t, err)
+		t.Run("not found error", func(t *testing.T) {
+			authorGetter := func(id values.CommentId) (core_values.UserId, error) {
+				return "", core_errors.ErrNotFound
+			}
+			err := service.NewCommentLikeToggler(authorGetter, nil, nil, nil)(comment, caller)
+			AssertError(t, err, client_errors.NotFound)
+		})
+		t.Run("some other error", func(t *testing.T) {
+			authorGetter := func(values.CommentId) (core_values.UserId, error) {
+				return "", RandomError()
+			}
+			err := service.NewCommentLikeToggler(authorGetter, nil, nil, nil)(comment, caller)
+			AssertSomeError(t, err)
+		})
 	})
 	authorGetter := func(values.CommentId) (core_values.UserId, error) {
 		return RandomId(), nil
@@ -156,20 +156,11 @@ func TestCommentLikeToggler(t *testing.T) {
 		AssertNoError(t, err)
 	})
 	t.Run("error case - like checker throws an error", func(t *testing.T) {
-		t.Run("it is a not found error, should return client error", func(t *testing.T) {
-			likeChecker := func(values.CommentId, core_values.UserId) (bool, error) {
-				return false, core_errors.ErrNotFound
-			}
-			err := service.NewCommentLikeToggler(authorGetter, likeChecker, nil, nil)(comment, caller)
-			AssertError(t, err, client_errors.NotFound)
-		})
-		t.Run("it is some other error", func(t *testing.T) {
-			likeChecker := func(values.CommentId, core_values.UserId) (bool, error) {
-				return false, RandomError()
-			}
-			err := service.NewCommentLikeToggler(authorGetter, likeChecker, nil, nil)(comment, caller)
-			AssertSomeError(t, err)
-		})
+		likeChecker := func(values.CommentId, core_values.UserId) (bool, error) {
+			return false, RandomError()
+		}
+		err := service.NewCommentLikeToggler(authorGetter, likeChecker, nil, nil)(comment, caller)
+		AssertSomeError(t, err)
 	})
 }
 

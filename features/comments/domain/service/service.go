@@ -66,9 +66,6 @@ func NewCommentCreator(validate validators.CommentValidator, getProfile profile_
 
 		newId, err := createComment(newComment, time.Now())
 		if err != nil {
-			if err == core_errors.ErrNotFound {
-				return entities.ContextedComment{}, client_errors.NotFound
-			}
 			return entities.ContextedComment{}, fmt.Errorf("while creating new comment: %w", err)
 		}
 
@@ -88,6 +85,9 @@ func NewCommentCreator(validate validators.CommentValidator, getProfile profile_
 func NewCommentLikeToggler(getAuthor store.AuthorGetter, checkLiked store.LikeChecker, like store.Liker, unlike store.Unliker) CommentLikeToggler {
 	return func(comment values.CommentId, caller core_values.UserId) error {
 		author, err := getAuthor(comment)
+		if err == core_errors.ErrNotFound {
+			return client_errors.NotFound
+		}
 		if err != nil {
 			return fmt.Errorf("while checking comment author: %w", err)
 		}
@@ -96,9 +96,6 @@ func NewCommentLikeToggler(getAuthor store.AuthorGetter, checkLiked store.LikeCh
 		}
 		isLiked, err := checkLiked(comment, caller)
 		if err != nil {
-			if err == core_errors.ErrNotFound {
-				return client_errors.NotFound
-			}
 			return fmt.Errorf("while checking if comment is liked: %w", err)
 		}
 		if isLiked {
