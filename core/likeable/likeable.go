@@ -5,12 +5,6 @@ import (
 	"github.com/k0marov/socnet/core/core_values"
 )
 
-type Likeable interface {
-	LikeToggler
-	LikesCountGetter
-	LikeChecker
-}
-
 type LikeToggler func(id string, owner, liker core_values.UserId) error
 type LikesCountGetter func(id string) (int, error)
 type LikeChecker func(id string, fromUser core_values.UserId) (bool, error)
@@ -21,6 +15,6 @@ type likeable struct {
 	IsLiked       LikeChecker
 }
 
-func NewLikeable(db *sql.DB, entityName string) likeable {
+func NewLikeable(db *sql.DB, targetTableName string) likeable {
 	return likeable{}
 }
