@@ -12,6 +12,8 @@ type ContextedPost struct {
 	Text      string
 	Images    []values.PostImage
 	CreatedAt time.Time
-	IsLiked   bool
-	IsMine    bool
+	Likes     int
+
+	IsLiked bool
+	IsMine  bool
 }

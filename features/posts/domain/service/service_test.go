@@ -26,6 +26,7 @@ func TestPostsGetter(t *testing.T) {
 			model.Text,
 			model.Images,
 			model.CreatedAt,
+			model.Likes,
 			isLiked,
 			isMine,
 		}

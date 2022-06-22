@@ -18,4 +18,5 @@ type PostModel struct {
 	Text      string
 	CreatedAt time.Time
 	Images    []values.PostImage
+	Likes     int
 }

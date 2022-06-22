@@ -110,6 +110,7 @@ func NewPostsGetter(getProfile profile_service.ProfileGetter, getPosts store.Pos
 				Text:      postModel.Text,
 				Images:    postModel.Images,
 				CreatedAt: postModel.CreatedAt,
+				Likes:     postModel.Likes,
 				IsLiked:   isLiked,
 				IsMine:    authorId == caller,
 			}

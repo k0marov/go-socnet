@@ -65,6 +65,7 @@ func TestSqlDB(t *testing.T) {
 			Author:    author,
 			Text:      post.Text,
 			CreatedAt: post.CreatedAt,
+			Likes:     0,
 			Images:    nil,
 		}
 	}
@@ -171,6 +172,40 @@ func TestSqlDB(t *testing.T) {
 		// post2 should not be affected
 		assertIsLiked(t, post2.Id, user1.Id, false)
 		assertIsLiked(t, post2.Id, user2.Id, false)
+
+	})
+	t.Run("liking a post from many profiles", func(t *testing.T) {
+		assertLikesOnFirstPost := func(t testing.TB, db *sql_db.SqlDB, author core_values.UserId, likesCount int) {
+			posts, err := db.GetPosts(author)
+			AssertNoError(t, err)
+			AssertFatal(t, len(posts), 1, "number of posts")
+			Assert(t, posts[0].Likes, likesCount, "number of likes")
+		}
+		driver := OpenSqliteDB(t)
+
+		sut, err := sql_db.NewSqlDB(driver)
+		AssertNoError(t, err)
+		profiles, err := profiles_db.NewSqlDB(driver)
+		AssertNoError(t, err)
+
+		// create author's profile
+		author := RandomNewProfile()
+		profiles.CreateProfile(author)
+
+		// create a random post
+		post := createRandomPost(t, sut, author.Id)
+
+		const count = 100
+		for i := 0; i < count; i++ {
+			// create a liker profile
+			liker := RandomNewProfile()
+			profiles.CreateProfile(liker)
+			// like the post from it
+			err := sut.LikePost(post.Id, liker.Id)
+			AssertNoError(t, err)
+			// assert the likes count
+			assertLikesOnFirstPost(t, sut, author.Id, i+1)
+		}
 	})
 	t.Run("returning posts ordered by createdAt", func(t *testing.T) {
 		driver := OpenSqliteDB(t)

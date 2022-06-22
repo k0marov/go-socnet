@@ -167,6 +167,7 @@ func RandomContextedPost() post_entities.ContextedPost {
 		Text:      RandomString(),
 		Images:    RandomPostImages(),
 		CreatedAt: RandomTime(),
+		Likes:     RandomInt(),
 		IsMine:    RandomBool(),
 		IsLiked:   RandomBool(),
 	}

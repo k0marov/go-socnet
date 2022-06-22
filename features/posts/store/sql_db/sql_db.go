@@ -60,7 +60,9 @@ func initSQL(sql *sql.DB) error {
 
 func (db *SqlDB) GetPosts(author core_values.UserId) (posts []post_models.PostModel, err error) {
 	rows, err := db.sql.Query(`
-		SELECT id, author_id, textContent, createdAt FROM Post 
+		SELECT id, author_id, textContent, createdAt,
+			(SELECT COUNT(*) FROM PostLike WHERE post_id = Post.Id) AS likes
+		FROM Post 
 		WHERE author_id = ?
 		ORDER BY createdAt DESC
 	`, author)
@@ -71,7 +73,7 @@ func (db *SqlDB) GetPosts(author core_values.UserId) (posts []post_models.PostMo
 	for rows.Next() {
 		post := post_models.PostModel{}
 		var createdAt int64
-		err = rows.Scan(&post.Id, &post.Author, &post.Text, &createdAt)
+		err = rows.Scan(&post.Id, &post.Author, &post.Text, &createdAt, &post.Likes)
 		if err != nil {
 			return []post_models.PostModel{}, fmt.Errorf("while scanning a post: %w", err)
 		}
