@@ -16,7 +16,7 @@ func NewCommentsRouterImpl(db *sql.DB, getProfile profile_service.ProfileGetter)
 	// db
 	sqlDB, err := sql_db.NewSqlDB(db)
 	if err != nil {
-		log.Fatalf("error while opening sql db for comments: %w", err)
+		log.Fatalf("error while opening sql db for comments: %v", err)
 	}
 	// service
 	validator := validators.NewCommentValidator()
