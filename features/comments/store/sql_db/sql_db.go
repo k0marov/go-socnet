@@ -3,6 +3,7 @@ package sql_db
 import (
 	"database/sql"
 	"fmt"
+	"github.com/k0marov/socnet/core/core_errors"
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/features/comments/domain/values"
 	"github.com/k0marov/socnet/features/comments/store/models"
@@ -113,6 +114,9 @@ func (db *SqlDB) GetAuthor(comment values.CommentId) (core_values.UserId, error)
     `, comment)
 	var authorId core_values.UserId
 	err := row.Scan(&authorId)
+	if err == sql.ErrNoRows {
+		return "", core_errors.ErrNotFound
+	}
 	if err != nil {
 		return "", fmt.Errorf("while scanning the SELECTed author_id: %w", err)
 	}

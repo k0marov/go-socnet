@@ -1,6 +1,7 @@
 package sql_db_test
 
 import (
+	"github.com/k0marov/socnet/core/core_errors"
 	"github.com/k0marov/socnet/core/core_values"
 	. "github.com/k0marov/socnet/core/test_helpers"
 	"github.com/k0marov/socnet/features/comments/domain/values"
@@ -119,6 +120,10 @@ func TestSqlDB(t *testing.T) {
 		assertAuthor(t, sqlDB, comments[1].Id, commenter.Id)
 		Assert(t, comments[0], secondComment, "the second created comment")
 		Assert(t, comments[1], firstComment, "the first created comment")
+
+		// getting author of non-existing comment throws ErrNotFound
+		_, err = sqlDB.GetAuthor("9999")
+		AssertError(t, err, core_errors.ErrNotFound)
 	})
 	t.Run("liking comments", func(t *testing.T) {
 		assertLikedValue := func(t testing.TB, db *sql_db.SqlDB, comment values.CommentId, liker core_values.UserId, value bool) {
