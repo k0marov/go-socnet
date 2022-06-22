@@ -11,7 +11,7 @@ type Likeable interface {
 	LikeChecker
 }
 
-type LikeToggler func(id string, fromUser core_values.UserId) error
+type LikeToggler func(id string, owner, liker core_values.UserId) error
 type LikesCountGetter func(id string) (int, error)
 type LikeChecker func(id string, fromUser core_values.UserId) (bool, error)
 
