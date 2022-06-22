@@ -1,6 +1,7 @@
 package sql_db_test
 
 import (
+	"github.com/k0marov/socnet/core/core_errors"
 	"github.com/k0marov/socnet/core/core_values"
 	. "github.com/k0marov/socnet/core/test_helpers"
 	"github.com/k0marov/socnet/features/posts/domain/values"
@@ -121,6 +122,11 @@ func TestSqlDB(t *testing.T) {
 		AssertNoError(t, err)
 		// assert it was deleted
 		assertPosts(t, sut, user2.Id, user2Posts[:1])
+
+		// getting author of non existing post should return not found
+		_, err = sut.GetAuthor("9999")
+		AssertError(t, err, core_errors.ErrNotFound)
+
 	})
 	t.Run("liking posts", func(t *testing.T) {
 		driver := OpenSqliteDB(t)

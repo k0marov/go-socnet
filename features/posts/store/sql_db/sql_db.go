@@ -3,6 +3,7 @@ package sql_db
 import (
 	"database/sql"
 	"fmt"
+	"github.com/k0marov/socnet/core/core_errors"
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/features/posts/domain/values"
 	"github.com/k0marov/socnet/features/posts/store/post_models"
@@ -12,8 +13,6 @@ import (
 type SqlDB struct {
 	sql *sql.DB
 }
-
-// TODO: err not found
 
 func NewSqlDB(sql *sql.DB) (*SqlDB, error) {
 	err := initSQL(sql)
@@ -122,6 +121,9 @@ func (db *SqlDB) GetAuthor(post values.PostId) (core_values.UserId, error) {
     `, post)
 	var authorId int
 	err := row.Scan(&authorId)
+	if err == sql.ErrNoRows {
+		return "", core_errors.ErrNotFound
+	}
 	if err != nil {
 		return "", fmt.Errorf("while SELECTing a post author: %w", err)
 	}
