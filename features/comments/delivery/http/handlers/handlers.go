@@ -12,7 +12,7 @@ import (
 )
 
 type CommentsResponse struct {
-	Comments []entities.Comment
+	Comments []entities.ContextedComment
 }
 type NewCommentRequest struct {
 	Text string

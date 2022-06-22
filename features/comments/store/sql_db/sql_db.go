@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+// TODO: not found errors
+
 type SqlDB struct {
 	sql *sql.DB
 }

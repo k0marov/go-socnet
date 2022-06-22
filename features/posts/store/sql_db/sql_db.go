@@ -13,6 +13,8 @@ type SqlDB struct {
 	sql *sql.DB
 }
 
+// TODO: err not found
+
 func NewSqlDB(sql *sql.DB) (*SqlDB, error) {
 	err := initSQL(sql)
 	if err != nil {

@@ -26,9 +26,9 @@ func createRequestWithPostId(id post_values.PostId, body io.Reader) *http.Reques
 
 func TestNewGetCommentsHandler(t *testing.T) {
 	post := RandomString()
-	comments := RandomComments()
+	comments := RandomContextedComments()
 	t.Run("happy case", func(t *testing.T) {
-		getter := func(postId post_values.PostId) ([]entities.Comment, error) {
+		getter := func(postId post_values.PostId) ([]entities.ContextedComment, error) {
 			if postId == post {
 				return comments, nil
 			}
@@ -44,8 +44,8 @@ func TestNewGetCommentsHandler(t *testing.T) {
 		AssertClientError(t, response, client_errors.IdNotProvided)
 	})
 	helpers.BaseTestServiceErrorHandling(t, func(err error, response *httptest.ResponseRecorder) {
-		getter := func(id post_values.PostId) ([]entities.Comment, error) {
-			return []entities.Comment{}, err
+		getter := func(id post_values.PostId) ([]entities.ContextedComment, error) {
+			return []entities.ContextedComment{}, err
 		}
 		handlers.NewGetCommentsHandler(getter).ServeHTTP(response, createRequestWithPostId(post, nil))
 	})
@@ -60,9 +60,9 @@ func TestNewCreateCommentHandler(t *testing.T) {
 		Text:   RandomString(),
 		Post:   post,
 	}
-	createdComment := RandomComment()
+	createdComment := RandomContextedComment()
 	t.Run("happy case", func(t *testing.T) {
-		creator := func(newComment values.NewCommentValue) (entities.Comment, error) {
+		creator := func(newComment values.NewCommentValue) (entities.ContextedComment, error) {
 			if newComment == wantNewComment {
 				return createdComment, nil
 			}
@@ -82,8 +82,8 @@ func TestNewCreateCommentHandler(t *testing.T) {
 		AssertClientError(t, response, client_errors.IdNotProvided)
 	})
 	helpers.BaseTestServiceErrorHandling(t, func(err error, response *httptest.ResponseRecorder) {
-		creator := func(values.NewCommentValue) (entities.Comment, error) {
-			return entities.Comment{}, err
+		creator := func(values.NewCommentValue) (entities.ContextedComment, error) {
+			return entities.ContextedComment{}, err
 		}
 		request := helpers.AddAuthDataToRequest(createRequestWithPostId(post, nil), user)
 		handlers.NewCreateCommentHandler(creator).ServeHTTP(response, request)

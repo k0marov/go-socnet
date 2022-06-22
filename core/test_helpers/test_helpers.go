@@ -220,19 +220,33 @@ func RandomClientError() client_errors.ClientError {
 	return client_errors.ClientError{
 		DetailCode:     RandomString(),
 		ReadableDetail: RandomString(),
-		HTTPCode:       RandomInt() + 400,
+		HTTPCode:       400 + rand.Intn(100),
 	}
 }
 
-func RandomComment() comment_entities.Comment {
-	return comment_entities.Comment{}
+func RandomContextedComment() comment_entities.ContextedComment {
+	return comment_entities.ContextedComment{
+		Id:        RandomId(),
+		Author:    RandomContextedProfile(),
+		Text:      RandomString(),
+		CreatedAt: RandomTime(),
+		Likes:     RandomInt(),
+		IsLiked:   RandomBool(),
+		IsMine:    RandomBool(),
+	}
 }
-func RandomComments() []comment_entities.Comment {
-	return []comment_entities.Comment{RandomComment(), RandomComment(), RandomComment()}
+func RandomContextedComments() []comment_entities.ContextedComment {
+	return []comment_entities.ContextedComment{RandomContextedComment(), RandomContextedComment(), RandomContextedComment()}
 }
 
 func RandomCommentModel() comment_models.CommentModel {
-	return comment_models.CommentModel{}
+	return comment_models.CommentModel{
+		Id:        RandomId(),
+		Author:    RandomString(),
+		Text:      RandomString(),
+		CreatedAt: RandomTime(),
+		Likes:     RandomInt(),
+	}
 }
 
 func RandomNewComment() comment_values.NewCommentValue {

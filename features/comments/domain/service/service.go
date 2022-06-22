@@ -9,45 +9,78 @@ import (
 	"github.com/k0marov/socnet/features/comments/domain/store"
 	"github.com/k0marov/socnet/features/comments/domain/validators"
 	"github.com/k0marov/socnet/features/comments/domain/values"
-	"github.com/k0marov/socnet/features/comments/store/models"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
+	profile_service "github.com/k0marov/socnet/features/profiles/domain/service"
 	"time"
 )
 
 type (
-	PostCommentsGetter func(post post_values.PostId) ([]entities.Comment, error)
-	CommentCreator     func(newComment values.NewCommentValue) (entities.Comment, error)
+	PostCommentsGetter func(post post_values.PostId, caller core_values.UserId) ([]entities.ContextedComment, error)
+	CommentCreator     func(newComment values.NewCommentValue) (entities.ContextedComment, error)
 	CommentLikeToggler func(values.CommentId, core_values.UserId) error
 )
 
-func NewPostCommentsGetter(getComments store.CommentsGetter) PostCommentsGetter {
-	return func(post post_values.PostId) ([]entities.Comment, error) {
+func NewPostCommentsGetter(getComments store.CommentsGetter, getProfile profile_service.ProfileGetter, checkLiked store.LikeChecker) PostCommentsGetter {
+	return func(post post_values.PostId, caller core_values.UserId) ([]entities.ContextedComment, error) {
 		models, err := getComments(post)
 		if err != nil {
-			return []entities.Comment{}, fmt.Errorf("while getting post comments from store: %w", err)
+			return []entities.ContextedComment{}, fmt.Errorf("while getting post comments from store: %w", err)
 		}
-		var comments []entities.Comment
+		var comments []entities.ContextedComment
 		for _, model := range models {
-			comments = append(comments, modelToEntity(model))
+			author, err := getProfile(model.Author, caller)
+			if err != nil {
+				return []entities.ContextedComment{}, fmt.Errorf("while getting comment's author profile: %w", err)
+			}
+			isLiked, err := checkLiked(model.Id, caller)
+			if err != nil {
+				return []entities.ContextedComment{}, fmt.Errorf("while checking if comment is liked: %w", err)
+			}
+			comment := entities.ContextedComment{
+				Id:        model.Id,
+				Author:    author,
+				Text:      model.Text,
+				CreatedAt: model.CreatedAt,
+				Likes:     model.Likes,
+
+				IsLiked: isLiked,
+				IsMine:  author.Id == caller,
+			}
+			comments = append(comments, comment)
 		}
 		return comments, nil
 	}
 }
 
-func NewCommentCreator(validate validators.CommentValidator, createComment store.Creator) CommentCreator {
-	return func(newComment values.NewCommentValue) (entities.Comment, error) {
+func NewCommentCreator(validate validators.CommentValidator, createComment store.Creator, getProfile profile_service.ProfileGetter) CommentCreator {
+	return func(newComment values.NewCommentValue) (entities.ContextedComment, error) {
 		clientErr, isValid := validate(newComment)
 		if !isValid {
-			return entities.Comment{}, clientErr
+			return entities.ContextedComment{}, clientErr
 		}
+
+		author, err := getProfile(newComment.Author, newComment.Author)
+		if err != nil {
+			return entities.ContextedComment{}, fmt.Errorf("while getting author's profile: %w", err)
+		}
+
 		newId, err := createComment(newComment, time.Now())
 		if err != nil {
 			if err == core_errors.ErrNotFound {
-				return entities.Comment{}, client_errors.NotFound
+				return entities.ContextedComment{}, client_errors.NotFound
 			}
-			return entities.Comment{}, fmt.Errorf("while creating new comment: %w", err)
+			return entities.ContextedComment{}, fmt.Errorf("while creating new comment: %w", err)
 		}
-		comment := entities.Comment{Id: newId}
+
+		comment := entities.ContextedComment{
+			Id:        newId,
+			Author:    author,
+			Text:      newComment.Text,
+			CreatedAt: time.Now(),
+			Likes:     0,
+			IsLiked:   false,
+			IsMine:    true,
+		}
 		return comment, nil
 	}
 }
@@ -74,8 +107,4 @@ func NewCommentLikeToggler(checkLiked store.LikeChecker, like store.Liker, unlik
 		}
 		return nil
 	}
-}
-
-func modelToEntity(model models.CommentModel) entities.Comment {
-	return entities.Comment{Id: model.Id}
 }
