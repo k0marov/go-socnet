@@ -14,7 +14,7 @@ type CommentListContextAdder func(comments []entities.Comment, caller core_value
 
 func NewCommentContextAdder(getProfile profile_service.ProfileGetter, checkLiked likeable.LikeChecker) CommentContextAdder {
 	return func(comment entities.Comment, caller core_values.UserId) (entities.ContextedComment, error) {
-		author, err := getProfile(comment.Author, caller)
+		author, err := getProfile(comment.AuthorId, caller)
 		if err != nil {
 			return entities.ContextedComment{}, fmt.Errorf("while getting author of comment: %w", err)
 		}

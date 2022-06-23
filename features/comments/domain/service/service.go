@@ -48,19 +48,23 @@ func NewCommentCreator(validate validators.CommentValidator, getProfile profile_
 			return entities.ContextedComment{}, fmt.Errorf("while getting author's profile: %w", err)
 		}
 
-		newId, err := createComment(newComment, time.Now())
+		createdAt := time.Now()
+		newId, err := createComment(newComment, createdAt)
 		if err != nil {
 			return entities.ContextedComment{}, fmt.Errorf("while creating new comment: %w", err)
 		}
 
 		comment := entities.ContextedComment{
-			Id:        newId,
-			Author:    author,
-			Text:      newComment.Text,
-			CreatedAt: time.Now(),
-			Likes:     0,
-			IsLiked:   false,
-			IsMine:    true,
+			Comment: entities.Comment{
+				Id:        newId,
+				AuthorId:  newComment.Author,
+				Text:      newComment.Text,
+				CreatedAt: createdAt,
+				Likes:     0,
+			},
+			Author:  author,
+			IsLiked: false,
+			IsMine:  true,
 		}
 		return comment, nil
 	}

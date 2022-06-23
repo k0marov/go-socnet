@@ -21,7 +21,7 @@ func TestCommentContextAdder(t *testing.T) {
 	}
 
 	authorGetter := func(id, callerId core_values.UserId) (profile_entities.ContextedProfile, error) {
-		if id == comment.Author && callerId == caller {
+		if id == comment.AuthorId && callerId == caller {
 			return author, nil
 		}
 		panic("unexpected args")

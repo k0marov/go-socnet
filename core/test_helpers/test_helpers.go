@@ -237,6 +237,7 @@ func RandomClientError() client_errors.ClientError {
 func RandomContextedComment() comment_entities.ContextedComment {
 	return comment_entities.ContextedComment{
 		Comment: RandomComment(),
+		Author:  RandomContextedProfile(),
 		IsLiked: RandomBool(),
 		IsMine:  RandomBool(),
 	}
@@ -256,7 +257,7 @@ func RandomCommentModel() comment_models.CommentModel {
 func RandomComment() comment_entities.Comment {
 	return comment_entities.Comment{
 		Id:        RandomId(),
-		Author:    RandomId(),
+		AuthorId:  RandomId(),
 		Text:      RandomString(),
 		CreatedAt: RandomTime(),
 		Likes:     RandomInt(),

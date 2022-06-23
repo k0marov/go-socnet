@@ -6,6 +6,7 @@ import (
 	"github.com/k0marov/socnet/core/likeable"
 	"github.com/k0marov/socnet/features/comments/delivery/http/handlers"
 	"github.com/k0marov/socnet/features/comments/delivery/http/router"
+	"github.com/k0marov/socnet/features/comments/domain/contexters"
 	"github.com/k0marov/socnet/features/comments/domain/service"
 	"github.com/k0marov/socnet/features/comments/domain/validators"
 	"github.com/k0marov/socnet/features/comments/store"
@@ -33,7 +34,9 @@ func NewCommentsRouterImpl(db *sql.DB, getProfile profile_service.ProfileGetter)
 
 	// service
 	validator := validators.NewCommentValidator()
-	getComments := service.NewPostCommentsGetter(storeGetComments, getProfile, likeableComment.IsLiked)
+	contextAdder := contexters.NewCommentListContextAdder(contexters.NewCommentContextAdder(getProfile, likeableComment.IsLiked))
+
+	getComments := service.NewPostCommentsGetter(storeGetComments, contextAdder)
 	createComment := service.NewCommentCreator(validator, getProfile, storeCreateComment)
 	toggleLike := service.NewCommentLikeToggler(storeGetAuthor, likeableComment.ToggleLike)
 	// handlers

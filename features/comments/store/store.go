@@ -34,7 +34,7 @@ func NewCommentsGetter(getComments DBCommentsGetter, getLikes likeable.LikesCoun
 			}
 			comment := entities.Comment{
 				Id:        model.Id,
-				Author:    model.Author,
+				AuthorId:  model.Author,
 				Text:      model.Text,
 				CreatedAt: model.CreatedAt,
 				Likes:     likes,

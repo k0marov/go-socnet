@@ -20,13 +20,16 @@ func TestCommentCreator(t *testing.T) {
 	createdId := RandomString()
 	author := RandomContextedProfile()
 	createdComment := entities.ContextedComment{
-		Id:        createdId,
-		Author:    author,
-		Text:      newComment.Text,
-		CreatedAt: time.Now(),
-		Likes:     0,
-		IsLiked:   false,
-		IsMine:    true,
+		Comment: entities.Comment{
+			Id:        createdId,
+			AuthorId:  newComment.Author,
+			Text:      newComment.Text,
+			CreatedAt: time.Now(),
+			Likes:     0,
+		},
+		Author:  author,
+		IsLiked: false,
+		IsMine:  true,
 	}
 	validator := func(gotComment values.NewCommentValue) (client_errors.ClientError, bool) {
 		if gotComment == newComment {

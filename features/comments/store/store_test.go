@@ -45,7 +45,7 @@ func TestCommentsGetter(t *testing.T) {
 	wantComments := []entities.Comment{
 		{
 			Id:        commentModels[0].Id,
-			Author:    commentModels[0].Author,
+			AuthorId:  commentModels[0].Author,
 			Text:      commentModels[0].Text,
 			CreatedAt: commentModels[0].CreatedAt,
 			Likes:     likes,

@@ -26,7 +26,7 @@ func createRequestWithPostId(id post_values.PostId, body io.Reader) *http.Reques
 
 func TestNewGetCommentsHandler(t *testing.T) {
 	post := RandomString()
-	comments := RandomContextedComments()
+	comments := []entities.ContextedComment{RandomContextedComment()}
 	caller := RandomAuthUser()
 
 	helpers.BaseTest401(t, handlers.NewGetCommentsHandler(nil))
