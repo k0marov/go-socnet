@@ -28,19 +28,17 @@ func TestGetListById(t *testing.T) {
 	helpers.BaseTest401(t, handlers.NewGetListByIdHandler(nil))
 	t.Run("happy case", func(t *testing.T) {
 		randomProfile := RandomString()
-		randomPosts := handlers.PostsResponse{
-			Posts: []entities.ContextedPost{RandomContextedPost()},
-		}
+		posts := []entities.ContextedPost{RandomContextedPost(), RandomContextedPost()}
 		getter := func(profileId, callerId core_values.UserId) ([]entities.ContextedPost, error) {
 			if profileId == randomProfile && callerId == caller.Id {
-				return randomPosts.Posts, nil
+				return posts, nil
 			}
 			panic("unexpected args")
 		}
 		request := helpers.AddAuthDataToRequest(httptest.NewRequest(http.MethodGet, "/handler-should-not-care?profile_id="+randomProfile, nil), caller)
 		response := httptest.NewRecorder()
 		handlers.NewGetListByIdHandler(getter).ServeHTTP(response, request)
-		AssertJSONData(t, response, randomPosts)
+		AssertJSONData(t, response, handlers.PostsToResponse(posts))
 	})
 	t.Run("error case - profile id is not provided", func(t *testing.T) {
 		request := helpers.AddAuthDataToRequest(helpers.CreateRequest(nil), caller)

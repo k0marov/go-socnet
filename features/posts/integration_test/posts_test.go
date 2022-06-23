@@ -13,7 +13,6 @@ import (
 	. "github.com/k0marov/socnet/core/test_helpers"
 	"github.com/k0marov/socnet/features/posts"
 	"github.com/k0marov/socnet/features/posts/delivery/http/handlers"
-	"github.com/k0marov/socnet/features/posts/domain/entities"
 	"github.com/k0marov/socnet/features/posts/domain/values"
 	post_storage "github.com/k0marov/socnet/features/posts/store/file_storage"
 	"github.com/k0marov/socnet/features/profiles"
@@ -71,7 +70,7 @@ func TestPosts(t *testing.T) {
 		r.ServeHTTP(response, request)
 		AssertStatusCode(t, response, http.StatusOK)
 	}
-	getPosts := func(t testing.TB, author core_values.UserId, caller auth.User) []entities.ContextedPost {
+	getPosts := func(t testing.TB, author core_values.UserId, caller auth.User) []handlers.PostResponse {
 		t.Helper()
 		request := helpers.AddAuthDataToRequest(httptest.NewRequest(http.MethodGet, "/posts/?profile_id="+author, nil), caller)
 		response := httptest.NewRecorder()
@@ -81,9 +80,9 @@ func TestPosts(t *testing.T) {
 		json.NewDecoder(response.Body).Decode(&posts)
 		return posts.Posts
 	}
-	assertImageCreated := func(t testing.TB, post entities.ContextedPost, postImage values.PostImage, wantImage []byte) {
+	assertImageCreated := func(t testing.TB, post handlers.PostResponse, postImage handlers.PostImageResponse, wantImage []byte) {
 		t.Helper()
-		path := filepath.Join(static_store.StaticDir, post_storage.GetPostDir(post.Id, post.PostModel.AuthorId), post_storage.ImagePrefix+strconv.Itoa(postImage.Index))
+		path := filepath.Join(static_store.StaticDir, post_storage.GetPostDir(post.Id, post.Author.Id), post_storage.ImagePrefix+strconv.Itoa(postImage.Index))
 		got := readFile(t, path)
 		Assert(t, got, wantImage, "the stored image data")
 	}
@@ -144,11 +143,11 @@ func TestPosts(t *testing.T) {
 		log.Print(fmt.Sprintf("first:  %+v, \nsecond: %+v", posts[0], posts[1]))
 
 		Assert(t, posts[0].Text, text1, "the first post's text")
-		Assert(t, posts[0].PostModel.AuthorId, user2.Id, "first post's author")
+		Assert(t, posts[0].Author.Id, user2.Id, "first post's author")
 		AssertFatal(t, len(posts[0].Images), 0, "number of images in first post")
 
 		Assert(t, posts[1].Text, text2, "the second post's text")
-		Assert(t, posts[1].PostModel.AuthorId, user2.Id, "second posts's author")
+		Assert(t, posts[1].Author.Id, user2.Id, "second posts's author")
 		AssertFatal(t, len(posts[1].Images), 2, "number of images in second post")
 		assertImageCreated(t, posts[1], posts[1].Images[0], image1)
 		assertImageCreated(t, posts[1], posts[1].Images[1], image2)
