@@ -75,7 +75,7 @@ func TestSqlDB(t *testing.T) {
 		postsDb, _ := posts_db.NewSqlDB(db)
 
 		// create an author profile
-		author := RandomNewProfile()
+		author := RandomProfileModel()
 		profilesDb.CreateProfile(author)
 
 		// create a post
@@ -86,7 +86,7 @@ func TestSqlDB(t *testing.T) {
 		})
 
 		// create a commenter profile
-		commenter := RandomNewProfile()
+		commenter := RandomProfileModel()
 		profilesDb.CreateProfile(commenter)
 
 		// create the first comment

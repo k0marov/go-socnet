@@ -10,7 +10,8 @@ import (
 	comment_values "github.com/k0marov/socnet/features/comments/domain/values"
 	comment_models "github.com/k0marov/socnet/features/comments/store/models"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
-	"github.com/k0marov/socnet/features/posts/store/models"
+	post_models "github.com/k0marov/socnet/features/posts/store/models"
+	profile_models "github.com/k0marov/socnet/features/profiles/store/models"
 	"math"
 	random "math/rand"
 	"net/http"
@@ -20,10 +21,8 @@ import (
 	"testing"
 	"time"
 
-	profile_entities "github.com/k0marov/socnet/features/profiles/domain/entities"
-	"github.com/k0marov/socnet/features/profiles/domain/values"
-
 	post_entities "github.com/k0marov/socnet/features/posts/domain/entities"
+	profile_entities "github.com/k0marov/socnet/features/profiles/domain/entities"
 
 	"github.com/k0marov/socnet/core/client_errors"
 	core_entities "github.com/k0marov/socnet/core/core_entities"
@@ -137,8 +136,8 @@ func RandomId() string {
 	return strconv.Itoa(rand.Intn(100000))
 }
 
-func RandomNewProfile() values.NewProfile {
-	return values.NewProfile{
+func RandomProfileModel() profile_models.ProfileModel {
+	return profile_models.ProfileModel{
 		Id:         RandomId(),
 		Username:   RandomString(),
 		About:      RandomString(),
@@ -184,8 +183,8 @@ func RandomTime() time.Time {
 	return time.Date(2022, 6, 17, 16, 53, 42, 0, time.UTC)
 }
 
-func RandomPostModel() models.PostModel {
-	return models.PostModel{
+func RandomPostModel() post_models.PostModel {
+	return post_models.PostModel{
 		Id:        RandomString(),
 		Author:    RandomString(),
 		Text:      RandomString(),

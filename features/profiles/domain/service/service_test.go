@@ -3,6 +3,7 @@ package service_test
 import (
 	"fmt"
 	"github.com/k0marov/socnet/core/static_store"
+	"github.com/k0marov/socnet/features/profiles/store/models"
 	"testing"
 
 	"github.com/k0marov/socnet/features/profiles/domain/entities"
@@ -16,110 +17,19 @@ import (
 	. "github.com/k0marov/socnet/core/test_helpers"
 )
 
-func TestFollowsGetter(t *testing.T) {
-	userId := RandomString()
-	t.Run("happy case", func(t *testing.T) {
-		randomFollows := []core_values.UserId{RandomString(), RandomString()}
-		storeFollowsGetter := func(gotUserId core_values.UserId) ([]core_values.UserId, error) {
-			if gotUserId == userId {
-				return randomFollows, nil
-			}
-			panic("called with unexpected args")
-		}
-		sut := service.NewFollowsGetter(storeFollowsGetter)
-
-		gotFollows, err := sut(userId)
-		AssertNoError(t, err)
-		Assert(t, gotFollows, randomFollows, "returned follows")
-	})
-	t.Run("error case - store returns not found", func(t *testing.T) {
-		storeFollowsGetter := func(core_values.UserId) ([]core_values.UserId, error) {
-			return nil, core_errors.ErrNotFound
-		}
-		sut := service.NewFollowsGetter(storeFollowsGetter)
-		_, err := sut(userId)
-		AssertError(t, err, client_errors.NotFound)
-	})
-	t.Run("error case - store returns some other error", func(t *testing.T) {
-		storeFollowsGetter := func(core_values.UserId) ([]core_values.UserId, error) {
-			return nil, RandomError()
-		}
-		sut := service.NewFollowsGetter(storeFollowsGetter)
-		_, err := sut(userId)
-		AssertSomeError(t, err)
-	})
-}
-
 func TestFollowToggler(t *testing.T) {
 	testTarget := RandomString()
 	testFollower := RandomString()
-	t.Run("should return client error if trying to follow yourself", func(t *testing.T) {
-		sut := service.NewFollowToggler(nil, nil, nil)
-		err := sut("42", "42")
-		AssertError(t, err, client_errors.FollowingYourself)
-	})
-	t.Run("checking if target is already followed", func(t *testing.T) {
-		t.Run("target does not exist", func(t *testing.T) {
-			followChecker := func(target, follower core_values.UserId) (bool, error) {
-				if target == testTarget && follower == testFollower {
-					return false, core_errors.ErrNotFound
-				}
-				panic("called with unexpected args")
+	t.Run("should forward the call to likeable.LikeToggler with owner set to target", func(t *testing.T) {
+		wantErr := RandomError()
+		likeToggler := func(target string, owner, caller core_values.UserId) error {
+			if target == testTarget && owner == testTarget && caller == testFollower {
+				return wantErr
 			}
-			sut := service.NewFollowToggler(followChecker, nil, nil)
-			err := sut(testTarget, testFollower)
-			AssertError(t, err, client_errors.NotFound)
-		})
-		t.Run("some other error is returned", func(t *testing.T) {
-			followChecker := func(target, follower core_values.UserId) (bool, error) {
-				return false, RandomError()
-			}
-			sut := service.NewFollowToggler(followChecker, nil, nil)
-			err := sut(testTarget, testFollower)
-			AssertSomeError(t, err)
-		})
-	})
-	t.Run("target is already followed - unfollow it", func(t *testing.T) {
-		followChecker := func(target, follower core_values.UserId) (bool, error) {
-			return true, nil
+			panic("unexpected args")
 		}
-		t.Run("happy case", func(t *testing.T) {
-			storeUnfollower := func(target, follower core_values.UserId) error {
-				return nil
-			}
-			sut := service.NewFollowToggler(followChecker, nil, storeUnfollower)
-			err := sut(testTarget, testFollower)
-			AssertNoError(t, err)
-		})
-		t.Run("error case - store throws", func(t *testing.T) {
-			storeUnfollower := func(target, follower core_values.UserId) error {
-				return RandomError()
-			}
-			sut := service.NewFollowToggler(followChecker, nil, storeUnfollower)
-			err := sut(testTarget, testFollower)
-			AssertSomeError(t, err)
-		})
-	})
-	t.Run("target is not already followed - follow it", func(t *testing.T) {
-		followChecker := func(target, follower core_values.UserId) (bool, error) {
-			return false, nil
-		}
-		t.Run("happy case", func(t *testing.T) {
-			storeFollower := func(target, follower core_values.UserId) error {
-				return nil
-			}
-			sut := service.NewFollowToggler(followChecker, storeFollower, nil)
-			err := sut(testTarget, testFollower)
-			AssertNoError(t, err)
-		})
-		t.Run("error case - store throws", func(t *testing.T) {
-			storeFollower := func(target, follower core_values.UserId) error {
-				return RandomError()
-			}
-			sut := service.NewFollowToggler(followChecker, storeFollower, nil)
-			err := sut(testTarget, testFollower)
-			AssertSomeError(t, err)
-		})
+		gotErr := service.NewFollowToggler(likeToggler)(testTarget, testFollower)
+		AssertError(t, gotErr, wantErr)
 	})
 }
 
@@ -182,7 +92,7 @@ func TestProfileGetter(t *testing.T) {
 func TestProfileCreator(t *testing.T) {
 	user := RandomUser()
 	t.Run("happy case", func(t *testing.T) {
-		testNewProfile := values.NewProfile{
+		testNewProfile := models.ProfileModel{
 			Id:         user.Id,
 			Username:   user.Username,
 			About:      service.DefaultAbout,
@@ -196,7 +106,7 @@ func TestProfileCreator(t *testing.T) {
 			Follows:    0,
 			Followers:  0,
 		}
-		storeNew := func(profile values.NewProfile) error {
+		storeNew := func(profile models.ProfileModel) error {
 			if profile == testNewProfile {
 				return nil
 			}
@@ -209,7 +119,7 @@ func TestProfileCreator(t *testing.T) {
 		Assert(t, gotProfile, wantCreatedProfile, "created profile")
 	})
 	t.Run("error case - store throws, it is NOT a client error", func(t *testing.T) {
-		storeNew := func(values.NewProfile) error {
+		storeNew := func(model models.ProfileModel) error {
 			return RandomError()
 		}
 		sut := service.NewProfileCreator(storeNew)

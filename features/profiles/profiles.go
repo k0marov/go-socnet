@@ -2,6 +2,7 @@ package profiles
 
 import (
 	"database/sql"
+	"github.com/k0marov/socnet/core/likeable"
 	"log"
 
 	"github.com/k0marov/socnet/features/profiles/delivery/http/handlers"
@@ -40,9 +41,12 @@ func NewProfileGetterImpl(db *sql.DB) service.ProfileGetter {
 	if err != nil {
 		log.Fatalf("Error while opening sql db as a db for profiles: %v", err)
 	}
-	getProfile := store.NewStoreProfileGetter(sqlDB.GetProfile)
-	isFollowed := store.NewStoreFollowChecker(sqlDB.IsFollowing)
-	return service.NewProfileGetter(getProfile, isFollowed)
+	likeableProfile, err := likeable.NewLikeable(db, sqlDB.TableName)
+	if err != nil {
+		log.Fatalf("Error while creating a likeable Profile: %v", err)
+	}
+	getProfile := store.NewStoreProfileGetter(sqlDB.GetProfile, likeableProfile.GetLikesCount, likeableProfile.GetUserLikesCount)
+	return service.NewProfileGetter(getProfile, likeableProfile.IsLiked)
 }
 
 func NewProfilesRouterImpl(db *sql.DB) func(chi.Router) {
@@ -51,25 +55,30 @@ func NewProfilesRouterImpl(db *sql.DB) func(chi.Router) {
 	if err != nil {
 		log.Fatalf("Error while opening sql db as a db for profiles: %v", err)
 	}
+	// likeable
+	likeableProfile, err := likeable.NewLikeable(db, sqlDB.TableName)
+	if err != nil {
+		log.Fatalf("Error while creating a likeable Profile: %v", err)
+	}
+
 	// file storage
 	avatarFileCreator := file_storage.NewAvatarFileCreator(static_store.NewStaticFileCreatorImpl())
+
 	// store
-	storeProfileUpdater := store.NewStoreProfileUpdater(sqlDB.UpdateProfile, sqlDB.GetProfile)
+	storeProfileGetter := store.NewStoreProfileGetter(sqlDB.GetProfile, likeableProfile.GetLikesCount, likeableProfile.GetUserLikesCount)
+	storeProfileUpdater := store.NewStoreProfileUpdater(sqlDB.UpdateProfile, storeProfileGetter)
 	storeAvatarUpdater := store.NewStoreAvatarUpdater(avatarFileCreator, sqlDB.UpdateProfile)
-	storeFollowsGetter := store.NewStoreFollowsGetter(sqlDB.GetFollows)
-	storeProfileGetter := store.NewStoreProfileGetter(sqlDB.GetProfile)
-	storeFollowChecker := store.NewStoreFollowChecker(sqlDB.IsFollowing)
-	storeFollower := store.NewStoreFollower(sqlDB.Follow)
-	storeUnfollower := store.NewStoreUnfollower(sqlDB.Unfollow)
+
 	// domain
 	profileUpdateValidator := validators.NewProfileUpdateValidator()
 	avatarValidator := validators.NewAvatarValidator(image_decoder.ImageDecoderImpl)
 
 	profileUpdater := service.NewProfileUpdater(profileUpdateValidator, storeProfileUpdater)
 	avatarUpdater := service.NewAvatarUpdater(avatarValidator, storeAvatarUpdater)
-	followsGetter := service.NewFollowsGetter(storeFollowsGetter)
-	profileGetter := service.NewProfileGetter(storeProfileGetter, storeFollowChecker)
-	followToggler := service.NewFollowToggler(storeFollowChecker, storeFollower, storeUnfollower)
+	profileGetter := service.NewProfileGetter(storeProfileGetter, likeableProfile.IsLiked)
+	followToggler := service.NewFollowToggler(likeableProfile.ToggleLike)
+	followsGetter := service.NewFollowsGetter(likeableProfile.GetUserLikes)
+
 	// handlers
 	getMe := handlers.NewGetMeHandler(profileGetter)
 	updateMe := handlers.NewUpdateMeHandler(profileUpdater)

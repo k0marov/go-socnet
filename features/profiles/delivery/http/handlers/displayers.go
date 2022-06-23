@@ -1,12 +1,12 @@
 package handlers
 
 import (
+	"github.com/k0marov/socnet/core/core_values"
 	"net/http"
 
 	"github.com/k0marov/socnet/features/profiles/domain/service"
 
 	"github.com/k0marov/socnet/core/client_errors"
-	"github.com/k0marov/socnet/core/core_values"
 	helpers "github.com/k0marov/socnet/core/http_helpers"
 
 	"github.com/go-chi/chi/v5"

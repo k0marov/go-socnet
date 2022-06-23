@@ -2,6 +2,7 @@ package store
 
 import (
 	"fmt"
+	"github.com/k0marov/socnet/core/likeable"
 
 	"github.com/k0marov/socnet/features/profiles/domain/entities"
 	"github.com/k0marov/socnet/features/profiles/domain/store"
@@ -32,7 +33,7 @@ func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBProfile DBProfi
 	}
 }
 
-func NewStoreProfileUpdater(updateDBProfile DBProfileUpdater, getProfile store.StoreDetailedProfileGetter) store.StoreProfileUpdater {
+func NewStoreProfileUpdater(updateDBProfile DBProfileUpdater, getProfile store.StoreProfileGetter) store.StoreProfileUpdater {
 	return func(id core_values.UserId, upd values.ProfileUpdateData) (entities.Profile, error) {
 		err := updateDBProfile(id, DBUpdateData{About: upd.About})
 		if err != nil {
@@ -46,22 +47,28 @@ func NewStoreProfileCreator(createDBProfile DBProfileCreator) store.StoreProfile
 	return store.StoreProfileCreator(createDBProfile)
 }
 
-func NewStoreProfileGetter(getDBProfile DBProfileGetter) store.StoreProfileGetter {
-	return store.StoreProfileGetter(getDBProfile)
-}
-
-func NewStoreFollowsGetter(dbFollowsGetter DBFollowsGetter) store.StoreFollowsGetter {
-	return store.StoreFollowsGetter(dbFollowsGetter)
-}
-
-func NewStoreFollowChecker(dbFollowChecker DBFollowChecker) store.StoreFollowChecker {
-	return store.StoreFollowChecker(dbFollowChecker)
-}
-
-func NewStoreFollower(dbFollower DBFollower) store.StoreFollower {
-	return store.StoreFollower(dbFollower)
-}
-
-func NewStoreUnfollower(dbUnfollower DBUnfollower) store.StoreUnfollower {
-	return store.StoreUnfollower(dbUnfollower)
+func NewStoreProfileGetter(getDBProfile DBProfileGetter, getFollowers likeable.LikesCountGetter, getFollows likeable.UserLikesCountGetter) store.StoreProfileGetter {
+	return func(id core_values.UserId) (entities.Profile, error) {
+		profileModel, err := getDBProfile(id)
+		if err != nil {
+			return entities.Profile{}, fmt.Errorf("while getting the profile model from db: %w", err)
+		}
+		followers, err := getFollowers(id)
+		if err != nil {
+			return entities.Profile{}, err
+		}
+		follows, err := getFollows(id)
+		if err != nil {
+			return entities.Profile{}, err
+		}
+		profile := entities.Profile{
+			Id:         profileModel.Id,
+			Username:   profileModel.Username,
+			About:      profileModel.About,
+			AvatarPath: profileModel.AvatarPath,
+			Follows:    follows,
+			Followers:  followers,
+		}
+		return profile, nil
+	}
 }

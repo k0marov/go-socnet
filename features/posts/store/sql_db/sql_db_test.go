@@ -81,8 +81,8 @@ func TestSqlDB(t *testing.T) {
 			Assert(t, gotAuthor, author, "the stored post author")
 		}
 		// create two profiles
-		user1 := RandomNewProfile()
-		user2 := RandomNewProfile()
+		user1 := RandomProfileModel()
+		user2 := RandomProfileModel()
 		profiles.CreateProfile(user1)
 		profiles.CreateProfile(user2)
 
@@ -123,7 +123,7 @@ func TestSqlDB(t *testing.T) {
 		profiles, err := profiles_db.NewSqlDB(driver)
 		AssertNoError(t, err)
 
-		profile := RandomNewProfile()
+		profile := RandomProfileModel()
 		profiles.CreateProfile(profile)
 
 		// create 3 posts

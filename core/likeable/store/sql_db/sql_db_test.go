@@ -52,7 +52,7 @@ func TestSqlDB(t *testing.T) {
 		// create a target entity
 		targetId := createTargetEntity(t, db)
 		// create a profile
-		profile := RandomNewProfile()
+		profile := RandomProfileModel()
 		profilesDB.CreateProfile(profile)
 
 		// define a helper
@@ -80,7 +80,7 @@ func TestSqlDB(t *testing.T) {
 		targetId := createTargetEntity(t, db)
 		const count = 100
 		for i := 0; i < count; i++ {
-			profile := RandomNewProfile()
+			profile := RandomProfileModel()
 			profilesDB.CreateProfile(profile)
 			err := sqlDB.Like(targetId, profile.Id)
 			AssertNoError(t, err)
@@ -92,7 +92,7 @@ func TestSqlDB(t *testing.T) {
 	})
 	t.Run("liking many targets from 1 profile", func(t *testing.T) {
 		const count = 100
-		profile := RandomNewProfile()
+		profile := RandomProfileModel()
 		profilesDB.CreateProfile(profile)
 
 		var targets []string

@@ -2,7 +2,9 @@ package service
 
 import (
 	"fmt"
+	"github.com/k0marov/socnet/core/likeable"
 	"github.com/k0marov/socnet/core/static_store"
+	"github.com/k0marov/socnet/features/profiles/store/models"
 
 	"github.com/k0marov/socnet/features/profiles/domain/entities"
 	"github.com/k0marov/socnet/features/profiles/domain/store"
@@ -17,14 +19,14 @@ import (
 
 type (
 	ProfileGetter  func(id, caller core_values.UserId) (entities.ContextedProfile, error)
-	FollowsGetter  func(core_values.UserId) ([]core_values.UserId, error)
-	FollowToggler  func(target, follower core_values.UserId) error
 	ProfileUpdater func(core_entities.User, values.ProfileUpdateData) (entities.Profile, error)
 	AvatarUpdater  func(core_entities.User, values.AvatarData) (core_values.FileURL, error)
 	ProfileCreator func(core_entities.User) (entities.Profile, error)
+	FollowToggler  func(target, follower core_values.UserId) error
+	FollowsGetter  func(target core_values.UserId) ([]core_values.UserId, error)
 )
 
-func NewProfileGetter(getProfile store.StoreProfileGetter, isFollowed store.StoreFollowChecker) ProfileGetter {
+func NewProfileGetter(getProfile store.StoreProfileGetter, isFollowed likeable.LikeChecker) ProfileGetter {
 	return func(id core_values.UserId, caller core_values.UserId) (entities.ContextedProfile, error) {
 		profile, err := getProfile(id)
 		if err != nil {
@@ -42,44 +44,14 @@ func NewProfileGetter(getProfile store.StoreProfileGetter, isFollowed store.Stor
 	}
 }
 
-func NewFollowsGetter(getFollows store.StoreFollowsGetter) FollowsGetter {
-	return func(user core_values.UserId) ([]core_values.UserId, error) {
-		follows, err := getFollows(user)
-		if err != nil {
-			if err == core_errors.ErrNotFound {
-				return []core_values.UserId{}, client_errors.NotFound
-			}
-			return []core_values.UserId{}, fmt.Errorf("while getting follows in service: %w", err)
-		}
-		return follows, nil
+func NewFollowToggler(toggleLike likeable.LikeToggler) FollowToggler {
+	return func(target, follower core_values.UserId) error {
+		return toggleLike(target, target, follower)
 	}
 }
 
-func NewFollowToggler(storeFollowChecker store.StoreFollowChecker, storeFollower store.StoreFollower, storeUnfollower store.StoreUnfollower) FollowToggler {
-	return func(target, follower core_values.UserId) error {
-		if target == follower {
-			return client_errors.FollowingYourself
-		}
-		isFollowed, err := storeFollowChecker(target, follower)
-		if err != nil {
-			if err == core_errors.ErrNotFound {
-				return client_errors.NotFound
-			}
-			return fmt.Errorf("while checking if target is already followed: %w", err)
-		}
-		if isFollowed {
-			err = storeUnfollower(target, follower)
-			if err != nil {
-				return fmt.Errorf("while unfollowing target: %w", err)
-			}
-		} else {
-			err = storeFollower(target, follower)
-			if err != nil {
-				return fmt.Errorf("while following target: %w", err)
-			}
-		}
-		return nil
-	}
+func NewFollowsGetter(getUserLikes likeable.UserLikesGetter) FollowsGetter {
+	return FollowsGetter(getUserLikes)
 }
 
 func NewProfileUpdater(validator validators.ProfileUpdateValidator, storeProfileUpdater store.StoreProfileUpdater) ProfileUpdater {
@@ -98,10 +70,10 @@ func NewProfileUpdater(validator validators.ProfileUpdateValidator, storeProfile
 const DefaultAbout = ""
 const DefaultAvatarPath = ""
 
-// this should be invoked when a new user is registered
+// NewProfileCreator this should be invoked when a new user is registered
 func NewProfileCreator(storeProfileCreator store.StoreProfileCreator) ProfileCreator {
 	return func(user core_entities.User) (entities.Profile, error) {
-		newProfile := values.NewProfile{
+		newProfile := models.ProfileModel{
 			Id:         user.Id,
 			Username:   user.Username,
 			About:      DefaultAbout,

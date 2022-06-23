@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"github.com/k0marov/socnet/core/static_store"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -153,6 +154,7 @@ func TestProfiles(t *testing.T) {
 			request := addAuthToReq(httptest.NewRequest(http.MethodGet, "/profiles/"+id+"/follows", nil), RandomUser())
 			response := httptest.NewRecorder()
 			r.ServeHTTP(response, request)
+			log.Print(response.Body)
 			AssertJSONData(t, response, handlers.FollowsResponse{Profiles: wantFollows})
 		}
 		assertIsFollowed := func(t testing.TB, target core_values.UserId, caller core_entities.User, isFollowed bool) {
@@ -207,7 +209,7 @@ func TestProfiles(t *testing.T) {
 		assertIsFollowed(t, user1.Id, user2, false)
 		wantProfile1.Followers = 0
 		checkProfileFromServer(t, wantProfile1)
-		checkFollows(t, user2.Id, []core_values.UserId{})
+		checkFollows(t, user2.Id, nil)
 		wantProfile2.Follows = 0
 		checkProfileFromServer(t, wantProfile2)
 	})

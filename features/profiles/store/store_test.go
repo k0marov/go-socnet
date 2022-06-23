@@ -2,6 +2,8 @@ package store_test
 
 import (
 	"fmt"
+	"github.com/k0marov/socnet/core/core_values"
+	"github.com/k0marov/socnet/features/profiles/store/models"
 	"reflect"
 	"testing"
 
@@ -120,4 +122,66 @@ func TestStoreAvatarUpdater(t *testing.T) {
 			AssertSomeError(t, err)
 		})
 	})
+}
+
+func TestStoreProfileGetter(t *testing.T) {
+	profileId := RandomId()
+	model := RandomProfileModel()
+	follows := RandomInt()
+	followers := RandomInt()
+
+	dbGetter := func(id core_values.UserId) (models.ProfileModel, error) {
+		if id == profileId {
+			return model, nil
+		}
+		panic("unexpected args")
+	}
+	t.Run("error case - getting model from db throws", func(t *testing.T) {
+		dbGetter := func(core_values.UserId) (models.ProfileModel, error) {
+			return models.ProfileModel{}, RandomError()
+		}
+		_, err := store.NewStoreProfileGetter(dbGetter, nil, nil)(profileId)
+		AssertSomeError(t, err)
+	})
+	followersGetter := func(targetId core_values.UserId) (int, error) {
+		if targetId == profileId {
+			return followers, nil
+		}
+		panic("unexpected args")
+	}
+	t.Run("error case - getting followers throws", func(t *testing.T) {
+		wantErr := RandomError()
+		followersGetter := func(core_values.UserId) (int, error) {
+			return 0, wantErr
+		}
+		_, err := store.NewStoreProfileGetter(dbGetter, followersGetter, nil)(profileId)
+		AssertError(t, err, wantErr)
+	})
+	followsGetter := func(targetId core_values.UserId) (int, error) {
+		if targetId == profileId {
+			return follows, nil
+		}
+		panic("unexpected args")
+	}
+	t.Run("error case - getting follows throws", func(t *testing.T) {
+		wantErr := RandomError()
+		followsGetter := func(id core_values.UserId) (int, error) {
+			return 0, wantErr
+		}
+		_, err := store.NewStoreProfileGetter(dbGetter, followersGetter, followsGetter)(profileId)
+		AssertError(t, err, wantErr)
+	})
+
+	sut := store.NewStoreProfileGetter(dbGetter, followersGetter, followsGetter)
+	gotProfile, err := sut(profileId)
+	AssertNoError(t, err)
+	wantProfile := entities.Profile{
+		Id:         model.Id,
+		Username:   model.Username,
+		About:      model.About,
+		AvatarPath: model.AvatarPath,
+		Follows:    follows,
+		Followers:  followers,
+	}
+	Assert(t, gotProfile, wantProfile, "returned profile entity")
 }
