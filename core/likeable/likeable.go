@@ -20,9 +20,9 @@ type likeable struct {
 	IsLiked       LikeChecker
 }
 
-func NewLikeable(db *sql.DB, targetTableName string) (likeable, error) {
+func NewLikeable(db *sql.DB, targetTableName table_name.TableName) (likeable, error) {
 	// store
-	store, err := sql_db.NewSqlDB(db, table_name.NewTableName(targetTableName))
+	store, err := sql_db.NewSqlDB(db, targetTableName)
 	if err != nil {
 		return likeable{}, fmt.Errorf("while opening the likeable sql db: %w", err)
 	}

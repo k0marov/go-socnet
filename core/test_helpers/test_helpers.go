@@ -246,7 +246,6 @@ func RandomCommentModel() comment_models.CommentModel {
 		Author:    RandomString(),
 		Text:      RandomString(),
 		CreatedAt: RandomTime(),
-		Likes:     RandomInt(),
 	}
 }
 

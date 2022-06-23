@@ -5,6 +5,7 @@ import (
 	"github.com/k0marov/socnet/core/client_errors"
 	"github.com/k0marov/socnet/core/core_errors"
 	"github.com/k0marov/socnet/core/core_values"
+	"github.com/k0marov/socnet/core/likeable"
 	"github.com/k0marov/socnet/features/comments/domain/entities"
 	"github.com/k0marov/socnet/features/comments/domain/store"
 	"github.com/k0marov/socnet/features/comments/domain/validators"
@@ -20,7 +21,7 @@ type (
 	CommentLikeToggler func(values.CommentId, core_values.UserId) error
 )
 
-func NewPostCommentsGetter(getComments store.CommentsGetter, getProfile profile_service.ProfileGetter, checkLiked store.LikeChecker) PostCommentsGetter {
+func NewPostCommentsGetter(getComments store.CommentsGetter, getProfile profile_service.ProfileGetter, getLikes likeable.LikesCountGetter, checkLiked likeable.LikeChecker) PostCommentsGetter {
 	return func(post post_values.PostId, caller core_values.UserId) ([]entities.ContextedComment, error) {
 		models, err := getComments(post)
 		if err != nil {
@@ -32,6 +33,10 @@ func NewPostCommentsGetter(getComments store.CommentsGetter, getProfile profile_
 			if err != nil {
 				return []entities.ContextedComment{}, fmt.Errorf("while getting comment's author profile: %w", err)
 			}
+			likes, err := getLikes(model.Id)
+			if err != nil {
+				return []entities.ContextedComment{}, fmt.Errorf("while getting likes count of comment: %w", err)
+			}
 			isLiked, err := checkLiked(model.Id, caller)
 			if err != nil {
 				return []entities.ContextedComment{}, fmt.Errorf("while checking if comment is liked: %w", err)
@@ -41,7 +46,7 @@ func NewPostCommentsGetter(getComments store.CommentsGetter, getProfile profile_
 				Author:    author,
 				Text:      model.Text,
 				CreatedAt: model.CreatedAt,
-				Likes:     model.Likes,
+				Likes:     likes,
 
 				IsLiked: isLiked,
 				IsMine:  author.Id == caller,
@@ -82,7 +87,7 @@ func NewCommentCreator(validate validators.CommentValidator, getProfile profile_
 	}
 }
 
-func NewCommentLikeToggler(getAuthor store.AuthorGetter, checkLiked store.LikeChecker, like store.Liker, unlike store.Unliker) CommentLikeToggler {
+func NewCommentLikeToggler(getAuthor store.AuthorGetter, toggleLike likeable.LikeToggler) CommentLikeToggler {
 	return func(comment values.CommentId, caller core_values.UserId) error {
 		author, err := getAuthor(comment)
 		if err == core_errors.ErrNotFound {
@@ -91,23 +96,9 @@ func NewCommentLikeToggler(getAuthor store.AuthorGetter, checkLiked store.LikeCh
 		if err != nil {
 			return fmt.Errorf("while checking comment author: %w", err)
 		}
-		if author == caller {
-			return client_errors.LikingYourself
-		}
-		isLiked, err := checkLiked(comment, caller)
+		err = toggleLike(comment, author, caller)
 		if err != nil {
-			return fmt.Errorf("while checking if comment is liked: %w", err)
-		}
-		if isLiked {
-			err = unlike(comment, caller)
-			if err != nil {
-				return fmt.Errorf("while unliking a comment: %w", err)
-			}
-		} else {
-			err = like(comment, caller)
-			if err != nil {
-				return fmt.Errorf("while liking a comment: %w", err)
-			}
+			return err
 		}
 		return nil
 	}

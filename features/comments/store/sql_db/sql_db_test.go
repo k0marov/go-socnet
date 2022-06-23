@@ -21,18 +21,6 @@ func TestSqlDB_ErrorHandling(t *testing.T) {
 	sqlDB, err := sql_db.NewSqlDB(db)
 	AssertNoError(t, err)
 	db.Close() // this will make all calls to db throw
-	t.Run("IsLiked", func(t *testing.T) {
-		_, err := sqlDB.IsLiked(RandomString(), RandomString())
-		AssertSomeError(t, err)
-	})
-	t.Run("Like", func(t *testing.T) {
-		err := sqlDB.Like(RandomString(), RandomString())
-		AssertSomeError(t, err)
-	})
-	t.Run("Unlike", func(t *testing.T) {
-		err := sqlDB.Unlike(RandomString(), RandomString())
-		AssertSomeError(t, err)
-	})
 	t.Run("GetComments", func(t *testing.T) {
 		_, err := sqlDB.GetComments(RandomString())
 		AssertSomeError(t, err)
@@ -63,7 +51,6 @@ func TestSqlDB(t *testing.T) {
 			Author:    author,
 			Text:      newComment.Text,
 			CreatedAt: createdAt,
-			Likes:     0,
 		}
 	}
 	getComments := func(t testing.TB, db *sql_db.SqlDB, post post_values.PostId) []models.CommentModel {
@@ -124,78 +111,5 @@ func TestSqlDB(t *testing.T) {
 		// getting author of non-existing comment throws ErrNotFound
 		_, err = sqlDB.GetAuthor("9999")
 		AssertError(t, err, core_errors.ErrNotFound)
-	})
-	t.Run("liking comments", func(t *testing.T) {
-		assertLikedValue := func(t testing.TB, db *sql_db.SqlDB, comment values.CommentId, liker core_values.UserId, value bool) {
-			t.Helper()
-			isLiked, err := db.IsLiked(comment, liker)
-			AssertNoError(t, err)
-			Assert(t, isLiked, value, "isLiked value")
-		}
-		assertNotLiked := func(t testing.TB, db *sql_db.SqlDB, comment values.CommentId, liker core_values.UserId) {
-			t.Helper()
-			assertLikedValue(t, db, comment, liker, false)
-		}
-		assertLiked := func(t testing.TB, db *sql_db.SqlDB, comment values.CommentId, liker core_values.UserId) {
-			t.Helper()
-			assertLikedValue(t, db, comment, liker, true)
-		}
-		unlike := func(t testing.TB, db *sql_db.SqlDB, comment values.CommentId, unliker core_values.UserId) {
-			t.Helper()
-			err := db.Unlike(comment, unliker)
-			AssertNoError(t, err)
-		}
-		like := func(t testing.TB, db *sql_db.SqlDB, comment values.CommentId, liker core_values.UserId) {
-			t.Helper()
-			err := db.Like(comment, liker)
-			AssertNoError(t, err)
-		}
-
-		db := OpenSqliteDB(t)
-		sqlDB, err := sql_db.NewSqlDB(db)
-		AssertNoError(t, err)
-		profilesDb, _ := profiles_db.NewSqlDB(db)
-		postsDb, _ := posts_db.NewSqlDB(db)
-
-		// create an author profile
-		author := RandomNewProfile()
-		profilesDb.CreateProfile(author)
-
-		// create a post
-		postId, _ := postsDb.CreatePost(post_models.PostToCreate{
-			Author:    author.Id,
-			Text:      RandomString(),
-			CreatedAt: time.Now(),
-		})
-
-		// create a comment
-		commenter := RandomNewProfile()
-		profilesDb.CreateProfile(commenter)
-		comment := createComment(t, sqlDB, postId, commenter.Id, 2020)
-
-		// create another profile
-		liker := RandomNewProfile()
-		profilesDb.CreateProfile(liker)
-		// assert the comment is not liked from this profile
-		assertNotLiked(t, sqlDB, comment.Id, liker.Id)
-		// like it
-		like(t, sqlDB, comment.Id, liker.Id)
-		// assert it was liked
-		assertLiked(t, sqlDB, comment.Id, liker.Id)
-		// unlike it
-		unlike(t, sqlDB, comment.Id, liker.Id)
-		// assert it is not liked
-		assertNotLiked(t, sqlDB, comment.Id, liker.Id)
-
-		// liking a comment from many profiles
-		const count = 100
-		for i := 0; i < count; i++ {
-			profile := RandomNewProfile()
-			profilesDb.CreateProfile(profile)
-			like(t, sqlDB, comment.Id, profile.Id)
-			comments := getComments(t, sqlDB, postId)
-			AssertFatal(t, len(comments), 1, "number of comments")
-			Assert(t, comments[0].Likes, i+1, "number of likes")
-		}
 	})
 }
