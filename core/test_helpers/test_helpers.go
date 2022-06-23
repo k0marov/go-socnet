@@ -134,7 +134,7 @@ func RandomContextedProfile() profile_entities.ContextedProfile {
 }
 
 func RandomId() string {
-	return strconv.Itoa(rand.Intn(10000))
+	return strconv.Itoa(rand.Intn(100000))
 }
 
 func RandomNewProfile() values.NewProfile {

@@ -93,3 +93,19 @@ func (db *SqlDB) GetLikesCount(target string) (int, error) {
 	}
 	return likes, nil
 }
+
+func (db *SqlDB) GetUserLikesCount(user core_values.UserId) (int, error) {
+	row := db.sql.QueryRow(`
+		SELECT COUNT(*) FROM `+db.verifiedLikeableTable+` WHERE liker_id = ?
+    `, user)
+	var userLikes int
+	err := row.Scan(&userLikes)
+	if err != nil {
+		return 0, fmt.Errorf("while scanning the user likes count: %w", err)
+	}
+	return userLikes, nil
+}
+
+func (db *SqlDB) GetUserLikes(user core_values.UserId) ([]string, error) {
+	panic("unimplemented")
+}
