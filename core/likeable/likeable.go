@@ -8,10 +8,16 @@ import (
 	"github.com/k0marov/socnet/core/likeable/table_name"
 )
 
+type (
+	LikeToggler      = service.LikeToggler
+	LikesCountGetter = service.LikesCountGetter
+	LikeChecker      = service.LikeChecker
+)
+
 type likeable struct {
-	ToggleLike    service.LikeToggler
-	GetLikesCount service.LikesCountGetter
-	IsLiked       service.LikeChecker
+	ToggleLike    LikeToggler
+	GetLikesCount LikesCountGetter
+	IsLiked       LikeChecker
 }
 
 func NewLikeable(db *sql.DB, targetTableName string) (likeable, error) {
