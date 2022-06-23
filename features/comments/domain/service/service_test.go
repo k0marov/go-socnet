@@ -10,6 +10,7 @@ import (
 	"github.com/k0marov/socnet/features/comments/domain/values"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
 	profile_entities "github.com/k0marov/socnet/features/profiles/domain/entities"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -122,10 +123,9 @@ func TestCommentLikeToggler(t *testing.T) {
 
 func TestPostCommentsGetter(t *testing.T) {
 	post := RandomString()
-	comments := []entities.Comment{RandomComment()}
-	author := RandomContextedProfile()
 	caller := RandomId()
-	isLiked := RandomBool()
+	comments := []entities.Comment{RandomComment()}
+	contextedComments := []entities.ContextedComment{RandomContextedComment()}
 
 	commentsGetter := func(postId post_values.PostId) ([]entities.Comment, error) {
 		if postId == post {
@@ -137,66 +137,23 @@ func TestPostCommentsGetter(t *testing.T) {
 		commentsGetter := func(post_values.PostId) ([]entities.Comment, error) {
 			return []entities.Comment{}, RandomError()
 		}
-		_, err := service.NewPostCommentsGetter(commentsGetter, nil, nil)(post, caller)
+		_, err := service.NewPostCommentsGetter(commentsGetter, nil)(post, caller)
 		AssertSomeError(t, err)
 	})
-	profileGetter := func(profileId core_values.UserId, callerId core_values.UserId) (profile_entities.ContextedProfile, error) {
-		if profileId == comments[0].Author && callerId == caller {
-			return author, nil
+	contextAdder := func(commentList []entities.Comment, callerId core_values.UserId) ([]entities.ContextedComment, error) {
+		if reflect.DeepEqual(commentList, comments) && callerId == caller {
+			return contextedComments, nil
 		}
 		panic("unexpected args")
 	}
-	t.Run("error case - getting profile throws", func(t *testing.T) {
-		profileGetter := func(profileId, callerId core_values.UserId) (profile_entities.ContextedProfile, error) {
-			return profile_entities.ContextedProfile{}, RandomError()
+	t.Run("error case - context adder returns some error", func(t *testing.T) {
+		contextAdder := func([]entities.Comment, core_values.UserId) ([]entities.ContextedComment, error) {
+			return nil, RandomError()
 		}
-		_, err := service.NewPostCommentsGetter(commentsGetter, profileGetter, nil)(post, caller)
+		_, err := service.NewPostCommentsGetter(commentsGetter, contextAdder)(post, caller)
 		AssertSomeError(t, err)
 	})
-	t.Run("error case - like checker throws", func(t *testing.T) {
-		likeChecker := func(commentId values.CommentId, callerId core_values.UserId) (bool, error) {
-			return false, RandomError()
-		}
-		_, err := service.NewPostCommentsGetter(commentsGetter, profileGetter, likeChecker)(post, caller)
-		AssertSomeError(t, err)
-	})
-	t.Run("happy cases", func(t *testing.T) {
-		addContext := func(comment entities.Comment, author profile_entities.ContextedProfile, isLiked, isMine bool) entities.ContextedComment {
-			return entities.ContextedComment{
-				Id:        comment.Id,
-				Author:    author,
-				Text:      comment.Text,
-				CreatedAt: comment.CreatedAt,
-				Likes:     comment.Likes,
-				IsLiked:   isLiked,
-				IsMine:    isMine,
-			}
-		}
-		t.Run("isMine = false", func(t *testing.T) {
-			likeChecker := func(commentId values.CommentId, callerId core_values.UserId) (bool, error) {
-				if commentId == comments[0].Id && callerId == caller {
-					return isLiked, nil
-				}
-				panic("unexpected args")
-			}
-			sut := service.NewPostCommentsGetter(commentsGetter, profileGetter, likeChecker)
-			wantProfiles := []entities.ContextedComment{addContext(comments[0], author, isLiked, false)}
-			gotProfiles, err := sut(post, caller)
-			AssertNoError(t, err)
-			Assert(t, gotProfiles, wantProfiles, "the returned profiles")
-		})
-		t.Run("isMine = true", func(t *testing.T) {
-			profileGetter := func(target, caller core_values.UserId) (profile_entities.ContextedProfile, error) {
-				return author, nil
-			}
-			likeChecker := func(commentId values.CommentId, callerId core_values.UserId) (bool, error) {
-				return isLiked, nil
-			}
-			sut := service.NewPostCommentsGetter(commentsGetter, profileGetter, likeChecker)
-			wantProfiles := []entities.ContextedComment{addContext(comments[0], author, isLiked, true)}
-			gotProfiles, err := sut(post, author.Id)
-			AssertNoError(t, err)
-			Assert(t, gotProfiles, wantProfiles, "the returned profiles")
-		})
-	})
+	gotComments, err := service.NewPostCommentsGetter(commentsGetter, contextAdder)(post, caller)
+	AssertNoError(t, err)
+	Assert(t, gotComments, contextedComments, "returned comments")
 }

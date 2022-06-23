@@ -6,6 +6,7 @@ import (
 	"github.com/k0marov/socnet/core/core_errors"
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/core/likeable"
+	"github.com/k0marov/socnet/features/comments/domain/contexters"
 	"github.com/k0marov/socnet/features/comments/domain/entities"
 	"github.com/k0marov/socnet/features/comments/domain/store"
 	"github.com/k0marov/socnet/features/comments/domain/validators"
@@ -21,33 +22,15 @@ type (
 	CommentLikeToggler func(values.CommentId, core_values.UserId) error
 )
 
-func NewPostCommentsGetter(getComments store.CommentsGetter, getProfile profile_service.ProfileGetter, checkLiked likeable.LikeChecker) PostCommentsGetter {
+func NewPostCommentsGetter(getComments store.CommentsGetter, addContexts contexters.CommentListContextAdder) PostCommentsGetter {
 	return func(post post_values.PostId, caller core_values.UserId) ([]entities.ContextedComment, error) {
 		comments, err := getComments(post)
 		if err != nil {
 			return []entities.ContextedComment{}, fmt.Errorf("while getting post contextedComments from store: %w", err)
 		}
-		var contextedComments []entities.ContextedComment
-		for _, comment := range comments {
-			author, err := getProfile(comment.Author, caller)
-			if err != nil {
-				return []entities.ContextedComment{}, fmt.Errorf("while getting contextedComment's author profile: %w", err)
-			}
-			isLiked, err := checkLiked(comment.Id, caller)
-			if err != nil {
-				return []entities.ContextedComment{}, fmt.Errorf("while checking if contextedComment is liked: %w", err)
-			}
-			contextedComment := entities.ContextedComment{
-				Id:        comment.Id,
-				Author:    author,
-				Text:      comment.Text,
-				CreatedAt: comment.CreatedAt,
-				Likes:     comment.Likes,
-
-				IsLiked: isLiked,
-				IsMine:  author.Id == caller,
-			}
-			contextedComments = append(contextedComments, contextedComment)
+		contextedComments, err := addContexts(comments, caller)
+		if err != nil {
+			return []entities.ContextedComment{}, fmt.Errorf("while adding contexts to comments: %w", err)
 		}
 		return contextedComments, nil
 	}
