@@ -11,11 +11,11 @@ type TableName struct {
 	isValid bool
 }
 
-func NewTableName(name string) (TableName, error) {
+func NewTableName(name string) TableName {
 	if name != "" && len(strings.FieldsFunc(name, unicode.IsLetter)) == 0 {
-		return TableName{name, true}, nil
+		return TableName{name, true}
 	} else {
-		return TableName{"", false}, fmt.Errorf("the provided table name is not valid: %s", name)
+		return TableName{"", false}
 	}
 }
 

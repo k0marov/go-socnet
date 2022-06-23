@@ -12,18 +12,13 @@ func TestTableName(t *testing.T) {
 		isValid   bool
 	}{
 		{"Profile", true},
-		{"'; DROP TABLE Profile", false},
+		{"'; DROP TABLE Profile; --", false},
 		{"", false},
 	}
 
 	for _, testCase := range cases {
 		t.Run(testCase.tableName, func(t *testing.T) {
-			tblName, err := table_name.NewTableName(testCase.tableName)
-			if testCase.isValid {
-				AssertNoError(t, err)
-			} else {
-				AssertSomeError(t, err)
-			}
+			tblName := table_name.NewTableName(testCase.tableName)
 			tblNameValue, err := tblName.Value()
 			if testCase.isValid {
 				AssertNoError(t, err)

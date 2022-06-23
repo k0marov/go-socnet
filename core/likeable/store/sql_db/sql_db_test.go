@@ -3,11 +3,14 @@ package sql_db_test
 import (
 	"database/sql"
 	"github.com/k0marov/socnet/core/likeable/store/sql_db"
+	"github.com/k0marov/socnet/core/likeable/table_name"
 	. "github.com/k0marov/socnet/core/test_helpers"
 	profiles_db "github.com/k0marov/socnet/features/profiles/store/sql_db"
 	_ "github.com/mattn/go-sqlite3"
 	"testing"
 )
+
+var targetTblName = table_name.NewTableName("Target")
 
 func TestSqlDB_ErrorHandling(t *testing.T) {
 	db := OpenSqliteDB(t)
@@ -72,22 +75,26 @@ func TestSqlDB(t *testing.T) {
 
 func setupSqlDB(t testing.TB, db *sql.DB) *sql_db.SqlDB {
 	t.Helper()
-	_, err := db.Exec(`
-		CREATE TABLE IF NOT EXISTS Target(
+	targetTable, err := targetTblName.Value()
+	AssertNoError(t, err)
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS ` + targetTable + `(
 		    id INTEGER PRIMARY KEY
 		)
     `)
 	AssertNoError(t, err)
-	sqlDB, err := sql_db.NewSqlDB(db, "Target")
+	sqlDB, err := sql_db.NewSqlDB(db, targetTblName)
 	AssertNoError(t, err)
 	return sqlDB
 }
 
 func createTargetEntity(t testing.TB, db *sql.DB) (id string) {
 	t.Helper()
+	targetTable, err := targetTblName.Value()
+	AssertNoError(t, err)
 	id = RandomId()
-	_, err := db.Exec(`
-		INSERT INTO Target(id) VALUES (?)
+	_, err = db.Exec(`
+		INSERT INTO `+targetTable+`(id) VALUES (?)
     `, id)
 	AssertNoError(t, err)
 	return
