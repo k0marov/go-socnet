@@ -5,9 +5,11 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/k0marov/socnet/core/image_decoder"
 	"github.com/k0marov/socnet/core/likeable"
+	likeable_contexters "github.com/k0marov/socnet/core/likeable/contexters"
 	"github.com/k0marov/socnet/core/static_store"
 	"github.com/k0marov/socnet/features/posts/delivery/http/handlers"
 	"github.com/k0marov/socnet/features/posts/delivery/http/router"
+	"github.com/k0marov/socnet/features/posts/domain/contexters"
 	"github.com/k0marov/socnet/features/posts/domain/service"
 	"github.com/k0marov/socnet/features/posts/domain/validators"
 	"github.com/k0marov/socnet/features/posts/store"
@@ -43,9 +45,12 @@ func NewPostsRouterImpl(db *sql.DB, getContextedProfile profile_service.ProfileG
 	// service
 	validatePost := validators.NewPostValidator(image_decoder.ImageDecoderImpl)
 
+	// contexters
+	addContext := contexters.NewPostListContextAdder(contexters.NewPostContextAdder(getContextedProfile, likeable_contexters.NewLikeableContextGetter(likeablePost.IsLiked)))
+
 	createPost := service.NewPostCreator(validatePost, storeCreatePost)
 	deletePost := service.NewPostDeleter(storeGetAuthor, storeDeletePost)
-	getPosts := service.NewPostsGetter(getContextedProfile, storeGetPosts, likeablePost.IsLiked)
+	getPosts := service.NewPostsGetter(storeGetPosts, addContext)
 	toggleLike := service.NewPostLikeToggler(storeGetAuthor, likeablePost.ToggleLike)
 
 	// handlers
