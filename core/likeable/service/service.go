@@ -16,7 +16,7 @@ type (
 )
 
 type (
-	LikeToggler          func(targetId string, owner, liker core_values.UserId) error
+	LikeToggler          func(target string, owner, liker core_values.UserId) error
 	LikesCountGetter     func(targetId string) (int, error)
 	UserLikesCountGetter func(core_values.UserId) (int, error)
 	UserLikesGetter      func(core_values.UserId) ([]string, error)

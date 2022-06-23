@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/core/helpers"
-	"github.com/k0marov/socnet/core/likeable"
+	likeable_contexters "github.com/k0marov/socnet/core/likeable/contexters"
 	"github.com/k0marov/socnet/features/comments/domain/entities"
 	profile_service "github.com/k0marov/socnet/features/profiles/domain/service"
 )
@@ -12,22 +12,20 @@ import (
 type CommentContextAdder func(comment entities.Comment, caller core_values.UserId) (entities.ContextedComment, error)
 type CommentListContextAdder func(comments []entities.Comment, caller core_values.UserId) ([]entities.ContextedComment, error)
 
-func NewCommentContextAdder(getProfile profile_service.ProfileGetter, checkLiked likeable.LikeChecker) CommentContextAdder {
+func NewCommentContextAdder(getProfile profile_service.ProfileGetter, getContext likeable_contexters.LikeableContextGetter) CommentContextAdder {
 	return func(comment entities.Comment, caller core_values.UserId) (entities.ContextedComment, error) {
 		author, err := getProfile(comment.AuthorId, caller)
 		if err != nil {
 			return entities.ContextedComment{}, fmt.Errorf("while getting author of comment: %w", err)
 		}
-		isLiked, err := checkLiked(comment.Id, caller)
+		context, err := getContext(comment.Id, author.Id, caller)
 		if err != nil {
-			return entities.ContextedComment{}, fmt.Errorf("while checking if comment is liked: %w", err)
+			return entities.ContextedComment{}, fmt.Errorf("while getting context data of a comment: %w", err)
 		}
-		isMine := author.Id == caller
 		return entities.ContextedComment{
-			Comment: comment,
-			Author:  author,
-			IsLiked: isLiked,
-			IsMine:  isMine,
+			Comment:         comment,
+			Author:          author,
+			LikeableContext: context,
 		}, nil
 	}
 }

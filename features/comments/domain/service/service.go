@@ -6,6 +6,7 @@ import (
 	"github.com/k0marov/socnet/core/core_errors"
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/core/likeable"
+	likeable_contexters "github.com/k0marov/socnet/core/likeable/contexters"
 	"github.com/k0marov/socnet/features/comments/domain/contexters"
 	"github.com/k0marov/socnet/features/comments/domain/entities"
 	"github.com/k0marov/socnet/features/comments/domain/store"
@@ -62,9 +63,11 @@ func NewCommentCreator(validate validators.CommentValidator, getProfile profile_
 				CreatedAt: createdAt,
 				Likes:     0,
 			},
-			Author:  author,
-			IsLiked: false,
-			IsMine:  true,
+			LikeableContext: likeable_contexters.LikeableContext{
+				IsLiked: false,
+				IsMine:  true,
+			},
+			Author: author,
 		}
 		return comment, nil
 	}

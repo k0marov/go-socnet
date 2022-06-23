@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/k0marov/socnet/core/core_values"
+	likeable_contexters "github.com/k0marov/socnet/core/likeable/contexters"
 	"github.com/k0marov/socnet/core/ref"
 	comment_entities "github.com/k0marov/socnet/features/comments/domain/entities"
 	comment_values "github.com/k0marov/socnet/features/comments/domain/values"
@@ -175,6 +176,13 @@ func RandomNewPostData() post_values.NewPostData {
 	}
 }
 
+func RandomLikeableContext() likeable_contexters.LikeableContext {
+	return likeable_contexters.LikeableContext{
+		IsMine:  RandomBool(),
+		IsLiked: RandomBool(),
+	}
+}
+
 func RandomTime() time.Time {
 	return time.Date(2022, 6, 17, 16, 53, 42, 0, time.UTC)
 }
@@ -232,10 +240,9 @@ func RandomClientError() client_errors.ClientError {
 
 func RandomContextedComment() comment_entities.ContextedComment {
 	return comment_entities.ContextedComment{
-		Comment: RandomComment(),
-		Author:  RandomContextedProfile(),
-		IsLiked: RandomBool(),
-		IsMine:  RandomBool(),
+		Comment:         RandomComment(),
+		Author:          RandomContextedProfile(),
+		LikeableContext: RandomLikeableContext(),
 	}
 }
 func RandomContextedComments() []comment_entities.ContextedComment {

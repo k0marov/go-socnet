@@ -2,6 +2,7 @@ package entities
 
 import (
 	"github.com/k0marov/socnet/core/core_values"
+	"github.com/k0marov/socnet/core/likeable/contexters"
 	"github.com/k0marov/socnet/features/comments/domain/values"
 	profile_entities "github.com/k0marov/socnet/features/profiles/domain/entities"
 	"time"
@@ -15,8 +16,15 @@ type Comment struct {
 	Likes     int
 }
 
+func (c Comment) GetId() string {
+	return c.Id
+}
+func (c Comment) GetOwner() core_values.UserId {
+	return c.AuthorId
+}
+
 type ContextedComment struct {
 	Comment
-	Author          profile_entities.ContextedProfile
-	IsLiked, IsMine bool
+	contexters.LikeableContext
+	Author profile_entities.ContextedProfile
 }

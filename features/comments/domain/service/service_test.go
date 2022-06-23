@@ -4,6 +4,7 @@ import (
 	"github.com/k0marov/socnet/core/client_errors"
 	"github.com/k0marov/socnet/core/core_errors"
 	"github.com/k0marov/socnet/core/core_values"
+	likeable_contexters "github.com/k0marov/socnet/core/likeable/contexters"
 	. "github.com/k0marov/socnet/core/test_helpers"
 	"github.com/k0marov/socnet/features/comments/domain/entities"
 	"github.com/k0marov/socnet/features/comments/domain/service"
@@ -27,9 +28,11 @@ func TestCommentCreator(t *testing.T) {
 			CreatedAt: time.Now(),
 			Likes:     0,
 		},
-		Author:  author,
-		IsLiked: false,
-		IsMine:  true,
+		LikeableContext: likeable_contexters.LikeableContext{
+			IsLiked: false,
+			IsMine:  true,
+		},
+		Author: author,
 	}
 	validator := func(gotComment values.NewCommentValue) (client_errors.ClientError, bool) {
 		if gotComment == newComment {
