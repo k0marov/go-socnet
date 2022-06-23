@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/k0marov/socnet/core/likeable/table_name"
-	"github.com/k0marov/socnet/features/profiles/store/models"
+	"github.com/k0marov/socnet/features/profiles/domain/models"
 
 	"github.com/k0marov/socnet/features/profiles/store"
 

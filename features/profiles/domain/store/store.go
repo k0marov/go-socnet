@@ -2,8 +2,8 @@ package store
 
 import (
 	"github.com/k0marov/socnet/features/profiles/domain/entities"
+	"github.com/k0marov/socnet/features/profiles/domain/models"
 	"github.com/k0marov/socnet/features/profiles/domain/values"
-	"github.com/k0marov/socnet/features/profiles/store/models"
 
 	"github.com/k0marov/socnet/core/core_values"
 )

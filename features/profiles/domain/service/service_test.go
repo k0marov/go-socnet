@@ -3,7 +3,7 @@ package service_test
 import (
 	"fmt"
 	"github.com/k0marov/socnet/core/static_store"
-	"github.com/k0marov/socnet/features/profiles/store/models"
+	"github.com/k0marov/socnet/features/profiles/domain/models"
 	"testing"
 
 	"github.com/k0marov/socnet/features/profiles/domain/entities"
@@ -90,12 +90,9 @@ func TestProfileCreator(t *testing.T) {
 			AvatarPath: service.DefaultAvatarPath,
 		}
 		wantCreatedProfile := entities.Profile{
-			Id:         user.Id,
-			Username:   user.Username,
-			About:      service.DefaultAbout,
-			AvatarPath: service.DefaultAvatarPath,
-			Follows:    0,
-			Followers:  0,
+			ProfileModel: testNewProfile,
+			Follows:      0,
+			Followers:    0,
 		}
 		storeNew := func(profile models.ProfileModel) error {
 			if profile == testNewProfile {

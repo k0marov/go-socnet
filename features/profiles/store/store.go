@@ -62,12 +62,9 @@ func NewStoreProfileGetter(getDBProfile DBProfileGetter, getFollowers likeable.L
 			return entities.Profile{}, err
 		}
 		profile := entities.Profile{
-			Id:         profileModel.Id,
-			Username:   profileModel.Username,
-			About:      profileModel.About,
-			AvatarPath: profileModel.AvatarPath,
-			Follows:    follows,
-			Followers:  followers,
+			ProfileModel: profileModel,
+			Follows:      follows,
+			Followers:    followers,
 		}
 		return profile, nil
 	}

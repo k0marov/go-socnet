@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"github.com/k0marov/socnet/core/static_store"
+	"github.com/k0marov/socnet/features/profiles/domain/models"
 	"io"
 	"log"
 	"mime/multipart"
@@ -81,20 +82,20 @@ func TestProfiles(t *testing.T) {
 
 		// assert that users are now accessible from GET handler
 		profile1 := entities.Profile{
-			Id:         user1.Id,
-			Username:   user1.Username,
-			About:      "",
-			AvatarPath: "",
-			Follows:    0,
-			Followers:  0,
+			ProfileModel: models.ProfileModel{
+				Id:       user1.Id,
+				Username: user1.Username,
+			},
+			Follows:   0,
+			Followers: 0,
 		}
 		profile2 := entities.Profile{
-			Id:         user2.Id,
-			Username:   user2.Username,
-			About:      "",
-			AvatarPath: "",
-			Follows:    0,
-			Followers:  0,
+			ProfileModel: models.ProfileModel{
+				Id:       user2.Id,
+				Username: user2.Username,
+			},
+			Follows:   0,
+			Followers: 0,
 		}
 		checkProfileFromServer(t, profile1)
 		checkProfileFromServer(t, profile2)
@@ -114,12 +115,13 @@ func TestProfiles(t *testing.T) {
 
 		// assert that it was updated
 		wantUpdatedProfile1 := entities.Profile{
-			Id:         user1.Id,
-			Username:   user1.Username,
-			About:      "",
-			AvatarPath: wantAvatarPath,
-			Follows:    0,
-			Followers:  0,
+			ProfileModel: models.ProfileModel{
+				Id:         user1.Id,
+				Username:   user1.Username,
+				AvatarPath: wantAvatarPath,
+			},
+			Follows:   0,
+			Followers: 0,
 		}
 		checkProfileFromServer(t, wantUpdatedProfile1)
 
@@ -135,12 +137,13 @@ func TestProfiles(t *testing.T) {
 
 		r.ServeHTTP(response, request)
 		wantUpdatedProfile2 := entities.Profile{
-			Id:         user2.Id,
-			Username:   user2.Username,
-			About:      upd.About,
-			AvatarPath: "",
-			Follows:    0,
-			Followers:  0,
+			ProfileModel: models.ProfileModel{
+				Id:       user2.Id,
+				Username: user2.Username,
+				About:    upd.About,
+			},
+			Follows:   0,
+			Followers: 0,
 		}
 		AssertJSONData(t, response, wantUpdatedProfile2)
 
@@ -182,8 +185,10 @@ func TestProfiles(t *testing.T) {
 		// assert it was followed
 		assertIsFollowed(t, user1.Id, user2, true)
 		wantProfile1 := entities.Profile{
-			Id:        user1.Id,
-			Username:  user1.Username,
+			ProfileModel: models.ProfileModel{
+				Id:       user1.Id,
+				Username: user1.Username,
+			},
 			Follows:   0,
 			Followers: 1,
 		}
@@ -192,8 +197,10 @@ func TestProfiles(t *testing.T) {
 		wantFollows := []core_values.UserId{wantProfile1.Id}
 		checkFollows(t, user2.Id, wantFollows)
 		wantProfile2 := entities.Profile{
-			Id:        user2.Id,
-			Username:  user2.Username,
+			ProfileModel: models.ProfileModel{
+				Id:       user2.Id,
+				Username: user2.Username,
+			},
 			Follows:   1,
 			Followers: 0,
 		}

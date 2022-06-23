@@ -3,7 +3,7 @@ package store
 import (
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/core/ref"
-	"github.com/k0marov/socnet/features/profiles/store/models"
+	"github.com/k0marov/socnet/features/profiles/domain/models"
 )
 
 type (

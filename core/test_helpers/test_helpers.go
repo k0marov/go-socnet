@@ -12,7 +12,7 @@ import (
 	comment_models "github.com/k0marov/socnet/features/comments/store/models"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
 	post_models "github.com/k0marov/socnet/features/posts/store/models"
-	profile_models "github.com/k0marov/socnet/features/profiles/store/models"
+	profile_models "github.com/k0marov/socnet/features/profiles/domain/models"
 	"math"
 	random "math/rand"
 	"net/http"
@@ -117,12 +117,9 @@ func RandomAuthUser() auth.User {
 
 func RandomProfile() profile_entities.Profile {
 	return profile_entities.Profile{
-		Id:         RandomId(),
-		Username:   RandomString(),
-		About:      RandomString(),
-		AvatarPath: RandomString(),
-		Follows:    RandomInt(),
-		Followers:  RandomInt(),
+		ProfileModel: RandomProfileModel(),
+		Follows:      RandomInt(),
+		Followers:    RandomInt(),
 	}
 }
 

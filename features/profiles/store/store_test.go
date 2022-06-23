@@ -3,7 +3,7 @@ package store_test
 import (
 	"fmt"
 	"github.com/k0marov/socnet/core/core_values"
-	"github.com/k0marov/socnet/features/profiles/store/models"
+	"github.com/k0marov/socnet/features/profiles/domain/models"
 	"reflect"
 	"testing"
 
@@ -20,10 +20,12 @@ func TestStoreProfileUpdater(t *testing.T) {
 	testUpdData := values.ProfileUpdateData{About: RandomString()}
 	testDBUpdData := store.DBUpdateData{About: testUpdData.About}
 	wantUpdatedProfile := entities.Profile{
-		Id:         testDetailedProfile.Id,
-		Username:   testDetailedProfile.Username,
-		AvatarPath: testDetailedProfile.AvatarPath,
-		About:      testUpdData.About,
+		ProfileModel: models.ProfileModel{
+			Id:         testDetailedProfile.Id,
+			Username:   testDetailedProfile.Username,
+			AvatarPath: testDetailedProfile.AvatarPath,
+			About:      testUpdData.About,
+		},
 	}
 	t.Run("happy case", func(t *testing.T) {
 		updaterCalled := false
@@ -176,12 +178,9 @@ func TestStoreProfileGetter(t *testing.T) {
 	gotProfile, err := sut(profileId)
 	AssertNoError(t, err)
 	wantProfile := entities.Profile{
-		Id:         model.Id,
-		Username:   model.Username,
-		About:      model.About,
-		AvatarPath: model.AvatarPath,
-		Follows:    follows,
-		Followers:  followers,
+		ProfileModel: model,
+		Follows:      follows,
+		Followers:    followers,
 	}
 	Assert(t, gotProfile, wantProfile, "returned profile entity")
 }

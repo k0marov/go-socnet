@@ -18,6 +18,7 @@ import (
 	post_storage "github.com/k0marov/socnet/features/posts/store/file_storage"
 	"github.com/k0marov/socnet/features/profiles"
 	profile_entities "github.com/k0marov/socnet/features/profiles/domain/entities"
+	profile_models "github.com/k0marov/socnet/features/profiles/domain/models"
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"mime/multipart"
@@ -110,8 +111,10 @@ func TestPosts(t *testing.T) {
 	registerProfile := func(user auth.User) profile_entities.Profile {
 		fakeRegisterProfile(user)
 		return profile_entities.Profile{
-			Id:       user.Id,
-			Username: user.Username,
+			ProfileModel: profile_models.ProfileModel{
+				Id:       user.Id,
+				Username: user.Username,
+			},
 		}
 	}
 

@@ -5,7 +5,7 @@ import (
 	"github.com/k0marov/socnet/core/likeable"
 	"github.com/k0marov/socnet/core/static_store"
 	"github.com/k0marov/socnet/features/profiles/domain/contexters"
-	"github.com/k0marov/socnet/features/profiles/store/models"
+	"github.com/k0marov/socnet/features/profiles/domain/models"
 
 	"github.com/k0marov/socnet/features/profiles/domain/entities"
 	"github.com/k0marov/socnet/features/profiles/domain/store"
@@ -84,12 +84,9 @@ func NewProfileCreator(storeProfileCreator store.StoreProfileCreator) ProfileCre
 			return entities.Profile{}, fmt.Errorf("got an error while creating a profile in a service: %w", err)
 		}
 		createdProfile := entities.Profile{
-			Id:         newProfile.Id,
-			Username:   newProfile.Username,
-			About:      newProfile.About,
-			AvatarPath: newProfile.AvatarPath,
-			Follows:    0,
-			Followers:  0,
+			ProfileModel: newProfile,
+			Follows:      0,
+			Followers:    0,
 		}
 		return createdProfile, nil
 	}
