@@ -9,15 +9,19 @@ import (
 )
 
 type (
-	LikeToggler      = service.LikeToggler
-	LikesCountGetter = service.LikesCountGetter
-	LikeChecker      = service.LikeChecker
+	LikeToggler          = service.LikeToggler
+	LikeChecker          = service.LikeChecker
+	LikesCountGetter     = service.LikesCountGetter
+	UserLikesCountGetter = service.UserLikesCountGetter
+	UserLikesGetter      = service.UserLikesGetter
 )
 
 type likeable struct {
-	ToggleLike    LikeToggler
-	GetLikesCount LikesCountGetter
-	IsLiked       LikeChecker
+	ToggleLike        LikeToggler
+	IsLiked           LikeChecker
+	GetLikesCount     LikesCountGetter
+	GetUserLikesCount UserLikesCountGetter
+	GetUserLikes      UserLikesGetter
 }
 
 func NewLikeable(db *sql.DB, targetTableName table_name.TableName) (likeable, error) {
@@ -28,11 +32,15 @@ func NewLikeable(db *sql.DB, targetTableName table_name.TableName) (likeable, er
 	}
 	// service
 	toggleLike := service.NewLikeToggler(store.IsLiked, store.Like, store.Unlike)
-	getLikesCount := service.NewLikesCountGetter(store.GetLikesCount)
 	isLiked := service.NewLikeChecker(store.IsLiked)
+	getLikesCount := service.NewLikesCountGetter(store.GetLikesCount)
+	getUserLikesCount := service.NewUserLikesCountGetter(store.GetUserLikesCount)
+	getUserLikes := service.NewUserLikesGetter(store.GetUserLikes)
 	return likeable{
-		ToggleLike:    toggleLike,
-		GetLikesCount: getLikesCount,
-		IsLiked:       isLiked,
+		ToggleLike:        toggleLike,
+		IsLiked:           isLiked,
+		GetLikesCount:     getLikesCount,
+		GetUserLikesCount: getUserLikesCount,
+		GetUserLikes:      getUserLikes,
 	}, nil
 }
