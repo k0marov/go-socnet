@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/go-chi/chi/v5"
 	"github.com/k0marov/socnet/core/image_decoder"
+	"github.com/k0marov/socnet/core/likeable"
 	"github.com/k0marov/socnet/core/static_store"
 	"github.com/k0marov/socnet/features/posts/delivery/http/handlers"
 	"github.com/k0marov/socnet/features/posts/delivery/http/router"
@@ -23,6 +24,12 @@ func NewPostsRouterImpl(db *sql.DB, getContextedProfile profile_service.ProfileG
 		log.Fatalf("error while opening sql db for posts: %v", err)
 	}
 
+	// likeable
+	likeablePost, err := likeable.NewLikeable(db, sqlDB.TableName)
+	if err != nil {
+		log.Fatalf("error while creating a Post likeable: %v", err)
+	}
+
 	// file storage
 	storeImages := file_storage.NewPostImageFilesCreator(static_store.NewStaticFileCreatorImpl())
 	deleteFiles := file_storage.NewPostFilesDeleter(static_store.NewStaticDirDeleterImpl())
@@ -32,17 +39,14 @@ func NewPostsRouterImpl(db *sql.DB, getContextedProfile profile_service.ProfileG
 	storeGetAuthor := store.NewStoreAuthorGetter(sqlDB.GetAuthor)
 	storeDeletePost := store.NewStorePostDeleter(sqlDB.DeletePost, deleteFiles)
 	storeGetPosts := store.NewStorePostsGetter(sqlDB.GetPosts)
-	storeCheckLiked := store.NewStoreLikeChecker(sqlDB.IsLiked)
-	storeLike := store.NewStoreLiker(sqlDB.LikePost)
-	storeUnlike := store.NewStoreUnliker(sqlDB.UnlikePost)
 
 	// service
 	validatePost := validators.NewPostValidator(image_decoder.ImageDecoderImpl)
 
 	createPost := service.NewPostCreator(validatePost, storeCreatePost)
 	deletePost := service.NewPostDeleter(storeGetAuthor, storeDeletePost)
-	getPosts := service.NewPostsGetter(getContextedProfile, storeGetPosts, storeCheckLiked)
-	toggleLike := service.NewPostLikeToggler(storeGetAuthor, storeCheckLiked, storeLike, storeUnlike)
+	getPosts := service.NewPostsGetter(getContextedProfile, storeGetPosts, likeablePost.GetLikesCount, likeablePost.IsLiked)
+	toggleLike := service.NewPostLikeToggler(storeGetAuthor, likeablePost.ToggleLike)
 
 	// handlers
 	createPostHandler := handlers.NewCreateHandler(createPost)
