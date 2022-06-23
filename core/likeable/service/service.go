@@ -7,35 +7,39 @@ import (
 )
 
 type (
-	StoreLikeChecker      func(id string, fromUser core_values.UserId) (bool, error)
-	StoreLike             func(id string, fromUser core_values.UserId) error
-	StoreUnlike           func(id string, fromUser core_values.UserId) error
-	StoreLikesCountGetter func(id string) (int, error)
+	StoreLikeChecker          func(targetId string, fromUser core_values.UserId) (bool, error)
+	StoreLike                 func(targetId string, fromUser core_values.UserId) error
+	StoreUnlike               func(targetId string, fromUser core_values.UserId) error
+	StoreLikesCountGetter     func(targetId string) (int, error)
+	StoreUserLikesCountGetter func(id core_values.UserId) (int, error)
+	StoreUserLikesGetter      func(id core_values.UserId) ([]string, error)
 )
 
 type (
-	LikeToggler      func(id string, owner, liker core_values.UserId) error
-	LikesCountGetter func(id string) (int, error)
-	LikeChecker      func(id string, fromUser core_values.UserId) (bool, error)
+	LikeToggler          func(targetId string, owner, liker core_values.UserId) error
+	LikesCountGetter     func(targetId string) (int, error)
+	UserLikesCountGetter func(core_values.UserId) (int, error)
+	UserLikesGetter      func(core_values.UserId) ([]string, error)
+	LikeChecker          func(targetId string, fromUser core_values.UserId) (bool, error)
 )
 
 func NewLikeToggler(checkLiked StoreLikeChecker, like StoreLike, unlike StoreUnlike) LikeToggler {
-	return func(id string, owner, fromUser core_values.UserId) error {
+	return func(target string, owner, fromUser core_values.UserId) error {
 		if owner == fromUser {
 			return client_errors.LikingYourself
 		}
-		isLiked, err := checkLiked(id, fromUser)
+		isLiked, err := checkLiked(target, fromUser)
 		if err != nil {
 			return fmt.Errorf("while checking if the target Likeable is liked: %w", err)
 		}
 
 		if isLiked {
-			err = unlike(id, fromUser)
+			err = unlike(target, fromUser)
 			if err != nil {
-				return fmt.Errorf("while unliking a Likable in service: %w", err)
+				return fmt.Errorf("while unliking a Likeable in service: %w", err)
 			}
 		} else {
-			err = like(id, fromUser)
+			err = like(target, fromUser)
 			if err != nil {
 				return fmt.Errorf("while liking a Likeable in service: %w", err)
 			}
@@ -46,21 +50,16 @@ func NewLikeToggler(checkLiked StoreLikeChecker, like StoreLike, unlike StoreUnl
 }
 
 func NewLikesCountGetter(getLikesCount StoreLikesCountGetter) LikesCountGetter {
-	return func(id string) (int, error) {
-		likes, err := getLikesCount(id)
-		if err != nil {
-			return 0, fmt.Errorf("while getting count of Likeable likes in service: %w", err)
-		}
-		return likes, nil
-	}
+	return LikesCountGetter(getLikesCount)
+}
+
+func NewUserLikesCountGetter(getUserLikesCount StoreUserLikesCountGetter) UserLikesCountGetter {
+	return UserLikesCountGetter(getUserLikesCount)
+}
+func NewUserLikesGetter(getUserLikes StoreUserLikesGetter) UserLikesGetter {
+	return UserLikesGetter(getUserLikes)
 }
 
 func NewLikeChecker(checkLiked StoreLikeChecker) LikeChecker {
-	return func(id string, fromUser core_values.UserId) (bool, error) {
-		isLiked, err := checkLiked(id, fromUser)
-		if err != nil {
-			return false, fmt.Errorf("while checking if Likeable is liked in service: %w", err)
-		}
-		return isLiked, nil
-	}
+	return LikeChecker(checkLiked)
 }
