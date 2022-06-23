@@ -8,7 +8,7 @@ import (
 
 type CommentModel struct {
 	Id        values.CommentId
-	Author    core_values.UserId
+	AuthorId  core_values.UserId
 	Text      string
 	CreatedAt time.Time
 }

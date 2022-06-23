@@ -7,6 +7,7 @@ import (
 	likeable_contexters "github.com/k0marov/socnet/core/likeable/contexters"
 	. "github.com/k0marov/socnet/core/test_helpers"
 	"github.com/k0marov/socnet/features/comments/domain/entities"
+	"github.com/k0marov/socnet/features/comments/domain/models"
 	"github.com/k0marov/socnet/features/comments/domain/service"
 	"github.com/k0marov/socnet/features/comments/domain/values"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
@@ -22,11 +23,13 @@ func TestCommentCreator(t *testing.T) {
 	author := RandomContextedProfile()
 	createdComment := entities.ContextedComment{
 		Comment: entities.Comment{
-			Id:        createdId,
-			AuthorId:  newComment.Author,
-			Text:      newComment.Text,
-			CreatedAt: time.Now(),
-			Likes:     0,
+			CommentModel: models.CommentModel{
+				Id:        createdId,
+				AuthorId:  newComment.Author,
+				Text:      newComment.Text,
+				CreatedAt: time.Now(),
+			},
+			Likes: 0,
 		},
 		LikeableContext: likeable_contexters.LikeableContext{
 			IsLiked: false,

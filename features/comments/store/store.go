@@ -1,15 +1,13 @@
 package store
 
-// TODO mappers
-
 import (
 	"fmt"
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/core/likeable"
 	"github.com/k0marov/socnet/features/comments/domain/entities"
+	"github.com/k0marov/socnet/features/comments/domain/models"
 	"github.com/k0marov/socnet/features/comments/domain/store"
 	"github.com/k0marov/socnet/features/comments/domain/values"
-	"github.com/k0marov/socnet/features/comments/store/models"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
 	"time"
 )
@@ -32,11 +30,8 @@ func NewCommentsGetter(getComments DBCommentsGetter, getLikes likeable.LikesCoun
 				return []entities.Comment{}, fmt.Errorf("while getting likes count for comment: %w", err)
 			}
 			comment := entities.Comment{
-				Id:        model.Id,
-				AuthorId:  model.Author,
-				Text:      model.Text,
-				CreatedAt: model.CreatedAt,
-				Likes:     likes,
+				CommentModel: model,
+				Likes:        likes,
 			}
 			comments = append(comments, comment)
 		}

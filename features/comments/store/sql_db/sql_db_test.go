@@ -4,8 +4,8 @@ import (
 	"github.com/k0marov/socnet/core/core_errors"
 	"github.com/k0marov/socnet/core/core_values"
 	. "github.com/k0marov/socnet/core/test_helpers"
+	"github.com/k0marov/socnet/features/comments/domain/models"
 	"github.com/k0marov/socnet/features/comments/domain/values"
-	"github.com/k0marov/socnet/features/comments/store/models"
 	"github.com/k0marov/socnet/features/comments/store/sql_db"
 	post_models "github.com/k0marov/socnet/features/posts/domain/models"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
@@ -48,7 +48,7 @@ func TestSqlDB(t *testing.T) {
 		AssertNoError(t, err)
 		return models.CommentModel{
 			Id:        id,
-			Author:    author,
+			AuthorId:  author,
 			Text:      newComment.Text,
 			CreatedAt: createdAt,
 		}

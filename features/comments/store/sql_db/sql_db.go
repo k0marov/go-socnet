@@ -6,8 +6,8 @@ import (
 	"github.com/k0marov/socnet/core/core_errors"
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/core/likeable/table_name"
+	"github.com/k0marov/socnet/features/comments/domain/models"
 	"github.com/k0marov/socnet/features/comments/domain/values"
-	"github.com/k0marov/socnet/features/comments/store/models"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
 	"time"
 )
@@ -57,7 +57,7 @@ func (db *SqlDB) GetComments(post post_values.PostId) ([]models.CommentModel, er
 	for rows.Next() {
 		comment := models.CommentModel{}
 		var createdAtUnix int64
-		err := rows.Scan(&comment.Id, &comment.Author, &comment.Text, &createdAtUnix)
+		err := rows.Scan(&comment.Id, &comment.AuthorId, &comment.Text, &createdAtUnix)
 		if err != nil {
 			return []models.CommentModel{}, fmt.Errorf("while scanning a comment: %w", err)
 		}

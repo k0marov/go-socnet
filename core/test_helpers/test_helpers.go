@@ -8,8 +8,8 @@ import (
 	likeable_contexters "github.com/k0marov/socnet/core/likeable/contexters"
 	"github.com/k0marov/socnet/core/ref"
 	comment_entities "github.com/k0marov/socnet/features/comments/domain/entities"
+	comment_models "github.com/k0marov/socnet/features/comments/domain/models"
 	comment_values "github.com/k0marov/socnet/features/comments/domain/values"
-	comment_models "github.com/k0marov/socnet/features/comments/store/models"
 	post_models "github.com/k0marov/socnet/features/posts/domain/models"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
 	profile_models "github.com/k0marov/socnet/features/profiles/domain/models"
@@ -244,18 +244,15 @@ func RandomContextedComments() []comment_entities.ContextedComment {
 func RandomCommentModel() comment_models.CommentModel {
 	return comment_models.CommentModel{
 		Id:        RandomId(),
-		Author:    RandomString(),
+		AuthorId:  RandomString(),
 		Text:      RandomString(),
 		CreatedAt: RandomTime(),
 	}
 }
 func RandomComment() comment_entities.Comment {
 	return comment_entities.Comment{
-		Id:        RandomId(),
-		AuthorId:  RandomId(),
-		Text:      RandomString(),
-		CreatedAt: RandomTime(),
-		Likes:     RandomInt(),
+		CommentModel: RandomCommentModel(),
+		Likes:        RandomInt(),
 	}
 }
 

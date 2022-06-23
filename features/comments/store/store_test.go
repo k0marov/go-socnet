@@ -4,8 +4,8 @@ import (
 	"github.com/k0marov/socnet/core/core_values"
 	. "github.com/k0marov/socnet/core/test_helpers"
 	"github.com/k0marov/socnet/features/comments/domain/entities"
+	comment_models "github.com/k0marov/socnet/features/comments/domain/models"
 	"github.com/k0marov/socnet/features/comments/store"
-	comment_models "github.com/k0marov/socnet/features/comments/store/models"
 	"testing"
 )
 
@@ -44,11 +44,8 @@ func TestCommentsGetter(t *testing.T) {
 	AssertNoError(t, err)
 	wantComments := []entities.Comment{
 		{
-			Id:        commentModels[0].Id,
-			AuthorId:  commentModels[0].Author,
-			Text:      commentModels[0].Text,
-			CreatedAt: commentModels[0].CreatedAt,
-			Likes:     likes,
+			CommentModel: commentModels[0],
+			Likes:        likes,
 		},
 	}
 	Assert(t, gotComments, wantComments, "returned comments")

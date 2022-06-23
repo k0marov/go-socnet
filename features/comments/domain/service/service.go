@@ -9,6 +9,7 @@ import (
 	likeable_contexters "github.com/k0marov/socnet/core/likeable/contexters"
 	"github.com/k0marov/socnet/features/comments/domain/contexters"
 	"github.com/k0marov/socnet/features/comments/domain/entities"
+	"github.com/k0marov/socnet/features/comments/domain/models"
 	"github.com/k0marov/socnet/features/comments/domain/store"
 	"github.com/k0marov/socnet/features/comments/domain/validators"
 	"github.com/k0marov/socnet/features/comments/domain/values"
@@ -57,11 +58,13 @@ func NewCommentCreator(validate validators.CommentValidator, getProfile profile_
 
 		comment := entities.ContextedComment{
 			Comment: entities.Comment{
-				Id:        newId,
-				AuthorId:  newComment.Author,
-				Text:      newComment.Text,
-				CreatedAt: createdAt,
-				Likes:     0,
+				CommentModel: models.CommentModel{
+					Id:        newId,
+					AuthorId:  newComment.Author,
+					Text:      newComment.Text,
+					CreatedAt: createdAt,
+				},
+				Likes: 0,
 			},
 			LikeableContext: likeable_contexters.LikeableContext{
 				IsLiked: false,
