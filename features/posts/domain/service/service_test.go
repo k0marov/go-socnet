@@ -2,7 +2,6 @@ package service_test
 
 import (
 	"github.com/k0marov/socnet/features/posts/domain/entities"
-	profile_entities "github.com/k0marov/socnet/features/profiles/domain/entities"
 	"reflect"
 	"testing"
 	"time"
@@ -17,41 +16,13 @@ import (
 )
 
 func TestPostsGetter(t *testing.T) {
-	author := RandomContextedProfile()
+	author := RandomId()
 	caller := RandomString()
-	isLiked := RandomBool()
-	addContext := func(post entities.Post, isMine, isLiked bool) entities.ContextedPost {
-		return entities.ContextedPost{
-			Post:    post,
-			Author:  author,
-			IsLiked: isLiked,
-			IsMine:  isMine,
-		}
-	}
 	posts := []entities.Post{RandomPost()}
+	ctxPosts := []entities.ContextedPost{RandomContextedPost()}
 
-	profileGetter := func(id, callerId core_values.UserId) (profile_entities.ContextedProfile, error) {
-		if id == author.Id && callerId == caller {
-			return author, nil
-		}
-		panic("unexpected args")
-	}
-	t.Run("error case - getting profile returns not found", func(t *testing.T) {
-		profileGetter := func(id, caller core_values.UserId) (profile_entities.ContextedProfile, error) {
-			return profile_entities.ContextedProfile{}, core_errors.ErrNotFound
-		}
-		_, err := service.NewPostsGetter(profileGetter, nil, nil)(author.Id, caller)
-		AssertError(t, err, client_errors.NotFound)
-	})
-	t.Run("error case - getting profile returns some other error", func(t *testing.T) {
-		profileGetter := func(id, caller core_values.UserId) (profile_entities.ContextedProfile, error) {
-			return profile_entities.ContextedProfile{}, RandomError()
-		}
-		_, err := service.NewPostsGetter(profileGetter, nil, nil)(author.Id, caller)
-		AssertSomeError(t, err)
-	})
 	storePostsGetter := func(authorId core_values.UserId) ([]entities.Post, error) {
-		if authorId == author.Id {
+		if authorId == author {
 			return posts, nil
 		}
 		panic("unexpected args")
@@ -60,45 +31,25 @@ func TestPostsGetter(t *testing.T) {
 		storeGetter := func(core_values.UserId) ([]entities.Post, error) {
 			return []entities.Post{}, RandomError()
 		}
-		_, err := service.NewPostsGetter(profileGetter, storeGetter, nil)(author.Id, caller)
+		_, err := service.NewPostsGetter(storeGetter, nil)(author, caller)
 		AssertSomeError(t, err)
 	})
-	likeChecker := func(post values.PostId, liker core_values.UserId) (bool, error) {
-		if post == posts[0].Id && liker == caller {
-			return isLiked, nil
+	contextAdder := func(postsList []entities.Post, callerId core_values.UserId) ([]entities.ContextedPost, error) {
+		if reflect.DeepEqual(postsList, posts) && callerId == caller {
+			return ctxPosts, nil
 		}
 		panic("unexpected args")
 	}
-	t.Run("error case - like checker throws an error", func(t *testing.T) {
-		likeChecker := func(values.PostId, core_values.UserId) (bool, error) {
-			return false, RandomError()
+	t.Run("error case - context adder throws an error", func(t *testing.T) {
+		contextAdder := func([]entities.Post, core_values.UserId) ([]entities.ContextedPost, error) {
+			return nil, RandomError()
 		}
-		sut := service.NewPostsGetter(profileGetter, storePostsGetter, likeChecker)
-		_, err := sut(author.Id, caller)
+		_, err := service.NewPostsGetter(storePostsGetter, contextAdder)(author, caller)
 		AssertSomeError(t, err)
 	})
-	t.Run("happy cases", func(t *testing.T) {
-		t.Run("isMine = false", func(t *testing.T) {
-			sut := service.NewPostsGetter(profileGetter, storePostsGetter, likeChecker)
-			gotPosts, err := sut(author.Id, caller)
-			AssertNoError(t, err)
-			wantPosts := []entities.ContextedPost{addContext(posts[0], false, isLiked)}
-			Assert(t, gotPosts, wantPosts, "returned posts")
-		})
-		t.Run("isMine = true", func(t *testing.T) {
-			profileGetter := func(target, caller core_values.UserId) (profile_entities.ContextedProfile, error) {
-				return author, nil
-			}
-			likeChecker := func(post values.PostId, liker core_values.UserId) (bool, error) {
-				return isLiked, nil
-			}
-			sut := service.NewPostsGetter(profileGetter, storePostsGetter, likeChecker)
-			gotPosts, err := sut(author.Id, author.Id)
-			AssertNoError(t, err)
-			wantPosts := []entities.ContextedPost{addContext(posts[0], true, isLiked)}
-			Assert(t, gotPosts, wantPosts, "returned posts")
-		})
-	})
+	gotPosts, err := service.NewPostsGetter(storePostsGetter, contextAdder)(author, caller)
+	AssertNoError(t, err)
+	Assert(t, gotPosts, ctxPosts, "returned posts")
 }
 
 func TestPostDeleter(t *testing.T) {

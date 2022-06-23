@@ -3,8 +3,8 @@ package service
 import (
 	"fmt"
 	"github.com/k0marov/socnet/core/likeable"
+	"github.com/k0marov/socnet/features/posts/domain/contexters"
 	"github.com/k0marov/socnet/features/posts/domain/validators"
-	profile_service "github.com/k0marov/socnet/features/profiles/domain/service"
 	"time"
 
 	"github.com/k0marov/socnet/features/posts/domain/entities"
@@ -77,32 +77,16 @@ func NewPostCreator(validate validators.PostValidator, createPost store.PostCrea
 	}
 }
 
-func NewPostsGetter(getProfile profile_service.ProfileGetter, getPosts store.PostsGetter, checkLiked likeable.LikeChecker) PostsGetter {
-	return func(authorId, caller core_values.UserId) (ctxPosts []entities.ContextedPost, err error) {
-		author, err := getProfile(authorId, caller)
-		if err == core_errors.ErrNotFound {
-			return []entities.ContextedPost{}, client_errors.NotFound
-		}
-		if err != nil {
-			return []entities.ContextedPost{}, fmt.Errorf("while getting the ctxPosts author: %w", err)
-		}
+func NewPostsGetter(getPosts store.PostsGetter, addContext contexters.PostListContextAdder) PostsGetter {
+	return func(authorId, caller core_values.UserId) ([]entities.ContextedPost, error) {
 		posts, err := getPosts(authorId)
 		if err != nil {
-			return []entities.ContextedPost{}, fmt.Errorf("while getting ctxPosts from store: %w", err)
+			return []entities.ContextedPost{}, fmt.Errorf("while getting posts from store: %w", err)
 		}
-		for _, post := range posts {
-			isLiked, err := checkLiked(post.Id, caller)
-			if err != nil {
-				return []entities.ContextedPost{}, fmt.Errorf("while checking if post is liked: %w", err)
-			}
-			ctxPost := entities.ContextedPost{
-				Post:    post,
-				Author:  author,
-				IsLiked: isLiked,
-				IsMine:  authorId == caller,
-			}
-			ctxPosts = append(ctxPosts, ctxPost)
+		ctxPosts, err := addContext(posts, caller)
+		if err != nil {
+			return []entities.ContextedPost{}, fmt.Errorf("while adding context to posts: %w", err)
 		}
-		return
+		return ctxPosts, nil
 	}
 }

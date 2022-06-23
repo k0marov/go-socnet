@@ -2,6 +2,7 @@ package entities
 
 import (
 	"github.com/k0marov/socnet/core/core_values"
+	"github.com/k0marov/socnet/core/likeable/contexters"
 	"github.com/k0marov/socnet/features/posts/domain/values"
 	profile_entities "github.com/k0marov/socnet/features/profiles/domain/entities"
 	"time"
@@ -18,7 +19,6 @@ type Post struct {
 
 type ContextedPost struct {
 	Post
-	Author  profile_entities.ContextedProfile
-	IsLiked bool
-	IsMine  bool
+	contexters.LikeableContext
+	Author profile_entities.ContextedProfile
 }

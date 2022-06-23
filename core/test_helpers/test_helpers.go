@@ -162,10 +162,9 @@ func RandomPostImages() []post_values.PostImage {
 
 func RandomContextedPost() post_entities.ContextedPost {
 	return post_entities.ContextedPost{
-		Post:    RandomPost(),
-		Author:  RandomContextedProfile(),
-		IsMine:  RandomBool(),
-		IsLiked: RandomBool(),
+		Post:            RandomPost(),
+		Author:          RandomContextedProfile(),
+		LikeableContext: RandomLikeableContext(),
 	}
 }
 func RandomNewPostData() post_values.NewPostData {
