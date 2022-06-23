@@ -72,6 +72,8 @@ func TestProfiles(t *testing.T) {
 			Username:   wantProfile.Username,
 			About:      wantProfile.About,
 			AvatarPath: wantProfile.AvatarPath,
+			Followers:  wantProfile.Followers,
+			Follows:    wantProfile.Follows,
 			IsMine:     false,
 			IsFollowed: false,
 		}
