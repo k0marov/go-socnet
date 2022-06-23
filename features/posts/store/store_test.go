@@ -3,6 +3,7 @@ package store_test
 import (
 	"github.com/k0marov/socnet/core/core_values"
 	. "github.com/k0marov/socnet/core/test_helpers"
+	"github.com/k0marov/socnet/features/posts/domain/entities"
 	"github.com/k0marov/socnet/features/posts/domain/values"
 	"github.com/k0marov/socnet/features/posts/store"
 	"github.com/k0marov/socnet/features/posts/store/models"
@@ -134,4 +135,47 @@ func TestStorePostDeleter(t *testing.T) {
 	sut := store.NewStorePostDeleter(deletePost, deleteFiles)
 	err := sut(post, author)
 	AssertNoError(t, err)
+}
+
+func TestStorePostsGetter(t *testing.T) {
+	author := RandomId()
+	postModels := []models.PostModel{RandomPostModel()}
+	likes := RandomInt()
+	dbGetter := func(authorId core_values.UserId) ([]models.PostModel, error) {
+		if authorId == author {
+			return postModels, nil
+		}
+		panic("unexpected args")
+	}
+	t.Run("error case - getting posts from db throws", func(t *testing.T) {
+		dbGetter := func(core_values.UserId) ([]models.PostModel, error) {
+			return nil, RandomError()
+		}
+		_, err := store.NewStorePostsGetter(dbGetter, nil)(author)
+		AssertSomeError(t, err)
+	})
+	likesGetter := func(targetId string) (int, error) {
+		if targetId == postModels[0].Id {
+			return likes, nil
+		}
+		panic("unexpected args")
+	}
+	t.Run("error case - getting likes throws", func(t *testing.T) {
+		likesGetter := func(string) (int, error) {
+			return 0, RandomError()
+		}
+		_, err := store.NewStorePostsGetter(dbGetter, likesGetter)(author)
+		AssertSomeError(t, err)
+	})
+	gotPosts, err := store.NewStorePostsGetter(dbGetter, likesGetter)(author)
+	AssertNoError(t, err)
+	wantPosts := []entities.Post{{
+		Id:        postModels[0].Id,
+		Author:    postModels[0].Author,
+		Text:      postModels[0].Text,
+		Images:    postModels[0].Images,
+		CreatedAt: postModels[0].CreatedAt,
+		Likes:     likes,
+	}}
+	Assert(t, gotPosts, wantPosts, "returned posts")
 }

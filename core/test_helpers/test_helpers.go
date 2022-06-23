@@ -192,6 +192,16 @@ func RandomPostModel() post_models.PostModel {
 		Images:    RandomPostImages(),
 	}
 }
+func RandomPost() post_entities.Post {
+	return post_entities.Post{
+		Id:        RandomId(),
+		Author:    RandomString(),
+		Text:      RandomString(),
+		Images:    RandomPostImages(),
+		CreatedAt: RandomTime(),
+		Likes:     RandomInt(),
+	}
+}
 
 func OpenSqliteDB(t testing.TB) *sql.DB {
 	t.Helper()
@@ -245,6 +255,15 @@ func RandomCommentModel() comment_models.CommentModel {
 		Author:    RandomString(),
 		Text:      RandomString(),
 		CreatedAt: RandomTime(),
+	}
+}
+func RandomComment() comment_entities.Comment {
+	return comment_entities.Comment{
+		Id:        RandomId(),
+		Author:    RandomId(),
+		Text:      RandomString(),
+		CreatedAt: RandomTime(),
+		Likes:     RandomInt(),
 	}
 }
 

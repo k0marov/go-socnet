@@ -21,39 +21,35 @@ type (
 	CommentLikeToggler func(values.CommentId, core_values.UserId) error
 )
 
-func NewPostCommentsGetter(getComments store.CommentsGetter, getProfile profile_service.ProfileGetter, getLikes likeable.LikesCountGetter, checkLiked likeable.LikeChecker) PostCommentsGetter {
+func NewPostCommentsGetter(getComments store.CommentsGetter, getProfile profile_service.ProfileGetter, checkLiked likeable.LikeChecker) PostCommentsGetter {
 	return func(post post_values.PostId, caller core_values.UserId) ([]entities.ContextedComment, error) {
-		models, err := getComments(post)
+		comments, err := getComments(post)
 		if err != nil {
-			return []entities.ContextedComment{}, fmt.Errorf("while getting post comments from store: %w", err)
+			return []entities.ContextedComment{}, fmt.Errorf("while getting post contextedComments from store: %w", err)
 		}
-		var comments []entities.ContextedComment
-		for _, model := range models {
-			author, err := getProfile(model.Author, caller)
+		var contextedComments []entities.ContextedComment
+		for _, comment := range comments {
+			author, err := getProfile(comment.Author, caller)
 			if err != nil {
-				return []entities.ContextedComment{}, fmt.Errorf("while getting comment's author profile: %w", err)
+				return []entities.ContextedComment{}, fmt.Errorf("while getting contextedComment's author profile: %w", err)
 			}
-			likes, err := getLikes(model.Id)
+			isLiked, err := checkLiked(comment.Id, caller)
 			if err != nil {
-				return []entities.ContextedComment{}, fmt.Errorf("while getting likes count of comment: %w", err)
+				return []entities.ContextedComment{}, fmt.Errorf("while checking if contextedComment is liked: %w", err)
 			}
-			isLiked, err := checkLiked(model.Id, caller)
-			if err != nil {
-				return []entities.ContextedComment{}, fmt.Errorf("while checking if comment is liked: %w", err)
-			}
-			comment := entities.ContextedComment{
-				Id:        model.Id,
+			contextedComment := entities.ContextedComment{
+				Id:        comment.Id,
 				Author:    author,
-				Text:      model.Text,
-				CreatedAt: model.CreatedAt,
-				Likes:     likes,
+				Text:      comment.Text,
+				CreatedAt: comment.CreatedAt,
+				Likes:     comment.Likes,
 
 				IsLiked: isLiked,
 				IsMine:  author.Id == caller,
 			}
-			comments = append(comments, comment)
+			contextedComments = append(contextedComments, contextedComment)
 		}
-		return comments, nil
+		return contextedComments, nil
 	}
 }
 

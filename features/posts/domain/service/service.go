@@ -77,39 +77,35 @@ func NewPostCreator(validate validators.PostValidator, createPost store.PostCrea
 	}
 }
 
-func NewPostsGetter(getProfile profile_service.ProfileGetter, getPosts store.PostsGetter, getLikes likeable.LikesCountGetter, checkLiked likeable.LikeChecker) PostsGetter {
-	return func(authorId, caller core_values.UserId) (posts []entities.ContextedPost, err error) {
+func NewPostsGetter(getProfile profile_service.ProfileGetter, getPosts store.PostsGetter, checkLiked likeable.LikeChecker) PostsGetter {
+	return func(authorId, caller core_values.UserId) (ctxPosts []entities.ContextedPost, err error) {
 		author, err := getProfile(authorId, caller)
 		if err == core_errors.ErrNotFound {
 			return []entities.ContextedPost{}, client_errors.NotFound
 		}
 		if err != nil {
-			return []entities.ContextedPost{}, fmt.Errorf("while getting the posts author: %w", err)
+			return []entities.ContextedPost{}, fmt.Errorf("while getting the ctxPosts author: %w", err)
 		}
-		postModels, err := getPosts(authorId)
+		posts, err := getPosts(authorId)
 		if err != nil {
-			return []entities.ContextedPost{}, fmt.Errorf("while getting posts from store: %w", err)
+			return []entities.ContextedPost{}, fmt.Errorf("while getting ctxPosts from store: %w", err)
 		}
-		for _, postModel := range postModels {
-			likes, err := getLikes(postModel.Id)
+		for _, post := range posts {
+			isLiked, err := checkLiked(post.Id, caller)
 			if err != nil {
-				return []entities.ContextedPost{}, fmt.Errorf("while getting likes count of post: %w", err)
+				return []entities.ContextedPost{}, fmt.Errorf("while checking if post is liked: %w", err)
 			}
-			isLiked, err := checkLiked(postModel.Id, caller)
-			if err != nil {
-				return []entities.ContextedPost{}, fmt.Errorf("while checking if one of the posts is liked: %w", err)
-			}
-			post := entities.ContextedPost{
-				Id:        postModel.Id,
+			ctxPost := entities.ContextedPost{
+				Id:        post.Id,
 				Author:    author,
-				Text:      postModel.Text,
-				Images:    postModel.Images,
-				CreatedAt: postModel.CreatedAt,
-				Likes:     likes,
+				Text:      post.Text,
+				Images:    post.Images,
+				CreatedAt: post.CreatedAt,
+				Likes:     post.Likes,
 				IsLiked:   isLiked,
 				IsMine:    authorId == caller,
 			}
-			posts = append(posts, post)
+			ctxPosts = append(ctxPosts, ctxPost)
 		}
 		return
 	}

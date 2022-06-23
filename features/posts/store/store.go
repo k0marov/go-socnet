@@ -3,6 +3,8 @@ package store
 import (
 	"fmt"
 	"github.com/k0marov/socnet/core/core_values"
+	"github.com/k0marov/socnet/core/likeable"
+	"github.com/k0marov/socnet/features/posts/domain/entities"
 	"github.com/k0marov/socnet/features/posts/domain/store"
 	"github.com/k0marov/socnet/features/posts/domain/values"
 	"github.com/k0marov/socnet/features/posts/store/file_storage"
@@ -68,8 +70,29 @@ func NewStorePostDeleter(deletePost DBPostDeleter, deleteFiles file_storage.Post
 	}
 }
 
-func NewStorePostsGetter(getter DBPostsGetter) store.PostsGetter {
-	return store.PostsGetter(getter)
+func NewStorePostsGetter(getter DBPostsGetter, likesGetter likeable.LikesCountGetter) store.PostsGetter {
+	return func(authorId core_values.UserId) (posts []entities.Post, err error) {
+		models, err := getter(authorId)
+		if err != nil {
+			return []entities.Post{}, fmt.Errorf("while getting posts from db: %w", err)
+		}
+		for _, model := range models {
+			likes, err := likesGetter(model.Id)
+			if err != nil {
+				return []entities.Post{}, fmt.Errorf("error while getting likes count of a post: %w", err)
+			}
+			post := entities.Post{
+				Id:        model.Id,
+				Author:    model.Author,
+				Text:      model.Text,
+				Images:    model.Images,
+				CreatedAt: model.CreatedAt,
+				Likes:     likes,
+			}
+			posts = append(posts, post)
+		}
+		return
+	}
 }
 
 func NewStoreAuthorGetter(authorGetter DBAuthorGetter) store.AuthorGetter {

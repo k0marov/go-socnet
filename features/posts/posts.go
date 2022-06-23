@@ -38,14 +38,14 @@ func NewPostsRouterImpl(db *sql.DB, getContextedProfile profile_service.ProfileG
 	storeCreatePost := store.NewStorePostCreator(sqlDB.CreatePost, storeImages, sqlDB.AddPostImages, sqlDB.DeletePost, deleteFiles)
 	storeGetAuthor := store.NewStoreAuthorGetter(sqlDB.GetAuthor)
 	storeDeletePost := store.NewStorePostDeleter(sqlDB.DeletePost, deleteFiles)
-	storeGetPosts := store.NewStorePostsGetter(sqlDB.GetPosts)
+	storeGetPosts := store.NewStorePostsGetter(sqlDB.GetPosts, likeablePost.GetLikesCount)
 
 	// service
 	validatePost := validators.NewPostValidator(image_decoder.ImageDecoderImpl)
 
 	createPost := service.NewPostCreator(validatePost, storeCreatePost)
 	deletePost := service.NewPostDeleter(storeGetAuthor, storeDeletePost)
-	getPosts := service.NewPostsGetter(getContextedProfile, storeGetPosts, likeablePost.GetLikesCount, likeablePost.IsLiked)
+	getPosts := service.NewPostsGetter(getContextedProfile, storeGetPosts, likeablePost.IsLiked)
 	toggleLike := service.NewPostLikeToggler(storeGetAuthor, likeablePost.ToggleLike)
 
 	// handlers

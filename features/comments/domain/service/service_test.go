@@ -8,7 +8,6 @@ import (
 	"github.com/k0marov/socnet/features/comments/domain/entities"
 	"github.com/k0marov/socnet/features/comments/domain/service"
 	"github.com/k0marov/socnet/features/comments/domain/values"
-	"github.com/k0marov/socnet/features/comments/store/models"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
 	profile_entities "github.com/k0marov/socnet/features/profiles/domain/entities"
 	"testing"
@@ -123,27 +122,26 @@ func TestCommentLikeToggler(t *testing.T) {
 
 func TestPostCommentsGetter(t *testing.T) {
 	post := RandomString()
-	commentModels := []models.CommentModel{RandomCommentModel()}
+	comments := []entities.Comment{RandomComment()}
 	author := RandomContextedProfile()
 	caller := RandomId()
 	isLiked := RandomBool()
-	likes := RandomInt()
 
-	commentsGetter := func(postId post_values.PostId) ([]models.CommentModel, error) {
+	commentsGetter := func(postId post_values.PostId) ([]entities.Comment, error) {
 		if postId == post {
-			return commentModels, nil
+			return comments, nil
 		}
 		panic("unexpected args")
 	}
 	t.Run("error case - getting the comments returns some error", func(t *testing.T) {
-		commentsGetter := func(post_values.PostId) ([]models.CommentModel, error) {
-			return []models.CommentModel{}, RandomError()
+		commentsGetter := func(post_values.PostId) ([]entities.Comment, error) {
+			return []entities.Comment{}, RandomError()
 		}
-		_, err := service.NewPostCommentsGetter(commentsGetter, nil, nil, nil)(post, caller)
+		_, err := service.NewPostCommentsGetter(commentsGetter, nil, nil)(post, caller)
 		AssertSomeError(t, err)
 	})
 	profileGetter := func(profileId core_values.UserId, callerId core_values.UserId) (profile_entities.ContextedProfile, error) {
-		if profileId == commentModels[0].Author && callerId == caller {
+		if profileId == comments[0].Author && callerId == caller {
 			return author, nil
 		}
 		panic("unexpected args")
@@ -152,50 +150,37 @@ func TestPostCommentsGetter(t *testing.T) {
 		profileGetter := func(profileId, callerId core_values.UserId) (profile_entities.ContextedProfile, error) {
 			return profile_entities.ContextedProfile{}, RandomError()
 		}
-		_, err := service.NewPostCommentsGetter(commentsGetter, profileGetter, nil, nil)(post, caller)
-		AssertSomeError(t, err)
-	})
-	likesGetter := func(target string) (int, error) {
-		if target == commentModels[0].Id {
-			return likes, nil
-		}
-		panic("unexpected args")
-	}
-	t.Run("error case - getting likes throws", func(t *testing.T) {
-		likesGetter := func(target string) (int, error) {
-			return 0, RandomError()
-		}
-		_, err := service.NewPostCommentsGetter(commentsGetter, profileGetter, likesGetter, nil)(post, caller)
+		_, err := service.NewPostCommentsGetter(commentsGetter, profileGetter, nil)(post, caller)
 		AssertSomeError(t, err)
 	})
 	t.Run("error case - like checker throws", func(t *testing.T) {
 		likeChecker := func(commentId values.CommentId, callerId core_values.UserId) (bool, error) {
 			return false, RandomError()
 		}
-		_, err := service.NewPostCommentsGetter(commentsGetter, profileGetter, likesGetter, likeChecker)(post, caller)
+		_, err := service.NewPostCommentsGetter(commentsGetter, profileGetter, likeChecker)(post, caller)
 		AssertSomeError(t, err)
 	})
 	t.Run("happy cases", func(t *testing.T) {
-		modelToEntity := func(model models.CommentModel, author profile_entities.ContextedProfile, isLiked, isMine bool) entities.ContextedComment {
+		addContext := func(comment entities.Comment, author profile_entities.ContextedProfile, isLiked, isMine bool) entities.ContextedComment {
 			return entities.ContextedComment{
-				Id:        model.Id,
+				Id:        comment.Id,
 				Author:    author,
-				Text:      model.Text,
-				CreatedAt: model.CreatedAt,
-				Likes:     likes,
+				Text:      comment.Text,
+				CreatedAt: comment.CreatedAt,
+				Likes:     comment.Likes,
 				IsLiked:   isLiked,
 				IsMine:    isMine,
 			}
 		}
 		t.Run("isMine = false", func(t *testing.T) {
 			likeChecker := func(commentId values.CommentId, callerId core_values.UserId) (bool, error) {
-				if commentId == commentModels[0].Id && callerId == caller {
+				if commentId == comments[0].Id && callerId == caller {
 					return isLiked, nil
 				}
 				panic("unexpected args")
 			}
-			sut := service.NewPostCommentsGetter(commentsGetter, profileGetter, likesGetter, likeChecker)
-			wantProfiles := []entities.ContextedComment{modelToEntity(commentModels[0], author, isLiked, false)}
+			sut := service.NewPostCommentsGetter(commentsGetter, profileGetter, likeChecker)
+			wantProfiles := []entities.ContextedComment{addContext(comments[0], author, isLiked, false)}
 			gotProfiles, err := sut(post, caller)
 			AssertNoError(t, err)
 			Assert(t, gotProfiles, wantProfiles, "the returned profiles")
@@ -207,8 +192,8 @@ func TestPostCommentsGetter(t *testing.T) {
 			likeChecker := func(commentId values.CommentId, callerId core_values.UserId) (bool, error) {
 				return isLiked, nil
 			}
-			sut := service.NewPostCommentsGetter(commentsGetter, profileGetter, likesGetter, likeChecker)
-			wantProfiles := []entities.ContextedComment{modelToEntity(commentModels[0], author, isLiked, true)}
+			sut := service.NewPostCommentsGetter(commentsGetter, profileGetter, likeChecker)
+			wantProfiles := []entities.ContextedComment{addContext(comments[0], author, isLiked, true)}
 			gotProfiles, err := sut(post, author.Id)
 			AssertNoError(t, err)
 			Assert(t, gotProfiles, wantProfiles, "the returned profiles")
