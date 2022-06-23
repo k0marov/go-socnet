@@ -68,8 +68,19 @@ func TestSqlDB(t *testing.T) {
 		assertLikedValue(t, false)
 
 	})
-	t.Run("liking a non-existing target", func(t *testing.T) {
+	t.Run("liking from many profiles", func(t *testing.T) {
+		targetId := createTargetEntity(t, db)
+		const count = 100
+		for i := 0; i < count; i++ {
+			profile := RandomNewProfile()
+			profilesDB.CreateProfile(profile)
+			err := sqlDB.Like(targetId, profile.Id)
+			AssertNoError(t, err)
 
+			likes, err := sqlDB.GetLikesCount(targetId)
+			AssertNoError(t, err)
+			Assert(t, likes, i+1, "number of likes")
+		}
 	})
 }
 

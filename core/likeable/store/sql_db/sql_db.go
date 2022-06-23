@@ -83,5 +83,13 @@ func (db *SqlDB) Unlike(target string, unliker core_values.UserId) error {
 }
 
 func (db *SqlDB) GetLikesCount(target string) (int, error) {
-	panic("unimplemented")
+	row := db.sql.QueryRow(`
+		SELECT COUNT(*) FROM `+db.verifiedLikeableTable+` WHERE target_id = ?
+    `, target)
+	var likes int
+	err := row.Scan(&likes)
+	if err != nil {
+		return 0, fmt.Errorf("while scanning the likes count: %w", err)
+	}
+	return likes, nil
 }
