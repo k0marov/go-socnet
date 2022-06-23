@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/k0marov/socnet/core/likeable"
 	"github.com/k0marov/socnet/core/static_store"
+	"github.com/k0marov/socnet/features/profiles/domain/contexters"
 	"github.com/k0marov/socnet/features/profiles/store/models"
 
 	"github.com/k0marov/socnet/features/profiles/domain/entities"
@@ -26,7 +27,7 @@ type (
 	FollowsGetter  func(target core_values.UserId) ([]core_values.UserId, error)
 )
 
-func NewProfileGetter(getProfile store.StoreProfileGetter, isFollowed likeable.LikeChecker) ProfileGetter {
+func NewProfileGetter(getProfile store.StoreProfileGetter, addContext contexters.ProfileContextAdder) ProfileGetter {
 	return func(id core_values.UserId, caller core_values.UserId) (entities.ContextedProfile, error) {
 		profile, err := getProfile(id)
 		if err != nil {
@@ -35,11 +36,10 @@ func NewProfileGetter(getProfile store.StoreProfileGetter, isFollowed likeable.L
 			}
 			return entities.ContextedProfile{}, fmt.Errorf("while getting profile in a service: %w", err)
 		}
-		followedByCaller, err := isFollowed(id, caller)
+		contextedProfile, err := addContext(profile, caller)
 		if err != nil {
-			return entities.ContextedProfile{}, fmt.Errorf("while checking if profile is followed by caller: %w", err)
+			return entities.ContextedProfile{}, fmt.Errorf("while adding context to profile: %w", err)
 		}
-		contextedProfile := entities.ContextedProfile{Profile: profile, IsFollowedByCaller: followedByCaller}
 		return contextedProfile, nil
 	}
 }

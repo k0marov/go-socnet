@@ -128,8 +128,8 @@ func RandomProfile() profile_entities.Profile {
 
 func RandomContextedProfile() profile_entities.ContextedProfile {
 	return profile_entities.ContextedProfile{
-		Profile:            RandomProfile(),
-		IsFollowedByCaller: RandomBool(),
+		Profile:         RandomProfile(),
+		LikeableContext: RandomLikeableContext(),
 	}
 }
 

@@ -1,6 +1,9 @@
 package entities
 
-import "github.com/k0marov/socnet/core/core_values"
+import (
+	"github.com/k0marov/socnet/core/core_values"
+	likeable_contexters "github.com/k0marov/socnet/core/likeable/contexters"
+)
 
 type Profile struct {
 	Id         core_values.UserId
@@ -9,10 +12,9 @@ type Profile struct {
 	AvatarPath string
 	Follows    int
 	Followers  int
-	// IsFollowedByCaller bool
 }
 
 type ContextedProfile struct {
 	Profile
-	IsFollowedByCaller bool
+	likeable_contexters.LikeableContext
 }
