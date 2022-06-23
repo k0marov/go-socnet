@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/k0marov/socnet/core/core_values"
+	"github.com/k0marov/socnet/features/profiles/domain/entities"
 	"net/http"
 
 	"github.com/k0marov/socnet/features/profiles/domain/service"
@@ -11,6 +12,26 @@ import (
 
 	"github.com/go-chi/chi/v5"
 )
+
+type ProfileResponse struct {
+	Id         string
+	Username   string
+	About      string
+	AvatarPath string
+	IsMine     bool
+	IsFollowed bool
+}
+
+func EntityToResponse(profile entities.ContextedProfile) ProfileResponse {
+	return ProfileResponse{
+		Id:         profile.Id,
+		Username:   profile.Username,
+		About:      profile.About,
+		AvatarPath: profile.AvatarPath,
+		IsMine:     profile.IsMine,
+		IsFollowed: profile.IsLiked,
+	}
+}
 
 func NewGetMeHandler(getProfile service.ProfileGetter) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +44,7 @@ func NewGetMeHandler(getProfile service.ProfileGetter) http.HandlerFunc {
 			helpers.HandleServiceError(w, err)
 			return
 		}
-		helpers.WriteJson(w, profile)
+		helpers.WriteJson(w, EntityToResponse(profile))
 	})
 }
 
@@ -43,7 +64,7 @@ func NewGetByIdHandler(profileGetter service.ProfileGetter) http.HandlerFunc {
 			helpers.HandleServiceError(w, err)
 			return
 		}
-		helpers.WriteJson(w, profile)
+		helpers.WriteJson(w, EntityToResponse(profile))
 	})
 }
 

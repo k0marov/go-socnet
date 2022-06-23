@@ -38,7 +38,7 @@ func TestGetMeHandler(t *testing.T) {
 		response := httptest.NewRecorder()
 		handlers.NewGetMeHandler(getter).ServeHTTP(response, createRequestWithAuth())
 
-		AssertJSONData(t, response, wantedProfile)
+		AssertJSONData(t, response, handlers.EntityToResponse(wantedProfile))
 	})
 	helpers.BaseTestServiceErrorHandling(t, func(wantErr error, response *httptest.ResponseRecorder) {
 		getter := func(core_values.UserId, core_values.UserId) (entities.ContextedProfile, error) {
@@ -72,7 +72,7 @@ func TestGetByIdHandler(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		handlers.NewGetByIdHandler(profileGetter).ServeHTTP(response, request)
-		AssertJSONData(t, response, randomProfile)
+		AssertJSONData(t, response, handlers.EntityToResponse(randomProfile))
 	})
 	t.Run("error case - id is not provided", func(t *testing.T) {
 		response := httptest.NewRecorder()

@@ -11,6 +11,11 @@ import (
 	"net/http"
 )
 
+//type CommentResponse struct {
+//	Id string
+//	Author ProfileResponse
+//
+//}
 type CommentsResponse struct {
 	Comments []entities.ContextedComment
 }

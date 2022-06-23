@@ -63,15 +63,25 @@ func TestProfiles(t *testing.T) {
 	}
 	checkProfileFromServer := func(t testing.TB, wantProfile entities.Profile) {
 		t.Helper()
+
 		request := addAuthToReq(httptest.NewRequest(http.MethodGet, "/profiles/"+wantProfile.Id, nil), RandomUser())
 		response := httptest.NewRecorder()
 		r.ServeHTTP(response, request)
-		AssertJSONData(t, response, wantProfile)
+		wantResponse := handlers.ProfileResponse{
+			Id:         wantProfile.Id,
+			Username:   wantProfile.Username,
+			About:      wantProfile.About,
+			AvatarPath: wantProfile.AvatarPath,
+			IsMine:     false,
+			IsFollowed: false,
+		}
+		AssertJSONData(t, response, wantResponse)
 
 		request = addAuthToReq(httptest.NewRequest(http.MethodGet, "/profiles/me", nil), core_entities.User{Id: wantProfile.Id, Username: wantProfile.Username})
 		response = httptest.NewRecorder()
 		r.ServeHTTP(response, request)
-		AssertJSONData(t, response, wantProfile)
+		wantResponse.IsMine = true
+		AssertJSONData(t, response, wantResponse)
 	}
 	t.Run("creating, reading and updating", func(t *testing.T) {
 		// register a couple users
@@ -165,9 +175,9 @@ func TestProfiles(t *testing.T) {
 			request := addAuthToReq(httptest.NewRequest(http.MethodGet, "/profiles/"+target, nil), caller)
 			response := httptest.NewRecorder()
 			r.ServeHTTP(response, request)
-			contextedProfile := entities.ContextedProfile{}
-			json.NewDecoder(response.Body).Decode(&contextedProfile)
-			Assert(t, contextedProfile.IsLiked, isFollowed, "caller following or not following target")
+			var profileResponse handlers.ProfileResponse
+			json.NewDecoder(response.Body).Decode(&profileResponse)
+			Assert(t, profileResponse.IsFollowed, isFollowed, "caller following or not following target")
 		}
 
 		// create 2 users
