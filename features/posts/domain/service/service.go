@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/k0marov/socnet/core/likeable"
 	"github.com/k0marov/socnet/features/posts/domain/validators"
 	profile_service "github.com/k0marov/socnet/features/profiles/domain/service"
 	"time"
@@ -43,7 +44,7 @@ func NewPostDeleter(getAuthor store.AuthorGetter, deletePost store.PostDeleter) 
 	}
 }
 
-func NewPostLikeToggler(getAuthor store.AuthorGetter, isLiked store.LikeChecker, like store.Liker, unlike store.Unliker) PostLikeToggler {
+func NewPostLikeToggler(getAuthor store.AuthorGetter, toggleLike likeable.LikeToggler) PostLikeToggler {
 	return func(postId values.PostId, caller core_values.UserId) error {
 		author, err := getAuthor(postId)
 		if err == core_errors.ErrNotFound {
@@ -52,22 +53,12 @@ func NewPostLikeToggler(getAuthor store.AuthorGetter, isLiked store.LikeChecker,
 		if err != nil {
 			return fmt.Errorf("while getting post author: %w", err)
 		}
-		if author == caller {
-			return client_errors.LikingYourself
+
+		err = toggleLike(postId, author, caller)
+		if err != nil {
+			return err
 		}
 
-		alreadyLiked, err := isLiked(postId, caller)
-		if err != nil {
-			return fmt.Errorf("error while checking if post is liked: %w", err)
-		}
-		if alreadyLiked {
-			err = unlike(postId, caller)
-		} else {
-			err = like(postId, caller)
-		}
-		if err != nil {
-			return fmt.Errorf("while liking/unliking a post: %w", err)
-		}
 		return nil
 	}
 }
@@ -86,7 +77,7 @@ func NewPostCreator(validate validators.PostValidator, createPost store.PostCrea
 	}
 }
 
-func NewPostsGetter(getProfile profile_service.ProfileGetter, getPosts store.PostsGetter, checkLiked store.LikeChecker) PostsGetter {
+func NewPostsGetter(getProfile profile_service.ProfileGetter, getPosts store.PostsGetter, getLikes likeable.LikesCountGetter, checkLiked likeable.LikeChecker) PostsGetter {
 	return func(authorId, caller core_values.UserId) (posts []entities.ContextedPost, err error) {
 		author, err := getProfile(authorId, caller)
 		if err == core_errors.ErrNotFound {
@@ -100,6 +91,10 @@ func NewPostsGetter(getProfile profile_service.ProfileGetter, getPosts store.Pos
 			return []entities.ContextedPost{}, fmt.Errorf("while getting posts from store: %w", err)
 		}
 		for _, postModel := range postModels {
+			likes, err := getLikes(postModel.Id)
+			if err != nil {
+				return []entities.ContextedPost{}, fmt.Errorf("while getting likes count of post: %w", err)
+			}
 			isLiked, err := checkLiked(postModel.Id, caller)
 			if err != nil {
 				return []entities.ContextedPost{}, fmt.Errorf("while checking if one of the posts is liked: %w", err)
@@ -110,7 +105,7 @@ func NewPostsGetter(getProfile profile_service.ProfileGetter, getPosts store.Pos
 				Text:      postModel.Text,
 				Images:    postModel.Images,
 				CreatedAt: postModel.CreatedAt,
-				Likes:     postModel.Likes,
+				Likes:     likes,
 				IsLiked:   isLiked,
 				IsMine:    authorId == caller,
 			}

@@ -5,7 +5,7 @@ import (
 	. "github.com/k0marov/socnet/core/test_helpers"
 	"github.com/k0marov/socnet/features/posts/domain/values"
 	"github.com/k0marov/socnet/features/posts/store"
-	"github.com/k0marov/socnet/features/posts/store/post_models"
+	"github.com/k0marov/socnet/features/posts/store/models"
 	"reflect"
 	"testing"
 	"time"
@@ -23,14 +23,14 @@ func TestStorePostCreator(t *testing.T) {
 		wantPostImages = append(wantPostImages, values.PostImage{URL: path, Index: img.Index})
 	}
 
-	createPost := func(newPost post_models.PostToCreate) (values.PostId, error) {
+	createPost := func(newPost models.PostToCreate) (values.PostId, error) {
 		if newPost.Author == tNewPost.Author && newPost.Text == tNewPost.Text && TimeAlmostEqual(newPost.CreatedAt, createdAt) {
 			return postId, nil
 		}
 		panic("unexpected args")
 	}
 	t.Run("error case - createPost returns an error", func(t *testing.T) {
-		createPost := func(post_models.PostToCreate) (values.PostId, error) {
+		createPost := func(models.PostToCreate) (values.PostId, error) {
 			return "", RandomError()
 		}
 		sut := store.NewStorePostCreator(createPost, nil, nil, nil, nil)

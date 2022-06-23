@@ -1,4 +1,4 @@
-package post_models
+package models
 
 import (
 	"github.com/k0marov/socnet/core/core_values"
@@ -18,5 +18,4 @@ type PostModel struct {
 	Text      string
 	CreatedAt time.Time
 	Images    []values.PostImage
-	Likes     int
 }

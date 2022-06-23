@@ -8,7 +8,7 @@ import (
 	"github.com/k0marov/socnet/features/comments/store/models"
 	"github.com/k0marov/socnet/features/comments/store/sql_db"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
-	"github.com/k0marov/socnet/features/posts/store/post_models"
+	post_models "github.com/k0marov/socnet/features/posts/store/models"
 	posts_db "github.com/k0marov/socnet/features/posts/store/sql_db"
 	profiles_db "github.com/k0marov/socnet/features/profiles/store/sql_db"
 	_ "github.com/mattn/go-sqlite3"
