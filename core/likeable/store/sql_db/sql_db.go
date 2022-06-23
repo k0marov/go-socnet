@@ -8,9 +8,8 @@ import (
 )
 
 type SqlDB struct {
-	sql                   *sql.DB
-	verifiedTargetTable   string
-	verifiedLikeableTable string
+	sql               *sql.DB
+	safeLikeableTable string
 }
 
 func NewSqlDB(db *sql.DB, targetTable table_name.TableName) (*SqlDB, error) {
@@ -29,9 +28,8 @@ func NewSqlDB(db *sql.DB, targetTable table_name.TableName) (*SqlDB, error) {
 		return nil, fmt.Errorf("while initializing sql for likeable %s: %w", targetName, err)
 	}
 	return &SqlDB{
-		sql:                   db,
-		verifiedTargetTable:   targetName,
-		verifiedLikeableTable: likeableName,
+		sql:               db,
+		safeLikeableTable: likeableName,
 	}, nil
 }
 
@@ -52,29 +50,29 @@ func initSQL(db *sql.DB, verifiedTarget, verifiedLikeable string) error {
 
 func (db *SqlDB) IsLiked(target string, liker core_values.UserId) (bool, error) {
 	row := db.sql.QueryRow(`
-		SELECT EXISTS(SELECT 1 FROM `+db.verifiedLikeableTable+` WHERE target_id = ? AND liker_id = ?)
+		SELECT EXISTS(SELECT 1 FROM `+db.safeLikeableTable+` WHERE target_id = ? AND liker_id = ?)
 	`, target, liker)
 	isLiked := 0
 	err := row.Scan(&isLiked)
 	if err != nil {
-		return false, fmt.Errorf("while SELECTing is %s liked: %w", db.verifiedLikeableTable, err)
+		return false, fmt.Errorf("while SELECTing is %s liked: %w", db.safeLikeableTable, err)
 	}
 	return isLiked == 1, nil
 }
 
 func (db *SqlDB) Like(target string, liker core_values.UserId) error {
 	_, err := db.sql.Exec(`
-		INSERT INTO `+db.verifiedLikeableTable+`(target_id, liker_id) VALUES(?, ?)
+		INSERT INTO `+db.safeLikeableTable+`(target_id, liker_id) VALUES(?, ?)
     `, target, liker)
 	if err != nil {
-		return fmt.Errorf("while INSERTing a new %s: %w", db.verifiedLikeableTable, err)
+		return fmt.Errorf("while INSERTing a new %s: %w", db.safeLikeableTable, err)
 	}
 	return nil
 }
 
 func (db *SqlDB) Unlike(target string, unliker core_values.UserId) error {
 	_, err := db.sql.Exec(`
-		DELETE FROM `+db.verifiedLikeableTable+` WHERE target_id = ? AND liker_id = ?
+		DELETE FROM `+db.safeLikeableTable+` WHERE target_id = ? AND liker_id = ?
 	`, target, unliker)
 	if err != nil {
 		return fmt.Errorf("while DELETEing a PostLike: %w", err)
@@ -84,7 +82,7 @@ func (db *SqlDB) Unlike(target string, unliker core_values.UserId) error {
 
 func (db *SqlDB) GetLikesCount(target string) (int, error) {
 	row := db.sql.QueryRow(`
-		SELECT COUNT(*) FROM `+db.verifiedLikeableTable+` WHERE target_id = ?
+		SELECT COUNT(*) FROM `+db.safeLikeableTable+` WHERE target_id = ?
     `, target)
 	var likes int
 	err := row.Scan(&likes)
@@ -96,7 +94,7 @@ func (db *SqlDB) GetLikesCount(target string) (int, error) {
 
 func (db *SqlDB) GetUserLikesCount(user core_values.UserId) (int, error) {
 	row := db.sql.QueryRow(`
-		SELECT COUNT(*) FROM `+db.verifiedLikeableTable+` WHERE liker_id = ?
+		SELECT COUNT(*) FROM `+db.safeLikeableTable+` WHERE liker_id = ?
     `, user)
 	var userLikes int
 	err := row.Scan(&userLikes)
@@ -106,6 +104,20 @@ func (db *SqlDB) GetUserLikesCount(user core_values.UserId) (int, error) {
 	return userLikes, nil
 }
 
-func (db *SqlDB) GetUserLikes(user core_values.UserId) ([]string, error) {
-	panic("unimplemented")
+func (db *SqlDB) GetUserLikes(user core_values.UserId) (targetIds []string, err error) {
+	rows, err := db.sql.Query(`
+		SELECT target_id FROM `+db.safeLikeableTable+` WHERE liker_id = ? 
+    `, user)
+	if err != nil {
+		return []string{}, fmt.Errorf("while SELECTing the target ids that are liked by user: %w", err)
+	}
+	for rows.Next() {
+		var targetId string
+		err := rows.Scan(&targetId)
+		if err != nil {
+			return []string{}, fmt.Errorf("while scanning a target id liked by user: %w", err)
+		}
+		targetIds = append(targetIds, targetId)
+	}
+	return targetIds, nil
 }

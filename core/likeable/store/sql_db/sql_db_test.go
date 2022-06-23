@@ -106,9 +106,9 @@ func TestSqlDB(t *testing.T) {
 			AssertNoError(t, err)
 			Assert(t, userLikesCount, i+1, "number of targets liked by user")
 
-			//userLikes, err := sqlDB.GetUserLikes(profile.Id)
-			//AssertNoError(t, err)
-			//Assert(t, userLikes, targets, "targets liked by user")
+			userLikes, err := sqlDB.GetUserLikes(profile.Id)
+			AssertNoError(t, err)
+			Assert(t, userLikes, targets, "targets liked by user")
 		}
 	})
 }
