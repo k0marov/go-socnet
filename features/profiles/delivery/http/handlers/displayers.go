@@ -18,6 +18,8 @@ type ProfileResponse struct {
 	Username   string
 	About      string
 	AvatarPath string
+	Follows    int
+	Followers  int
 	IsMine     bool
 	IsFollowed bool
 }
@@ -28,6 +30,8 @@ func EntityToResponse(profile entities.ContextedProfile) ProfileResponse {
 		Username:   profile.Username,
 		About:      profile.About,
 		AvatarPath: profile.AvatarPath,
+		Follows:    profile.Follows,
+		Followers:  profile.Followers,
 		IsMine:     profile.IsMine,
 		IsFollowed: profile.IsLiked,
 	}
