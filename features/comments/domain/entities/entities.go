@@ -16,12 +16,7 @@ type Comment struct {
 }
 
 type ContextedComment struct {
-	Id        values.CommentId
-	Author    profile_entities.ContextedProfile
-	Text      string
-	CreatedAt time.Time
-	Likes     int
-
-	IsLiked bool
-	IsMine  bool
+	Comment
+	Author          profile_entities.ContextedProfile
+	IsLiked, IsMine bool
 }

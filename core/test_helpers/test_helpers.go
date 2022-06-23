@@ -236,13 +236,9 @@ func RandomClientError() client_errors.ClientError {
 
 func RandomContextedComment() comment_entities.ContextedComment {
 	return comment_entities.ContextedComment{
-		Id:        RandomId(),
-		Author:    RandomContextedProfile(),
-		Text:      RandomString(),
-		CreatedAt: RandomTime(),
-		Likes:     RandomInt(),
-		IsLiked:   RandomBool(),
-		IsMine:    RandomBool(),
+		Comment: RandomComment(),
+		IsLiked: RandomBool(),
+		IsMine:  RandomBool(),
 	}
 }
 func RandomContextedComments() []comment_entities.ContextedComment {
