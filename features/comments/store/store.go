@@ -1,7 +1,6 @@
 package store
 
 // TODO mappers
-// TODO move context adding to another package in domain layer
 
 import (
 	"fmt"
