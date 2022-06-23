@@ -83,7 +83,7 @@ func NewStorePostsGetter(getter DBPostsGetter, likesGetter likeable.LikesCountGe
 			}
 			post := entities.Post{
 				Id:        model.Id,
-				Author:    model.Author,
+				AuthorId:  model.Author,
 				Text:      model.Text,
 				Images:    model.Images,
 				CreatedAt: model.CreatedAt,

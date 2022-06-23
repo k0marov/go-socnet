@@ -96,14 +96,10 @@ func NewPostsGetter(getProfile profile_service.ProfileGetter, getPosts store.Pos
 				return []entities.ContextedPost{}, fmt.Errorf("while checking if post is liked: %w", err)
 			}
 			ctxPost := entities.ContextedPost{
-				Id:        post.Id,
-				Author:    author,
-				Text:      post.Text,
-				Images:    post.Images,
-				CreatedAt: post.CreatedAt,
-				Likes:     post.Likes,
-				IsLiked:   isLiked,
-				IsMine:    authorId == caller,
+				Post:    post,
+				Author:  author,
+				IsLiked: isLiked,
+				IsMine:  authorId == caller,
 			}
 			ctxPosts = append(ctxPosts, ctxPost)
 		}

@@ -22,14 +22,10 @@ func TestPostsGetter(t *testing.T) {
 	isLiked := RandomBool()
 	addContext := func(post entities.Post, isMine, isLiked bool) entities.ContextedPost {
 		return entities.ContextedPost{
-			post.Id,
-			author,
-			post.Text,
-			post.Images,
-			post.CreatedAt,
-			post.Likes,
-			isLiked,
-			isMine,
+			Post:    post,
+			Author:  author,
+			IsLiked: isLiked,
+			IsMine:  isMine,
 		}
 	}
 	posts := []entities.Post{RandomPost()}

@@ -171,7 +171,7 @@ func TestStorePostsGetter(t *testing.T) {
 	AssertNoError(t, err)
 	wantPosts := []entities.Post{{
 		Id:        postModels[0].Id,
-		Author:    postModels[0].Author,
+		AuthorId:  postModels[0].Author,
 		Text:      postModels[0].Text,
 		Images:    postModels[0].Images,
 		CreatedAt: postModels[0].CreatedAt,
