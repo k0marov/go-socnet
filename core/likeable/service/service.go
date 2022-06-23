@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/k0marov/socnet/core/client_errors"
 	"github.com/k0marov/socnet/core/core_values"
-	"github.com/k0marov/socnet/core/likeable"
 )
 
 type (
@@ -14,7 +13,13 @@ type (
 	StoreLikesCountGetter func(id string) (int, error)
 )
 
-func NewLikeToggler(checkLiked StoreLikeChecker, like StoreLike, unlike StoreUnlike) likeable.LikeToggler {
+type (
+	LikeToggler      func(id string, owner, liker core_values.UserId) error
+	LikesCountGetter func(id string) (int, error)
+	LikeChecker      func(id string, fromUser core_values.UserId) (bool, error)
+)
+
+func NewLikeToggler(checkLiked StoreLikeChecker, like StoreLike, unlike StoreUnlike) LikeToggler {
 	return func(id string, owner, fromUser core_values.UserId) error {
 		if owner == fromUser {
 			return client_errors.LikingYourself
@@ -40,7 +45,7 @@ func NewLikeToggler(checkLiked StoreLikeChecker, like StoreLike, unlike StoreUnl
 	}
 }
 
-func NewLikesCountGetter(getLikesCount StoreLikesCountGetter) likeable.LikesCountGetter {
+func NewLikesCountGetter(getLikesCount StoreLikesCountGetter) LikesCountGetter {
 	return func(id string) (int, error) {
 		likes, err := getLikesCount(id)
 		if err != nil {
@@ -50,7 +55,7 @@ func NewLikesCountGetter(getLikesCount StoreLikesCountGetter) likeable.LikesCoun
 	}
 }
 
-func NewLikeChecker(checkLiked StoreLikeChecker) likeable.LikeChecker {
+func NewLikeChecker(checkLiked StoreLikeChecker) LikeChecker {
 	return func(id string, fromUser core_values.UserId) (bool, error) {
 		isLiked, err := checkLiked(id, fromUser)
 		if err != nil {
