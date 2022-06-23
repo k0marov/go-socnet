@@ -4,8 +4,8 @@ import (
 	"github.com/k0marov/socnet/core/core_errors"
 	"github.com/k0marov/socnet/core/core_values"
 	. "github.com/k0marov/socnet/core/test_helpers"
+	"github.com/k0marov/socnet/features/posts/domain/models"
 	"github.com/k0marov/socnet/features/posts/domain/values"
-	"github.com/k0marov/socnet/features/posts/store/models"
 	"github.com/k0marov/socnet/features/posts/store/sql_db"
 	profiles_db "github.com/k0marov/socnet/features/profiles/store/sql_db"
 	_ "github.com/mattn/go-sqlite3"
@@ -51,7 +51,7 @@ func TestSqlDB(t *testing.T) {
 		AssertNoError(t, err)
 		return models.PostModel{
 			Id:        post1Id,
-			Author:    author,
+			AuthorId:  author,
 			Text:      post.Text,
 			CreatedAt: post.CreatedAt,
 			Images:    nil,

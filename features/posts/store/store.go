@@ -5,10 +5,10 @@ import (
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/core/likeable"
 	"github.com/k0marov/socnet/features/posts/domain/entities"
+	"github.com/k0marov/socnet/features/posts/domain/models"
 	"github.com/k0marov/socnet/features/posts/domain/store"
 	"github.com/k0marov/socnet/features/posts/domain/values"
 	"github.com/k0marov/socnet/features/posts/store/file_storage"
-	"github.com/k0marov/socnet/features/posts/store/models"
 	"time"
 )
 
@@ -82,11 +82,7 @@ func NewStorePostsGetter(getter DBPostsGetter, likesGetter likeable.LikesCountGe
 				return []entities.Post{}, fmt.Errorf("error while getting likes count of a post: %w", err)
 			}
 			post := entities.Post{
-				Id:        model.Id,
-				AuthorId:  model.Author,
-				Text:      model.Text,
-				Images:    model.Images,
-				CreatedAt: model.CreatedAt,
+				PostModel: model,
 				Likes:     likes,
 			}
 			posts = append(posts, post)

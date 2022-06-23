@@ -14,7 +14,7 @@ type PostToCreate struct {
 
 type PostModel struct {
 	Id        values.PostId
-	Author    core_values.UserId
+	AuthorId  core_values.UserId
 	Text      string
 	CreatedAt time.Time
 	Images    []values.PostImage

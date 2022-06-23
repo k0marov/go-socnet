@@ -17,7 +17,7 @@ func TestPostContextAdder(t *testing.T) {
 	ctx := RandomLikeableContext()
 
 	getProfile := func(id, callerId core_values.UserId) (profile_entities.ContextedProfile, error) {
-		if id == post.AuthorId && callerId == caller {
+		if id == post.PostModel.AuthorId && callerId == caller {
 			return author, nil
 		}
 		panic("unexpected args")

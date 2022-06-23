@@ -6,8 +6,8 @@ import (
 	"github.com/k0marov/socnet/core/core_errors"
 	"github.com/k0marov/socnet/core/core_values"
 	"github.com/k0marov/socnet/core/likeable/table_name"
+	"github.com/k0marov/socnet/features/posts/domain/models"
 	"github.com/k0marov/socnet/features/posts/domain/values"
-	"github.com/k0marov/socnet/features/posts/store/models"
 	"time"
 )
 
@@ -65,7 +65,7 @@ func (db *SqlDB) GetPosts(author core_values.UserId) (posts []models.PostModel, 
 	for rows.Next() {
 		post := models.PostModel{}
 		var createdAt int64
-		err = rows.Scan(&post.Id, &post.Author, &post.Text, &createdAt)
+		err = rows.Scan(&post.Id, &post.AuthorId, &post.Text, &createdAt)
 		if err != nil {
 			return []models.PostModel{}, fmt.Errorf("while scanning a post: %w", err)
 		}

@@ -83,7 +83,7 @@ func TestPosts(t *testing.T) {
 	}
 	assertImageCreated := func(t testing.TB, post entities.ContextedPost, postImage values.PostImage, wantImage []byte) {
 		t.Helper()
-		path := filepath.Join(static_store.StaticDir, post_storage.GetPostDir(post.Id, post.AuthorId), post_storage.ImagePrefix+strconv.Itoa(postImage.Index))
+		path := filepath.Join(static_store.StaticDir, post_storage.GetPostDir(post.Id, post.PostModel.AuthorId), post_storage.ImagePrefix+strconv.Itoa(postImage.Index))
 		got := readFile(t, path)
 		Assert(t, got, wantImage, "the stored image data")
 	}
@@ -144,11 +144,11 @@ func TestPosts(t *testing.T) {
 		log.Print(fmt.Sprintf("first:  %+v, \nsecond: %+v", posts[0], posts[1]))
 
 		Assert(t, posts[0].Text, text1, "the first post's text")
-		Assert(t, posts[0].AuthorId, user2.Id, "first post's author")
+		Assert(t, posts[0].PostModel.AuthorId, user2.Id, "first post's author")
 		AssertFatal(t, len(posts[0].Images), 0, "number of images in first post")
 
 		Assert(t, posts[1].Text, text2, "the second post's text")
-		Assert(t, posts[1].AuthorId, user2.Id, "second posts's author")
+		Assert(t, posts[1].PostModel.AuthorId, user2.Id, "second posts's author")
 		AssertFatal(t, len(posts[1].Images), 2, "number of images in second post")
 		assertImageCreated(t, posts[1], posts[1].Images[0], image1)
 		assertImageCreated(t, posts[1], posts[1].Images[1], image2)

@@ -10,8 +10,8 @@ import (
 	comment_entities "github.com/k0marov/socnet/features/comments/domain/entities"
 	comment_values "github.com/k0marov/socnet/features/comments/domain/values"
 	comment_models "github.com/k0marov/socnet/features/comments/store/models"
+	post_models "github.com/k0marov/socnet/features/posts/domain/models"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
-	post_models "github.com/k0marov/socnet/features/posts/store/models"
 	profile_models "github.com/k0marov/socnet/features/profiles/domain/models"
 	"math"
 	random "math/rand"
@@ -41,7 +41,7 @@ func AssertStatusCode(t testing.TB, got *httptest.ResponseRecorder, want int) {
 func Assert[T any](t testing.TB, got, want T, description string) bool {
 	t.Helper()
 	if !reflect.DeepEqual(got, want) {
-		t.Errorf("%s is not right: got '%v', want '%v'", description, got, want)
+		t.Errorf("%s is not right:\ngot '%v',\nwant '%v'", description, got, want)
 		return false
 	}
 	return true
@@ -186,7 +186,7 @@ func RandomTime() time.Time {
 func RandomPostModel() post_models.PostModel {
 	return post_models.PostModel{
 		Id:        RandomString(),
-		Author:    RandomString(),
+		AuthorId:  RandomString(),
 		Text:      RandomString(),
 		CreatedAt: RandomTime(),
 		Images:    RandomPostImages(),
@@ -194,11 +194,7 @@ func RandomPostModel() post_models.PostModel {
 }
 func RandomPost() post_entities.Post {
 	return post_entities.Post{
-		Id:        RandomId(),
-		AuthorId:  RandomString(),
-		Text:      RandomString(),
-		Images:    RandomPostImages(),
-		CreatedAt: RandomTime(),
+		PostModel: RandomPostModel(),
 		Likes:     RandomInt(),
 	}
 }

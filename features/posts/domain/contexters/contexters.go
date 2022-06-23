@@ -14,7 +14,7 @@ type PostListContextAdder func(posts []entities.Post, caller core_values.UserId)
 
 func NewPostContextAdder(getProfile profile_service.ProfileGetter, getContext likeable_contexters.LikeableContextGetter) PostContextAdder {
 	return func(post entities.Post, caller core_values.UserId) (entities.ContextedPost, error) {
-		author, err := getProfile(post.AuthorId, caller)
+		author, err := getProfile(post.PostModel.AuthorId, caller)
 		if err != nil {
 			return entities.ContextedPost{}, fmt.Errorf("while getting author of post: %w", err)
 		}

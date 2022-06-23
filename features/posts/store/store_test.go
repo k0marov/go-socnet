@@ -4,9 +4,9 @@ import (
 	"github.com/k0marov/socnet/core/core_values"
 	. "github.com/k0marov/socnet/core/test_helpers"
 	"github.com/k0marov/socnet/features/posts/domain/entities"
+	"github.com/k0marov/socnet/features/posts/domain/models"
 	"github.com/k0marov/socnet/features/posts/domain/values"
 	"github.com/k0marov/socnet/features/posts/store"
-	"github.com/k0marov/socnet/features/posts/store/models"
 	"reflect"
 	"testing"
 	"time"
@@ -170,11 +170,7 @@ func TestStorePostsGetter(t *testing.T) {
 	gotPosts, err := store.NewStorePostsGetter(dbGetter, likesGetter)(author)
 	AssertNoError(t, err)
 	wantPosts := []entities.Post{{
-		Id:        postModels[0].Id,
-		AuthorId:  postModels[0].Author,
-		Text:      postModels[0].Text,
-		Images:    postModels[0].Images,
-		CreatedAt: postModels[0].CreatedAt,
+		PostModel: postModels[0],
 		Likes:     likes,
 	}}
 	Assert(t, gotPosts, wantPosts, "returned posts")
