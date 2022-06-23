@@ -3,6 +3,8 @@ package profiles
 import (
 	"database/sql"
 	"github.com/k0marov/socnet/core/likeable"
+	likeable_contexters "github.com/k0marov/socnet/core/likeable/contexters"
+	"github.com/k0marov/socnet/features/profiles/domain/contexters"
 	"log"
 
 	"github.com/k0marov/socnet/features/profiles/delivery/http/handlers"
@@ -45,8 +47,11 @@ func NewProfileGetterImpl(db *sql.DB) service.ProfileGetter {
 	if err != nil {
 		log.Fatalf("Error while creating a likeable Profile: %v", err)
 	}
+
+	addContext := contexters.NewProfileContextAdder(likeable_contexters.NewLikeableContextGetter(likeableProfile.IsLiked))
+
 	getProfile := store.NewStoreProfileGetter(sqlDB.GetProfile, likeableProfile.GetLikesCount, likeableProfile.GetUserLikesCount)
-	return service.NewProfileGetter(getProfile, likeableProfile.IsLiked)
+	return service.NewProfileGetter(getProfile, addContext)
 }
 
 func NewProfilesRouterImpl(db *sql.DB) func(chi.Router) {
@@ -73,9 +78,11 @@ func NewProfilesRouterImpl(db *sql.DB) func(chi.Router) {
 	profileUpdateValidator := validators.NewProfileUpdateValidator()
 	avatarValidator := validators.NewAvatarValidator(image_decoder.ImageDecoderImpl)
 
+	addContext := contexters.NewProfileContextAdder(likeable_contexters.NewLikeableContextGetter(likeableProfile.IsLiked))
+
 	profileUpdater := service.NewProfileUpdater(profileUpdateValidator, storeProfileUpdater)
 	avatarUpdater := service.NewAvatarUpdater(avatarValidator, storeAvatarUpdater)
-	profileGetter := service.NewProfileGetter(storeProfileGetter, likeableProfile.IsLiked)
+	profileGetter := service.NewProfileGetter(storeProfileGetter, addContext)
 	followToggler := service.NewFollowToggler(likeableProfile.ToggleLike)
 	followsGetter := service.NewFollowsGetter(likeableProfile.GetUserLikes)
 

@@ -164,7 +164,7 @@ func TestProfiles(t *testing.T) {
 			r.ServeHTTP(response, request)
 			contextedProfile := entities.ContextedProfile{}
 			json.NewDecoder(response.Body).Decode(&contextedProfile)
-			Assert(t, contextedProfile.IsFollowedByCaller, isFollowed, "caller following or not following target")
+			Assert(t, contextedProfile.IsLiked, isFollowed, "caller following or not following target")
 		}
 
 		// create 2 users
