@@ -120,6 +120,7 @@ func RandomAuthUser() auth.User {
 func RandomProfile() profile_entities.Profile {
 	return profile_entities.Profile{
 		ProfileModel: RandomProfileModel(),
+		AvatarURL:    RandomString(),
 		Follows:      RandomInt(),
 		Followers:    RandomInt(),
 	}
@@ -191,12 +192,20 @@ func RandomPostModel() post_models.PostModel {
 		AuthorId:  RandomString(),
 		Text:      RandomString(),
 		CreatedAt: RandomTime(),
-		Images:    RandomPostImages(),
+		Images:    RandomPostImageModels(),
+	}
+}
+func RandomPostImageModels() []post_models.PostImageModel {
+	return []post_models.PostImageModel{
+		{Path: RandomString(), Index: 1},
+		{Path: RandomString(), Index: 2},
+		{Path: RandomString(), Index: 3},
 	}
 }
 func RandomPost() post_entities.Post {
 	return post_entities.Post{
 		PostModel: RandomPostModel(),
+		Images:    RandomPostImages(),
 		Likes:     RandomInt(),
 	}
 }

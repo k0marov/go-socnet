@@ -7,17 +7,17 @@ import (
 )
 
 type CommentResponse struct {
-	Id        string
-	Author    profile_responses.ProfileResponse
-	Text      string
-	CreatedAt time.Time
-	Likes     int
-	IsLiked   bool
-	IsMine    bool
+	Id        string                            `json:"id"`
+	Author    profile_responses.ProfileResponse `json:"author"`
+	Text      string                            `json:"text"`
+	CreatedAt time.Time                         `json:"created_at"`
+	Likes     int                               `json:"likes"`
+	IsLiked   bool                              `json:"is_liked"`
+	IsMine    bool                              `json:"is_mine"`
 }
 
 type CommentsResponse struct {
-	Comments []CommentResponse
+	Comments []CommentResponse `json:"comments"`
 }
 
 func NewCommentResponse(comment entities.ContextedComment) CommentResponse {

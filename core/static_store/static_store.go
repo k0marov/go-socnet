@@ -14,5 +14,8 @@ const StaticDir = "static/"
 const StaticHost = "static.example.com"
 
 func PathToURL(path core_values.StaticPath) core_values.FileURL {
+	if path == "" {
+		return ""
+	}
 	return StaticHost + "/" + path
 }

@@ -17,7 +17,7 @@ type (
 	DBAuthorGetter func(values.PostId) (core_values.UserId, error)
 
 	DBPostCreator     func(newPost models.PostToCreate) (values.PostId, error)
-	DBPostImagesAdder func(values.PostId, []values.PostImage) error
+	DBPostImagesAdder func(values.PostId, []models.PostImageModel) error
 	DBPostDeleter     func(values.PostId) error
 )
 
@@ -39,10 +39,10 @@ func NewStorePostCreator(
 			deletePost(postId)
 			return fmt.Errorf("while storing image files: %w", err)
 		}
-		var postImages []values.PostImage
+		var postImages []models.PostImageModel
 		for i, path := range imagePaths {
-			postImages = append(postImages, values.PostImage{
-				URL:   path,
+			postImages = append(postImages, models.PostImageModel{
+				Path:  path,
 				Index: post.Images[i].Index,
 			})
 		}
@@ -83,6 +83,7 @@ func NewStorePostsGetter(getter DBPostsGetter, likesGetter likeable.LikesCountGe
 			}
 			post := entities.Post{
 				PostModel: model,
+				Images:    entities.ImagePathsToUrls(model.Images),
 				Likes:     likes,
 			}
 			posts = append(posts, post)

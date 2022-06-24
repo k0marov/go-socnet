@@ -3,6 +3,7 @@ package store
 import (
 	"fmt"
 	"github.com/k0marov/socnet/core/likeable"
+	"github.com/k0marov/socnet/core/static_store"
 
 	"github.com/k0marov/socnet/features/profiles/domain/entities"
 	"github.com/k0marov/socnet/features/profiles/domain/store"
@@ -63,6 +64,7 @@ func NewStoreProfileGetter(getDBProfile DBProfileGetter, getFollowers likeable.L
 		}
 		profile := entities.Profile{
 			ProfileModel: profileModel,
+			AvatarURL:    static_store.PathToURL(profileModel.AvatarPath),
 			Follows:      follows,
 			Followers:    followers,
 		}

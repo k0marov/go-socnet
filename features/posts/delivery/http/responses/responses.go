@@ -8,8 +8,8 @@ import (
 )
 
 type PostImageResponse struct {
-	Index int
-	Url   string
+	Index int    `json:"index"`
+	Url   string `json:"url"`
 }
 
 func newPostImageListResponse(images []values.PostImage) (respList []PostImageResponse) {
@@ -24,17 +24,17 @@ func newPostImageListResponse(images []values.PostImage) (respList []PostImageRe
 }
 
 type PostResponse struct {
-	Id        string
-	Author    profile_responses.ProfileResponse
-	Text      string
-	CreatedAt time.Time
-	Images    []PostImageResponse
-	Likes     int
-	IsLiked   bool
-	IsMine    bool
+	Id        string                            `json:"id"`
+	Author    profile_responses.ProfileResponse `json:"author"`
+	Text      string                            `json:"text"`
+	CreatedAt time.Time                         `json:"created_at"`
+	Images    []PostImageResponse               `json:"images"`
+	Likes     int                               `json:"likes"`
+	IsLiked   bool                              `json:"is_liked"`
+	IsMine    bool                              `json:"is_mine"`
 }
 type PostsResponse struct {
-	Posts []PostResponse
+	Posts []PostResponse `json:"posts"`
 }
 
 func NewPostListResponse(posts []entities.ContextedPost) PostsResponse {

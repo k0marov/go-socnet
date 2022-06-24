@@ -3,6 +3,7 @@ package store_test
 import (
 	"fmt"
 	"github.com/k0marov/socnet/core/core_values"
+	"github.com/k0marov/socnet/core/static_store"
 	"github.com/k0marov/socnet/features/profiles/domain/models"
 	"reflect"
 	"testing"
@@ -179,6 +180,7 @@ func TestStoreProfileGetter(t *testing.T) {
 	AssertNoError(t, err)
 	wantProfile := entities.Profile{
 		ProfileModel: model,
+		AvatarURL:    static_store.PathToURL(model.AvatarPath),
 		Follows:      follows,
 		Followers:    followers,
 	}

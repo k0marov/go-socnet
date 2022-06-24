@@ -12,7 +12,7 @@ import (
 )
 
 type NewCommentRequest struct {
-	Text string
+	Text string `json:"text"`
 }
 
 func NewGetCommentsHandler(getComments service.PostCommentsGetter) http.HandlerFunc {

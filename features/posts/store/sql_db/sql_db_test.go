@@ -31,7 +31,7 @@ func TestSqlDB_ErrorHandling(t *testing.T) {
 		AssertSomeError(t, err)
 	})
 	t.Run("AddPostImages", func(t *testing.T) {
-		err := sut.AddPostImages(RandomString(), RandomPostImages())
+		err := sut.AddPostImages(RandomString(), RandomPostImageModels())
 		AssertSomeError(t, err)
 	})
 	t.Run("DeletePost", func(t *testing.T) {
@@ -91,7 +91,7 @@ func TestSqlDB(t *testing.T) {
 		assertAuthor(t, wantPost1.Id, user1.Id)
 		assertPosts(t, sut, user1.Id, []models.PostModel{wantPost1})
 		// add images to that post
-		wantPost1.Images = RandomPostImages()
+		wantPost1.Images = RandomPostImageModels()
 		err = sut.AddPostImages(wantPost1.Id, wantPost1.Images)
 		AssertNoError(t, err)
 		assertPosts(t, sut, user1.Id, []models.PostModel{wantPost1})

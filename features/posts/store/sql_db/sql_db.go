@@ -109,7 +109,7 @@ func (db *SqlDB) CreatePost(newPost models.PostToCreate) (values.PostId, error) 
 	return fmt.Sprintf("%d", id), nil
 }
 
-func (db *SqlDB) AddPostImages(post values.PostId, images []values.PostImage) error {
+func (db *SqlDB) AddPostImages(post values.PostId, images []models.PostImageModel) error {
 	for _, image := range images {
 		err := db.addImage(post, image)
 		if err != nil {
@@ -129,29 +129,29 @@ func (db *SqlDB) DeletePost(post values.PostId) error {
 	return nil
 }
 
-func (db *SqlDB) addImage(post values.PostId, image values.PostImage) error {
+func (db *SqlDB) addImage(post values.PostId, image models.PostImageModel) error {
 	_, err := db.sql.Exec(`
 		INSERT INTO PostImage(post_id, path, ind) VALUES (?, ?, ?)
-   `, post, image.URL, image.Index)
+   `, post, image.Path, image.Index)
 	if err != nil {
 		return fmt.Errorf("while inserting a post image: %w", err)
 	}
 	return nil
 }
 
-func (db *SqlDB) getImages(post values.PostId) (images []values.PostImage, err error) {
+func (db *SqlDB) getImages(post values.PostId) (images []models.PostImageModel, err error) {
 	rows, err := db.sql.Query(`
 		SELECT path, ind FROM PostImage WHERE post_id = ?
     `, post)
 	if err != nil {
-		return []values.PostImage{}, fmt.Errorf("while SELECTing post images: %w", err)
+		return []models.PostImageModel{}, fmt.Errorf("while SELECTing post images: %w", err)
 	}
 	defer rows.Close()
 	for rows.Next() {
-		image := values.PostImage{}
-		err := rows.Scan(&image.URL, &image.Index)
+		image := models.PostImageModel{}
+		err := rows.Scan(&image.Path, &image.Index)
 		if err != nil {
-			return []values.PostImage{}, fmt.Errorf("while scanning an image: %w", err)
+			return []models.PostImageModel{}, fmt.Errorf("while scanning an image: %w", err)
 		}
 		images = append(images, image)
 	}

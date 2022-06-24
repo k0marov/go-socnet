@@ -3,14 +3,14 @@ package responses
 import "github.com/k0marov/socnet/features/profiles/domain/entities"
 
 type ProfileResponse struct {
-	Id         string
-	Username   string
-	About      string
-	AvatarPath string
-	Follows    int
-	Followers  int
-	IsMine     bool
-	IsFollowed bool
+	Id         string `json:"id"`
+	Username   string `json:"username"`
+	About      string `json:"about"`
+	AvatarPath string `json:"avatar_path"`
+	Follows    int    `json:"follows"`
+	Followers  int    `json:"followers"`
+	IsMine     bool   `json:"is_mine"`
+	IsFollowed bool   `json:"is_followed"`
 }
 
 func NewProfileResponse(profile entities.ContextedProfile) ProfileResponse {

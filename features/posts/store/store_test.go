@@ -17,11 +17,11 @@ func TestStorePostCreator(t *testing.T) {
 	postId := RandomString()
 	createdAt := time.Now()
 	var imagePaths []core_values.StaticPath
-	var wantPostImages []values.PostImage
+	var wantPostImages []models.PostImageModel
 	for _, img := range tNewPost.Images {
 		path := RandomString()
 		imagePaths = append(imagePaths, path)
-		wantPostImages = append(wantPostImages, values.PostImage{URL: path, Index: img.Index})
+		wantPostImages = append(wantPostImages, models.PostImageModel{Path: path, Index: img.Index})
 	}
 
 	createPost := func(newPost models.PostToCreate) (values.PostId, error) {
@@ -61,14 +61,14 @@ func TestStorePostCreator(t *testing.T) {
 		AssertSomeError(t, err)
 		Assert(t, postDeleted, true, "post was deleted")
 	})
-	addImages := func(post values.PostId, images []values.PostImage) error {
+	addImages := func(post values.PostId, images []models.PostImageModel) error {
 		if post == postId && reflect.DeepEqual(images, wantPostImages) {
 			return nil
 		}
 		panic("unimplemented")
 	}
 	t.Run("error case - addImages returns an error", func(t *testing.T) {
-		addImages := func(values.PostId, []values.PostImage) error {
+		addImages := func(values.PostId, []models.PostImageModel) error {
 			return RandomError()
 		}
 		postDeleted := false
@@ -171,6 +171,7 @@ func TestStorePostsGetter(t *testing.T) {
 	AssertNoError(t, err)
 	wantPosts := []entities.Post{{
 		PostModel: postModels[0],
+		Images:    entities.ImagePathsToUrls(postModels[0].Images),
 		Likes:     likes,
 	}}
 	Assert(t, gotPosts, wantPosts, "returned posts")

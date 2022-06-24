@@ -12,10 +12,15 @@ type PostToCreate struct {
 	CreatedAt time.Time
 }
 
+type PostImageModel struct {
+	Index int
+	Path  core_values.StaticPath
+}
+
 type PostModel struct {
 	Id        values.PostId
 	AuthorId  core_values.UserId
 	Text      string
 	CreatedAt time.Time
-	Images    []values.PostImage
+	Images    []PostImageModel
 }
