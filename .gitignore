@@ -1,0 +1,4 @@
+deploy/static
+deploy/db.sqlite3
+deploy/deploy
+deploy/auth.db.csv
