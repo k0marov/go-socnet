@@ -4,7 +4,6 @@ import (
 	"github.com/k0marov/socnet/features/posts/delivery/http/responses"
 	"github.com/k0marov/socnet/features/posts/domain/service"
 	"github.com/k0marov/socnet/features/posts/domain/values"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -82,7 +81,6 @@ func NewCreateHandler(createPost service.PostCreator) http.HandlerFunc {
 			Text:   r.FormValue("text"),
 			Images: parseImages(r),
 		}
-		log.Printf("%+v", newPost)
 		err := createPost(newPost)
 		if err != nil {
 			helpers.HandleServiceError(w, err)
