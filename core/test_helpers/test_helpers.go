@@ -35,7 +35,9 @@ var rand = random.New(random.NewSource(time.Now().UnixNano()))
 
 func AssertStatusCode(t testing.TB, got *httptest.ResponseRecorder, want int) {
 	t.Helper()
-	Assert(t, got.Result().StatusCode, want, "response status code")
+	if !Assert(t, got.Result().StatusCode, want, "response status code") {
+		t.Fatalf("response: %v", got.Body)
+	}
 }
 
 func Assert[T any](t testing.TB, got, want T, description string) bool {
