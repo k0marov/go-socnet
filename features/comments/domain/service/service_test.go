@@ -82,6 +82,8 @@ func TestCommentCreator(t *testing.T) {
 	gotCreated, err := sut(newComment)
 	AssertNoError(t, err)
 	Assert(t, TimeAlmostNow(gotCreated.CreatedAt), true, "createdAt is time.Now()")
+	_, zoneOffset := gotCreated.CreatedAt.Zone()
+	Assert(t, zoneOffset, 0, "time zone offset")
 	gotCreated.CreatedAt = createdComment.CreatedAt
 	Assert(t, gotCreated, createdComment, "the returned created comment")
 }

@@ -50,7 +50,7 @@ func NewCommentCreator(validate validators.CommentValidator, getProfile profile_
 			return entities.ContextedComment{}, fmt.Errorf("while getting author's profile: %w", err)
 		}
 
-		createdAt := time.Now()
+		createdAt := time.Now().UTC()
 		newId, err := createComment(newComment, createdAt)
 		if err != nil {
 			return entities.ContextedComment{}, fmt.Errorf("while creating new comment: %w", err)
