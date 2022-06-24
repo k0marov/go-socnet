@@ -5,9 +5,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"github.com/k0marov/socnet/core/static_store"
-	"github.com/k0marov/socnet/features/profiles/delivery/http/responses"
-	"github.com/k0marov/socnet/features/profiles/domain/models"
 	"io"
 	"log"
 	"mime/multipart"
@@ -17,14 +14,18 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/k0marov/socnet/features/profiles"
-	"github.com/k0marov/socnet/features/profiles/delivery/http/handlers"
-	"github.com/k0marov/socnet/features/profiles/domain/entities"
-	"github.com/k0marov/socnet/features/profiles/domain/values"
+	"github.com/k0marov/go-socnet/core/static_store"
+	"github.com/k0marov/go-socnet/features/profiles/delivery/http/responses"
+	"github.com/k0marov/go-socnet/features/profiles/domain/models"
 
-	core_entities "github.com/k0marov/socnet/core/core_entities"
-	"github.com/k0marov/socnet/core/core_values"
-	. "github.com/k0marov/socnet/core/test_helpers"
+	"github.com/k0marov/go-socnet/features/profiles"
+	"github.com/k0marov/go-socnet/features/profiles/delivery/http/handlers"
+	"github.com/k0marov/go-socnet/features/profiles/domain/entities"
+	"github.com/k0marov/go-socnet/features/profiles/domain/values"
+
+	core_entities "github.com/k0marov/go-socnet/core/core_entities"
+	"github.com/k0marov/go-socnet/core/core_values"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
 
 	_ "github.com/mattn/go-sqlite3"
 

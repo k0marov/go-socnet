@@ -6,9 +6,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/k0marov/socnet/core/ref"
-	"github.com/k0marov/socnet/core/static_store"
-	. "github.com/k0marov/socnet/core/test_helpers"
+	"github.com/k0marov/go-socnet/core/ref"
+	"github.com/k0marov/go-socnet/core/static_store"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
 )
 
 func TestStaticFileCreator(t *testing.T) {

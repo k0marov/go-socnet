@@ -6,10 +6,10 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/k0marov/socnet/core/client_errors"
-	core_entities "github.com/k0marov/socnet/core/core_entities"
-	"github.com/k0marov/socnet/core/core_values"
-	"github.com/k0marov/socnet/core/ref"
+	"github.com/k0marov/go-socnet/core/client_errors"
+	core_entities "github.com/k0marov/go-socnet/core/core_entities"
+	"github.com/k0marov/go-socnet/core/core_values"
+	"github.com/k0marov/go-socnet/core/ref"
 
 	auth "github.com/k0marov/golang-auth"
 )

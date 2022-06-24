@@ -2,13 +2,14 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/go-chi/chi/v5"
-	"github.com/k0marov/socnet/core/client_errors"
-	"github.com/k0marov/socnet/core/http_helpers"
-	"github.com/k0marov/socnet/features/comments/delivery/http/responses"
-	"github.com/k0marov/socnet/features/comments/domain/service"
-	"github.com/k0marov/socnet/features/comments/domain/values"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/k0marov/go-socnet/core/client_errors"
+	"github.com/k0marov/go-socnet/core/http_helpers"
+	"github.com/k0marov/go-socnet/features/comments/delivery/http/responses"
+	"github.com/k0marov/go-socnet/features/comments/domain/service"
+	"github.com/k0marov/go-socnet/features/comments/domain/values"
 )
 
 type NewCommentRequest struct {

@@ -2,14 +2,15 @@ package store
 
 import (
 	"fmt"
-	"github.com/k0marov/socnet/core/core_values"
-	"github.com/k0marov/socnet/core/likeable"
-	"github.com/k0marov/socnet/features/posts/domain/entities"
-	"github.com/k0marov/socnet/features/posts/domain/models"
-	"github.com/k0marov/socnet/features/posts/domain/store"
-	"github.com/k0marov/socnet/features/posts/domain/values"
-	"github.com/k0marov/socnet/features/posts/store/file_storage"
 	"time"
+
+	"github.com/k0marov/go-socnet/core/core_values"
+	"github.com/k0marov/go-socnet/core/likeable"
+	"github.com/k0marov/go-socnet/features/posts/domain/entities"
+	"github.com/k0marov/go-socnet/features/posts/domain/models"
+	"github.com/k0marov/go-socnet/features/posts/domain/store"
+	"github.com/k0marov/go-socnet/features/posts/domain/values"
+	"github.com/k0marov/go-socnet/features/posts/store/file_storage"
 )
 
 type (

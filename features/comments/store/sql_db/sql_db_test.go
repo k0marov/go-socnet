@@ -1,19 +1,20 @@
 package sql_db_test
 
 import (
-	"github.com/k0marov/socnet/core/core_errors"
-	"github.com/k0marov/socnet/core/core_values"
-	. "github.com/k0marov/socnet/core/test_helpers"
-	"github.com/k0marov/socnet/features/comments/domain/models"
-	"github.com/k0marov/socnet/features/comments/domain/values"
-	"github.com/k0marov/socnet/features/comments/store/sql_db"
-	post_models "github.com/k0marov/socnet/features/posts/domain/models"
-	post_values "github.com/k0marov/socnet/features/posts/domain/values"
-	posts_db "github.com/k0marov/socnet/features/posts/store/sql_db"
-	profiles_db "github.com/k0marov/socnet/features/profiles/store/sql_db"
-	_ "github.com/mattn/go-sqlite3"
 	"testing"
 	"time"
+
+	"github.com/k0marov/go-socnet/core/core_errors"
+	"github.com/k0marov/go-socnet/core/core_values"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
+	"github.com/k0marov/go-socnet/features/comments/domain/models"
+	"github.com/k0marov/go-socnet/features/comments/domain/values"
+	"github.com/k0marov/go-socnet/features/comments/store/sql_db"
+	post_models "github.com/k0marov/go-socnet/features/posts/domain/models"
+	post_values "github.com/k0marov/go-socnet/features/posts/domain/values"
+	posts_db "github.com/k0marov/go-socnet/features/posts/store/sql_db"
+	profiles_db "github.com/k0marov/go-socnet/features/profiles/store/sql_db"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func TestSqlDB_ErrorHandling(t *testing.T) {

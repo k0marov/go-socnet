@@ -1,15 +1,16 @@
 package file_storage_test
 
 import (
-	"github.com/k0marov/socnet/core/core_values"
-	. "github.com/k0marov/socnet/core/test_helpers"
-	"github.com/k0marov/socnet/features/posts/domain/values"
-	"github.com/k0marov/socnet/features/posts/store/file_storage"
-	profiles "github.com/k0marov/socnet/features/profiles/store/file_storage"
 	"path/filepath"
 	"reflect"
 	"strconv"
 	"testing"
+
+	"github.com/k0marov/go-socnet/core/core_values"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
+	"github.com/k0marov/go-socnet/features/posts/domain/values"
+	"github.com/k0marov/go-socnet/features/posts/store/file_storage"
+	profiles "github.com/k0marov/go-socnet/features/profiles/store/file_storage"
 )
 
 func TestPostImageFilesCreator(t *testing.T) {

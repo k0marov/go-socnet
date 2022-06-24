@@ -1,11 +1,12 @@
 package service_test
 
 import (
-	"github.com/k0marov/socnet/core/client_errors"
-	"github.com/k0marov/socnet/core/core_values"
-	"github.com/k0marov/socnet/core/likeable/service"
-	. "github.com/k0marov/socnet/core/test_helpers"
 	"testing"
+
+	"github.com/k0marov/go-socnet/core/client_errors"
+	"github.com/k0marov/go-socnet/core/core_values"
+	"github.com/k0marov/go-socnet/core/likeable/service"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
 )
 
 func TestLikeToggler(t *testing.T) {

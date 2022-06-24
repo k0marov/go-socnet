@@ -1,9 +1,9 @@
 package responses
 
 import (
-	"github.com/k0marov/socnet/features/posts/domain/entities"
-	"github.com/k0marov/socnet/features/posts/domain/values"
-	profile_responses "github.com/k0marov/socnet/features/profiles/delivery/http/responses"
+	"github.com/k0marov/go-socnet/features/posts/domain/entities"
+	"github.com/k0marov/go-socnet/features/posts/domain/values"
+	profile_responses "github.com/k0marov/go-socnet/features/profiles/delivery/http/responses"
 )
 
 type PostImageResponse struct {

@@ -2,9 +2,10 @@ package contexters
 
 import (
 	"fmt"
-	"github.com/k0marov/socnet/core/core_values"
-	likeable_contexters "github.com/k0marov/socnet/core/likeable/contexters"
-	"github.com/k0marov/socnet/features/profiles/domain/entities"
+
+	"github.com/k0marov/go-socnet/core/core_values"
+	likeable_contexters "github.com/k0marov/go-socnet/core/likeable/contexters"
+	"github.com/k0marov/go-socnet/features/profiles/domain/entities"
 )
 
 type ProfileContextAdder func(profile entities.Profile, caller core_values.UserId) (entities.ContextedProfile, error)

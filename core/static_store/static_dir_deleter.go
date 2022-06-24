@@ -2,9 +2,10 @@ package static_store
 
 import (
 	"fmt"
-	"github.com/k0marov/socnet/core/core_values"
 	"os"
 	"path/filepath"
+
+	"github.com/k0marov/go-socnet/core/core_values"
 )
 
 // DirDeleter os.RemoveAll implements this

@@ -1,8 +1,8 @@
 package values
 
 import (
-	"github.com/k0marov/socnet/core/core_values"
-	post_values "github.com/k0marov/socnet/features/posts/domain/values"
+	"github.com/k0marov/go-socnet/core/core_values"
+	post_values "github.com/k0marov/go-socnet/features/posts/domain/values"
 )
 
 type CommentId = string

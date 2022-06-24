@@ -2,11 +2,12 @@ package contexters
 
 import (
 	"fmt"
-	"github.com/k0marov/socnet/core/core_values"
-	"github.com/k0marov/socnet/core/helpers"
-	likeable_contexters "github.com/k0marov/socnet/core/likeable/contexters"
-	"github.com/k0marov/socnet/features/posts/domain/entities"
-	profile_service "github.com/k0marov/socnet/features/profiles/domain/service"
+
+	"github.com/k0marov/go-socnet/core/core_values"
+	"github.com/k0marov/go-socnet/core/helpers"
+	likeable_contexters "github.com/k0marov/go-socnet/core/likeable/contexters"
+	"github.com/k0marov/go-socnet/features/posts/domain/entities"
+	profile_service "github.com/k0marov/go-socnet/features/profiles/domain/service"
 )
 
 type PostContextAdder func(post entities.Post, caller core_values.UserId) (entities.ContextedPost, error)

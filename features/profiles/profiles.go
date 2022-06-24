@@ -2,22 +2,23 @@ package profiles
 
 import (
 	"database/sql"
-	"github.com/k0marov/socnet/core/likeable"
-	likeable_contexters "github.com/k0marov/socnet/core/likeable/contexters"
-	"github.com/k0marov/socnet/features/profiles/domain/contexters"
 	"log"
 
-	"github.com/k0marov/socnet/features/profiles/delivery/http/handlers"
-	"github.com/k0marov/socnet/features/profiles/delivery/http/router"
-	"github.com/k0marov/socnet/features/profiles/domain/service"
-	"github.com/k0marov/socnet/features/profiles/domain/validators"
-	"github.com/k0marov/socnet/features/profiles/store"
-	"github.com/k0marov/socnet/features/profiles/store/file_storage"
-	"github.com/k0marov/socnet/features/profiles/store/sql_db"
+	"github.com/k0marov/go-socnet/core/likeable"
+	likeable_contexters "github.com/k0marov/go-socnet/core/likeable/contexters"
+	"github.com/k0marov/go-socnet/features/profiles/domain/contexters"
 
-	"github.com/k0marov/socnet/core/core_entities"
-	"github.com/k0marov/socnet/core/image_decoder"
-	"github.com/k0marov/socnet/core/static_store"
+	"github.com/k0marov/go-socnet/features/profiles/delivery/http/handlers"
+	"github.com/k0marov/go-socnet/features/profiles/delivery/http/router"
+	"github.com/k0marov/go-socnet/features/profiles/domain/service"
+	"github.com/k0marov/go-socnet/features/profiles/domain/validators"
+	"github.com/k0marov/go-socnet/features/profiles/store"
+	"github.com/k0marov/go-socnet/features/profiles/store/file_storage"
+	"github.com/k0marov/go-socnet/features/profiles/store/sql_db"
+
+	"github.com/k0marov/go-socnet/core/core_entities"
+	"github.com/k0marov/go-socnet/core/image_decoder"
+	"github.com/k0marov/go-socnet/core/static_store"
 
 	"github.com/go-chi/chi/v5"
 	auth "github.com/k0marov/golang-auth"

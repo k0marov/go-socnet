@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/k0marov/socnet/core/ref"
+	"github.com/k0marov/go-socnet/core/ref"
 )
 
 // RecursiveDirCreator os.MkdirAll implements this

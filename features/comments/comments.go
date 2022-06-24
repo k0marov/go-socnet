@@ -2,18 +2,19 @@ package comments
 
 import (
 	"database/sql"
-	"github.com/go-chi/chi/v5"
-	"github.com/k0marov/socnet/core/likeable"
-	likeable_contexters "github.com/k0marov/socnet/core/likeable/contexters"
-	"github.com/k0marov/socnet/features/comments/delivery/http/handlers"
-	"github.com/k0marov/socnet/features/comments/delivery/http/router"
-	"github.com/k0marov/socnet/features/comments/domain/contexters"
-	"github.com/k0marov/socnet/features/comments/domain/service"
-	"github.com/k0marov/socnet/features/comments/domain/validators"
-	"github.com/k0marov/socnet/features/comments/store"
-	"github.com/k0marov/socnet/features/comments/store/sql_db"
-	profile_service "github.com/k0marov/socnet/features/profiles/domain/service"
 	"log"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/k0marov/go-socnet/core/likeable"
+	likeable_contexters "github.com/k0marov/go-socnet/core/likeable/contexters"
+	"github.com/k0marov/go-socnet/features/comments/delivery/http/handlers"
+	"github.com/k0marov/go-socnet/features/comments/delivery/http/router"
+	"github.com/k0marov/go-socnet/features/comments/domain/contexters"
+	"github.com/k0marov/go-socnet/features/comments/domain/service"
+	"github.com/k0marov/go-socnet/features/comments/domain/validators"
+	"github.com/k0marov/go-socnet/features/comments/store"
+	"github.com/k0marov/go-socnet/features/comments/store/sql_db"
+	profile_service "github.com/k0marov/go-socnet/features/profiles/domain/service"
 )
 
 func NewCommentsRouterImpl(db *sql.DB, getProfile profile_service.ProfileGetter) func(chi.Router) {

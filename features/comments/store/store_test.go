@@ -1,12 +1,13 @@
 package store_test
 
 import (
-	"github.com/k0marov/socnet/core/core_values"
-	. "github.com/k0marov/socnet/core/test_helpers"
-	"github.com/k0marov/socnet/features/comments/domain/entities"
-	comment_models "github.com/k0marov/socnet/features/comments/domain/models"
-	"github.com/k0marov/socnet/features/comments/store"
 	"testing"
+
+	"github.com/k0marov/go-socnet/core/core_values"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
+	"github.com/k0marov/go-socnet/features/comments/domain/entities"
+	comment_models "github.com/k0marov/go-socnet/features/comments/domain/models"
+	"github.com/k0marov/go-socnet/features/comments/store"
 )
 
 func TestCommentsGetter(t *testing.T) {

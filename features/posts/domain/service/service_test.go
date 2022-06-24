@@ -1,18 +1,19 @@
 package service_test
 
 import (
-	"github.com/k0marov/socnet/features/posts/domain/entities"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/k0marov/socnet/features/posts/domain/service"
-	"github.com/k0marov/socnet/features/posts/domain/values"
+	"github.com/k0marov/go-socnet/features/posts/domain/entities"
 
-	"github.com/k0marov/socnet/core/client_errors"
-	"github.com/k0marov/socnet/core/core_errors"
-	"github.com/k0marov/socnet/core/core_values"
-	. "github.com/k0marov/socnet/core/test_helpers"
+	"github.com/k0marov/go-socnet/features/posts/domain/service"
+	"github.com/k0marov/go-socnet/features/posts/domain/values"
+
+	"github.com/k0marov/go-socnet/core/client_errors"
+	"github.com/k0marov/go-socnet/core/core_errors"
+	"github.com/k0marov/go-socnet/core/core_values"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
 )
 
 func TestPostsGetter(t *testing.T) {

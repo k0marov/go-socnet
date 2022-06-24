@@ -1,14 +1,15 @@
 package validators_test
 
 import (
-	"github.com/k0marov/socnet/core/client_errors"
-	"github.com/k0marov/socnet/core/image_decoder"
-	. "github.com/k0marov/socnet/core/test_helpers"
-	"github.com/k0marov/socnet/features/posts/domain/validators"
-	"github.com/k0marov/socnet/features/posts/domain/values"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/k0marov/go-socnet/core/client_errors"
+	"github.com/k0marov/go-socnet/core/image_decoder"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
+	"github.com/k0marov/go-socnet/features/posts/domain/validators"
+	"github.com/k0marov/go-socnet/features/posts/domain/values"
 )
 
 func TestPostValidator(t *testing.T) {

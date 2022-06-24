@@ -1,9 +1,10 @@
 package models
 
 import (
-	"github.com/k0marov/socnet/core/core_values"
-	"github.com/k0marov/socnet/features/posts/domain/values"
 	"time"
+
+	"github.com/k0marov/go-socnet/core/core_values"
+	"github.com/k0marov/go-socnet/features/posts/domain/values"
 )
 
 type PostToCreate struct {

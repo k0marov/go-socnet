@@ -1,10 +1,11 @@
 package static_store_test
 
 import (
-	"github.com/k0marov/socnet/core/static_store"
-	. "github.com/k0marov/socnet/core/test_helpers"
 	"path/filepath"
 	"testing"
+
+	"github.com/k0marov/go-socnet/core/static_store"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
 )
 
 func TestStaticDirDeleter(t *testing.T) {

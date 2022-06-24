@@ -1,9 +1,9 @@
 package entities
 
 import (
-	"github.com/k0marov/socnet/core/likeable/contexters"
-	"github.com/k0marov/socnet/features/comments/domain/models"
-	profile_entities "github.com/k0marov/socnet/features/profiles/domain/entities"
+	"github.com/k0marov/go-socnet/core/likeable/contexters"
+	"github.com/k0marov/go-socnet/features/comments/domain/models"
+	profile_entities "github.com/k0marov/go-socnet/features/profiles/domain/entities"
 )
 
 type Comment struct {

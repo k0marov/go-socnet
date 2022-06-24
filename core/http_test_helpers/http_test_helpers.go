@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	. "github.com/k0marov/socnet/core/test_helpers"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
 
 	auth "github.com/k0marov/golang-auth"
 )

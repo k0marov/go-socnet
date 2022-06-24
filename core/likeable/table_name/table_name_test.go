@@ -1,9 +1,10 @@
 package table_name_test
 
 import (
-	"github.com/k0marov/socnet/core/likeable/table_name"
-	. "github.com/k0marov/socnet/core/test_helpers"
 	"testing"
+
+	"github.com/k0marov/go-socnet/core/likeable/table_name"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
 )
 
 func TestTableName(t *testing.T) {

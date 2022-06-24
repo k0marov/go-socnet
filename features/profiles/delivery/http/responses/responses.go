@@ -1,6 +1,6 @@
 package responses
 
-import "github.com/k0marov/socnet/features/profiles/domain/entities"
+import "github.com/k0marov/go-socnet/features/profiles/domain/entities"
 
 type ProfileResponse struct {
 	Id         string `json:"id"`

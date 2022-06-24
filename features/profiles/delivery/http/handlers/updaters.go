@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/k0marov/socnet/features/profiles/domain/service"
-	"github.com/k0marov/socnet/features/profiles/domain/values"
+	"github.com/k0marov/go-socnet/features/profiles/domain/service"
+	"github.com/k0marov/go-socnet/features/profiles/domain/values"
 
-	"github.com/k0marov/socnet/core/client_errors"
-	helpers "github.com/k0marov/socnet/core/http_helpers"
+	"github.com/k0marov/go-socnet/core/client_errors"
+	helpers "github.com/k0marov/go-socnet/core/http_helpers"
 
 	"github.com/go-chi/chi/v5"
 )

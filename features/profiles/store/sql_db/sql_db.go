@@ -3,13 +3,14 @@ package sql_db
 import (
 	"database/sql"
 	"fmt"
-	"github.com/k0marov/socnet/core/likeable/table_name"
-	"github.com/k0marov/socnet/features/profiles/domain/models"
 
-	"github.com/k0marov/socnet/features/profiles/store"
+	"github.com/k0marov/go-socnet/core/likeable/table_name"
+	"github.com/k0marov/go-socnet/features/profiles/domain/models"
 
-	"github.com/k0marov/socnet/core/core_errors"
-	"github.com/k0marov/socnet/core/core_values"
+	"github.com/k0marov/go-socnet/features/profiles/store"
+
+	"github.com/k0marov/go-socnet/core/core_errors"
+	"github.com/k0marov/go-socnet/core/core_values"
 )
 
 type SqlDB struct {

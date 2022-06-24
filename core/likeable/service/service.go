@@ -2,8 +2,9 @@ package service
 
 import (
 	"fmt"
-	"github.com/k0marov/socnet/core/client_errors"
-	"github.com/k0marov/socnet/core/core_values"
+
+	"github.com/k0marov/go-socnet/core/client_errors"
+	"github.com/k0marov/go-socnet/core/core_values"
 )
 
 type (

@@ -2,12 +2,13 @@ package main
 
 import (
 	"database/sql"
-	"github.com/go-chi/chi/v5"
-	"github.com/k0marov/socnet/features/comments"
-	"github.com/k0marov/socnet/features/posts"
-	"github.com/k0marov/socnet/features/profiles"
 	"log"
 	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/k0marov/go-socnet/features/comments"
+	"github.com/k0marov/go-socnet/features/posts"
+	"github.com/k0marov/go-socnet/features/profiles"
 
 	_ "github.com/mattn/go-sqlite3"
 

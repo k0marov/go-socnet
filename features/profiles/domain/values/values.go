@@ -1,7 +1,7 @@
 package values
 
 import (
-	"github.com/k0marov/socnet/core/core_values"
+	"github.com/k0marov/go-socnet/core/core_values"
 )
 
 type ProfileUpdateData struct {

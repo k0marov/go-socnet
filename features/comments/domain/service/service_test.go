@@ -1,20 +1,21 @@
 package service_test
 
 import (
-	"github.com/k0marov/socnet/core/client_errors"
-	"github.com/k0marov/socnet/core/core_errors"
-	"github.com/k0marov/socnet/core/core_values"
-	likeable_contexters "github.com/k0marov/socnet/core/likeable/contexters"
-	. "github.com/k0marov/socnet/core/test_helpers"
-	"github.com/k0marov/socnet/features/comments/domain/entities"
-	"github.com/k0marov/socnet/features/comments/domain/models"
-	"github.com/k0marov/socnet/features/comments/domain/service"
-	"github.com/k0marov/socnet/features/comments/domain/values"
-	post_values "github.com/k0marov/socnet/features/posts/domain/values"
-	profile_entities "github.com/k0marov/socnet/features/profiles/domain/entities"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/k0marov/go-socnet/core/client_errors"
+	"github.com/k0marov/go-socnet/core/core_errors"
+	"github.com/k0marov/go-socnet/core/core_values"
+	likeable_contexters "github.com/k0marov/go-socnet/core/likeable/contexters"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
+	"github.com/k0marov/go-socnet/features/comments/domain/entities"
+	"github.com/k0marov/go-socnet/features/comments/domain/models"
+	"github.com/k0marov/go-socnet/features/comments/domain/service"
+	"github.com/k0marov/go-socnet/features/comments/domain/values"
+	post_values "github.com/k0marov/go-socnet/features/posts/domain/values"
+	profile_entities "github.com/k0marov/go-socnet/features/profiles/domain/entities"
 )
 
 func TestCommentCreator(t *testing.T) {

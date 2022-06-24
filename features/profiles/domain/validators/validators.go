@@ -1,10 +1,10 @@
 package validators
 
 import (
-	"github.com/k0marov/socnet/features/profiles/domain/values"
+	"github.com/k0marov/go-socnet/features/profiles/domain/values"
 
-	"github.com/k0marov/socnet/core/client_errors"
-	"github.com/k0marov/socnet/core/image_decoder"
+	"github.com/k0marov/go-socnet/core/client_errors"
+	"github.com/k0marov/go-socnet/core/image_decoder"
 )
 
 type ProfileUpdateValidator func(values.ProfileUpdateData) (client_errors.ClientError, bool)

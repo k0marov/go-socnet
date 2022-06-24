@@ -2,13 +2,14 @@ package file_storage
 
 import (
 	"fmt"
-	"github.com/k0marov/socnet/core/core_values"
-	"github.com/k0marov/socnet/core/static_store"
-	"github.com/k0marov/socnet/features/posts/domain/values"
 	"path/filepath"
 	"strconv"
 
-	profiles "github.com/k0marov/socnet/features/profiles/store/file_storage"
+	"github.com/k0marov/go-socnet/core/core_values"
+	"github.com/k0marov/go-socnet/core/static_store"
+	"github.com/k0marov/go-socnet/features/posts/domain/values"
+
+	profiles "github.com/k0marov/go-socnet/features/profiles/store/file_storage"
 )
 
 const PostPrefix = "post_"

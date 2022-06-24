@@ -1,8 +1,8 @@
 package responses
 
 import (
-	"github.com/k0marov/socnet/features/comments/domain/entities"
-	profile_responses "github.com/k0marov/socnet/features/profiles/delivery/http/responses"
+	"github.com/k0marov/go-socnet/features/comments/domain/entities"
+	profile_responses "github.com/k0marov/go-socnet/features/profiles/delivery/http/responses"
 )
 
 type CommentResponse struct {

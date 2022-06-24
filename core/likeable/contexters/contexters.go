@@ -2,8 +2,9 @@ package contexters
 
 import (
 	"fmt"
-	"github.com/k0marov/socnet/core/core_values"
-	"github.com/k0marov/socnet/core/likeable"
+
+	"github.com/k0marov/go-socnet/core/core_values"
+	"github.com/k0marov/go-socnet/core/likeable"
 )
 
 type LikeableContext struct {

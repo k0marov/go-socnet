@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/k0marov/socnet/core/image_decoder"
-	. "github.com/k0marov/socnet/core/test_helpers"
+	"github.com/k0marov/go-socnet/core/image_decoder"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
 )
 
 func TestImageDecoderImpl(t *testing.T) {

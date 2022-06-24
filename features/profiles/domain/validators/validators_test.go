@@ -6,13 +6,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/k0marov/socnet/features/profiles/domain/validators"
-	"github.com/k0marov/socnet/features/profiles/domain/values"
+	"github.com/k0marov/go-socnet/features/profiles/domain/validators"
+	"github.com/k0marov/go-socnet/features/profiles/domain/values"
 
-	"github.com/k0marov/socnet/core/client_errors"
-	"github.com/k0marov/socnet/core/image_decoder"
-	"github.com/k0marov/socnet/core/ref"
-	. "github.com/k0marov/socnet/core/test_helpers"
+	"github.com/k0marov/go-socnet/core/client_errors"
+	"github.com/k0marov/go-socnet/core/image_decoder"
+	"github.com/k0marov/go-socnet/core/ref"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
 )
 
 func TestProfileUpdateValidator(t *testing.T) {

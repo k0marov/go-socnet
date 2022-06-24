@@ -10,15 +10,15 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/k0marov/socnet/features/profiles/delivery/http/handlers"
-	"github.com/k0marov/socnet/features/profiles/domain/entities"
-	"github.com/k0marov/socnet/features/profiles/domain/values"
+	"github.com/k0marov/go-socnet/features/profiles/delivery/http/handlers"
+	"github.com/k0marov/go-socnet/features/profiles/domain/entities"
+	"github.com/k0marov/go-socnet/features/profiles/domain/values"
 
-	"github.com/k0marov/socnet/core/client_errors"
-	core_entities "github.com/k0marov/socnet/core/core_entities"
-	"github.com/k0marov/socnet/core/core_values"
-	helpers "github.com/k0marov/socnet/core/http_test_helpers"
-	. "github.com/k0marov/socnet/core/test_helpers"
+	"github.com/k0marov/go-socnet/core/client_errors"
+	core_entities "github.com/k0marov/go-socnet/core/core_entities"
+	"github.com/k0marov/go-socnet/core/core_values"
+	helpers "github.com/k0marov/go-socnet/core/http_test_helpers"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
 )
 
 func TestUpdateMeHandler(t *testing.T) {

@@ -1,12 +1,13 @@
 package sql_db_test
 
 import (
-	"github.com/k0marov/socnet/core/core_errors"
-	. "github.com/k0marov/socnet/core/test_helpers"
-	"github.com/k0marov/socnet/features/profiles/domain/models"
-	"github.com/k0marov/socnet/features/profiles/store"
-	"github.com/k0marov/socnet/features/profiles/store/sql_db"
 	"testing"
+
+	"github.com/k0marov/go-socnet/core/core_errors"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
+	"github.com/k0marov/go-socnet/features/profiles/domain/models"
+	"github.com/k0marov/go-socnet/features/profiles/store"
+	"github.com/k0marov/go-socnet/features/profiles/store/sql_db"
 
 	_ "github.com/mattn/go-sqlite3"
 )

@@ -2,20 +2,21 @@ package service
 
 import (
 	"fmt"
-	"github.com/k0marov/socnet/core/client_errors"
-	"github.com/k0marov/socnet/core/core_errors"
-	"github.com/k0marov/socnet/core/core_values"
-	"github.com/k0marov/socnet/core/likeable"
-	likeable_contexters "github.com/k0marov/socnet/core/likeable/contexters"
-	"github.com/k0marov/socnet/features/comments/domain/contexters"
-	"github.com/k0marov/socnet/features/comments/domain/entities"
-	"github.com/k0marov/socnet/features/comments/domain/models"
-	"github.com/k0marov/socnet/features/comments/domain/store"
-	"github.com/k0marov/socnet/features/comments/domain/validators"
-	"github.com/k0marov/socnet/features/comments/domain/values"
-	post_values "github.com/k0marov/socnet/features/posts/domain/values"
-	profile_service "github.com/k0marov/socnet/features/profiles/domain/service"
 	"time"
+
+	"github.com/k0marov/go-socnet/core/client_errors"
+	"github.com/k0marov/go-socnet/core/core_errors"
+	"github.com/k0marov/go-socnet/core/core_values"
+	"github.com/k0marov/go-socnet/core/likeable"
+	likeable_contexters "github.com/k0marov/go-socnet/core/likeable/contexters"
+	"github.com/k0marov/go-socnet/features/comments/domain/contexters"
+	"github.com/k0marov/go-socnet/features/comments/domain/entities"
+	"github.com/k0marov/go-socnet/features/comments/domain/models"
+	"github.com/k0marov/go-socnet/features/comments/domain/store"
+	"github.com/k0marov/go-socnet/features/comments/domain/validators"
+	"github.com/k0marov/go-socnet/features/comments/domain/values"
+	post_values "github.com/k0marov/go-socnet/features/posts/domain/values"
+	profile_service "github.com/k0marov/go-socnet/features/profiles/domain/service"
 )
 
 type (

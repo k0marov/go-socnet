@@ -1,12 +1,13 @@
 package validators_test
 
 import (
-	"github.com/k0marov/socnet/core/client_errors"
-	. "github.com/k0marov/socnet/core/test_helpers"
-	"github.com/k0marov/socnet/features/comments/domain/validators"
-	"github.com/k0marov/socnet/features/comments/domain/values"
 	"strings"
 	"testing"
+
+	"github.com/k0marov/go-socnet/core/client_errors"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
+	"github.com/k0marov/go-socnet/features/comments/domain/validators"
+	"github.com/k0marov/go-socnet/features/comments/domain/values"
 )
 
 func TestCommentValidator(t *testing.T) {

@@ -2,12 +2,13 @@ package sql_db_test
 
 import (
 	"database/sql"
-	"github.com/k0marov/socnet/core/likeable/store/sql_db"
-	"github.com/k0marov/socnet/core/likeable/table_name"
-	. "github.com/k0marov/socnet/core/test_helpers"
-	profiles_db "github.com/k0marov/socnet/features/profiles/store/sql_db"
-	_ "github.com/mattn/go-sqlite3"
 	"testing"
+
+	"github.com/k0marov/go-socnet/core/likeable/store/sql_db"
+	"github.com/k0marov/go-socnet/core/likeable/table_name"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
+	profiles_db "github.com/k0marov/go-socnet/features/profiles/store/sql_db"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 var targetTblName = table_name.NewTableName("Target")

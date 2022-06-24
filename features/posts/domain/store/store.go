@@ -1,11 +1,12 @@
 package store
 
 import (
-	"github.com/k0marov/socnet/features/posts/domain/entities"
-	"github.com/k0marov/socnet/features/posts/domain/values"
 	"time"
 
-	"github.com/k0marov/socnet/core/core_values"
+	"github.com/k0marov/go-socnet/features/posts/domain/entities"
+	"github.com/k0marov/go-socnet/features/posts/domain/values"
+
+	"github.com/k0marov/go-socnet/core/core_values"
 )
 
 type PostsGetter func(authorId core_values.UserId) ([]entities.Post, error)

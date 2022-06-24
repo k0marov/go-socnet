@@ -3,10 +3,10 @@ package file_storage_test
 import (
 	"testing"
 
-	"github.com/k0marov/socnet/features/profiles/store/file_storage"
+	"github.com/k0marov/go-socnet/features/profiles/store/file_storage"
 
-	"github.com/k0marov/socnet/core/ref"
-	. "github.com/k0marov/socnet/core/test_helpers"
+	"github.com/k0marov/go-socnet/core/ref"
+	. "github.com/k0marov/go-socnet/core/test_helpers"
 )
 
 func TestAvatarFileCreator(t *testing.T) {
