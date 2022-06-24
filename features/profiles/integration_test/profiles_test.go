@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"github.com/k0marov/socnet/core/static_store"
+	"github.com/k0marov/socnet/features/profiles/delivery/http/responses"
 	"github.com/k0marov/socnet/features/profiles/domain/models"
 	"io"
 	"log"
@@ -67,7 +68,7 @@ func TestProfiles(t *testing.T) {
 		request := addAuthToReq(httptest.NewRequest(http.MethodGet, "/profiles/"+wantProfile.Id, nil), RandomUser())
 		response := httptest.NewRecorder()
 		r.ServeHTTP(response, request)
-		wantResponse := handlers.ProfileResponse{
+		wantResponse := responses.ProfileResponse{
 			Id:         wantProfile.Id,
 			Username:   wantProfile.Username,
 			About:      wantProfile.About,
@@ -177,7 +178,7 @@ func TestProfiles(t *testing.T) {
 			request := addAuthToReq(httptest.NewRequest(http.MethodGet, "/profiles/"+target, nil), caller)
 			response := httptest.NewRecorder()
 			r.ServeHTTP(response, request)
-			var profileResponse handlers.ProfileResponse
+			var profileResponse responses.ProfileResponse
 			json.NewDecoder(response.Body).Decode(&profileResponse)
 			Assert(t, profileResponse.IsFollowed, isFollowed, "caller following or not following target")
 		}

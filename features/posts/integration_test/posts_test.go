@@ -12,7 +12,7 @@ import (
 	"github.com/k0marov/socnet/core/static_store"
 	. "github.com/k0marov/socnet/core/test_helpers"
 	"github.com/k0marov/socnet/features/posts"
-	"github.com/k0marov/socnet/features/posts/delivery/http/handlers"
+	"github.com/k0marov/socnet/features/posts/delivery/http/responses"
 	"github.com/k0marov/socnet/features/posts/domain/values"
 	post_storage "github.com/k0marov/socnet/features/posts/store/file_storage"
 	"github.com/k0marov/socnet/features/profiles"
@@ -70,17 +70,17 @@ func TestPosts(t *testing.T) {
 		r.ServeHTTP(response, request)
 		AssertStatusCode(t, response, http.StatusOK)
 	}
-	getPosts := func(t testing.TB, author core_values.UserId, caller auth.User) []handlers.PostResponse {
+	getPosts := func(t testing.TB, author core_values.UserId, caller auth.User) []responses.PostResponse {
 		t.Helper()
 		request := helpers.AddAuthDataToRequest(httptest.NewRequest(http.MethodGet, "/posts/?profile_id="+author, nil), caller)
 		response := httptest.NewRecorder()
 		r.ServeHTTP(response, request)
 		AssertStatusCode(t, response, http.StatusOK)
-		var posts handlers.PostsResponse
+		var posts responses.PostsResponse
 		json.NewDecoder(response.Body).Decode(&posts)
 		return posts.Posts
 	}
-	assertImageCreated := func(t testing.TB, post handlers.PostResponse, postImage handlers.PostImageResponse, wantImage []byte) {
+	assertImageCreated := func(t testing.TB, post responses.PostResponse, postImage responses.PostImageResponse, wantImage []byte) {
 		t.Helper()
 		path := filepath.Join(static_store.StaticDir, post_storage.GetPostDir(post.Id, post.Author.Id), post_storage.ImagePrefix+strconv.Itoa(postImage.Index))
 		got := readFile(t, path)

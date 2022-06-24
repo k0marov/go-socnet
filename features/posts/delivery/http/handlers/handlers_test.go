@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/k0marov/socnet/features/posts/delivery/http/responses"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -38,7 +39,7 @@ func TestGetListById(t *testing.T) {
 		request := helpers.AddAuthDataToRequest(httptest.NewRequest(http.MethodGet, "/handler-should-not-care?profile_id="+randomProfile, nil), caller)
 		response := httptest.NewRecorder()
 		handlers.NewGetListByIdHandler(getter).ServeHTTP(response, request)
-		AssertJSONData(t, response, handlers.PostsToResponse(posts))
+		AssertJSONData(t, response, responses.NewPostListResponse(posts))
 	})
 	t.Run("error case - profile id is not provided", func(t *testing.T) {
 		request := helpers.AddAuthDataToRequest(helpers.CreateRequest(nil), caller)

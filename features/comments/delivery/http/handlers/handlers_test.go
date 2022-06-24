@@ -11,6 +11,7 @@ import (
 	helpers "github.com/k0marov/socnet/core/http_test_helpers"
 	. "github.com/k0marov/socnet/core/test_helpers"
 	"github.com/k0marov/socnet/features/comments/delivery/http/handlers"
+	"github.com/k0marov/socnet/features/comments/delivery/http/responses"
 	"github.com/k0marov/socnet/features/comments/domain/entities"
 	"github.com/k0marov/socnet/features/comments/domain/values"
 	post_values "github.com/k0marov/socnet/features/posts/domain/values"
@@ -40,7 +41,7 @@ func TestNewGetCommentsHandler(t *testing.T) {
 		response := httptest.NewRecorder()
 		request := helpers.AddAuthDataToRequest(createRequestWithPostId(post, nil), caller)
 		handlers.NewGetCommentsHandler(getter).ServeHTTP(response, request)
-		AssertJSONData(t, response, handlers.EntitiesToResponse(comments))
+		AssertJSONData(t, response, responses.NewCommentListResponse(comments))
 	})
 	t.Run("error case - post_id is not provided", func(t *testing.T) {
 		response := httptest.NewRecorder()
@@ -79,7 +80,7 @@ func TestNewCreateCommentHandler(t *testing.T) {
 		json.NewEncoder(body).Encode(handlers.NewCommentRequest{Text: wantNewComment.Text})
 		request := helpers.AddAuthDataToRequest(createRequestWithPostId(post, body), user)
 		handlers.NewCreateCommentHandler(creator).ServeHTTP(response, request)
-		AssertJSONData(t, response, handlers.EntityToResponse(createdComment))
+		AssertJSONData(t, response, responses.NewCommentResponse(createdComment))
 	})
 	t.Run("error case - post id is not provided", func(t *testing.T) {
 		request := helpers.AddAuthDataToRequest(helpers.CreateRequest(nil), user)

@@ -3,6 +3,7 @@ package handlers_test
 import (
 	"context"
 	"fmt"
+	"github.com/k0marov/socnet/features/profiles/delivery/http/responses"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -38,7 +39,7 @@ func TestGetMeHandler(t *testing.T) {
 		response := httptest.NewRecorder()
 		handlers.NewGetMeHandler(getter).ServeHTTP(response, createRequestWithAuth())
 
-		AssertJSONData(t, response, handlers.EntityToResponse(wantedProfile))
+		AssertJSONData(t, response, responses.NewProfileResponse(wantedProfile))
 	})
 	helpers.BaseTestServiceErrorHandling(t, func(wantErr error, response *httptest.ResponseRecorder) {
 		getter := func(core_values.UserId, core_values.UserId) (entities.ContextedProfile, error) {
@@ -72,7 +73,7 @@ func TestGetByIdHandler(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		handlers.NewGetByIdHandler(profileGetter).ServeHTTP(response, request)
-		AssertJSONData(t, response, handlers.EntityToResponse(randomProfile))
+		AssertJSONData(t, response, responses.NewProfileResponse(randomProfile))
 	})
 	t.Run("error case - id is not provided", func(t *testing.T) {
 		response := httptest.NewRecorder()
