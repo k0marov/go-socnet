@@ -45,6 +45,13 @@ func initSQL(db *sql.DB, verifiedTarget, verifiedLikeable string) error {
 	if err != nil {
 		return fmt.Errorf("while creating table %s: %w", verifiedLikeable, err)
 	}
+	verifiedIndex := verifiedLikeable + "Index"
+	_, err = db.Exec(`
+		CREATE INDEX IF NOT EXISTS `+verifiedIndex+` ON `+verifiedLikeable+` (target_id, liker_id)
+    `, verifiedIndex)
+	if err != nil {
+		return fmt.Errorf("while creating index %s: %w", verifiedIndex, err)
+	}
 	return nil
 }
 
