@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"github.com/go-chi/chi/v5"
+	"github.com/k0marov/socnet/features/comments"
 	"github.com/k0marov/socnet/features/posts"
 	"github.com/k0marov/socnet/features/profiles"
 	"log"
@@ -30,6 +31,9 @@ func main() {
 	// posts
 	postsRouter := posts.NewPostsRouterImpl(sql, profileGetter)
 
+	// comments
+	commentsRouter := comments.NewCommentsRouterImpl(sql, profileGetter)
+
 	// auth
 	authStore, err := auth.NewStoreImpl("auth.db.csv")
 	if err != nil {
@@ -50,6 +54,7 @@ func main() {
 		r.Use(authMiddleware)
 		r.Route("/profiles", profilesRouter)
 		r.Route("/posts", postsRouter)
+		r.Route("/comments", commentsRouter)
 	})
 
 	http.ListenAndServe(":4242", r)

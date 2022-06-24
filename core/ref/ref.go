@@ -2,7 +2,7 @@ package ref
 
 import "errors"
 
-// ref is pointer that can't be nil
+// Ref is a pointer that can't be nil
 type Ref[T any] struct {
 	pointer *T
 }
