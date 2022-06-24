@@ -72,7 +72,7 @@ func TestProfiles(t *testing.T) {
 			Id:         wantProfile.Id,
 			Username:   wantProfile.Username,
 			About:      wantProfile.About,
-			AvatarPath: wantProfile.AvatarPath,
+			AvatarURL:  wantProfile.AvatarURL,
 			Followers:  wantProfile.Followers,
 			Follows:    wantProfile.Follows,
 			IsMine:     false,
@@ -129,10 +129,10 @@ func TestProfiles(t *testing.T) {
 		// assert that it was updated
 		wantUpdatedProfile1 := entities.Profile{
 			ProfileModel: models.ProfileModel{
-				Id:         user1.Id,
-				Username:   user1.Username,
-				AvatarPath: wantAvatarPath,
+				Id:       user1.Id,
+				Username: user1.Username,
 			},
+			AvatarURL: wantAvatarURL,
 			Follows:   0,
 			Followers: 0,
 		}
