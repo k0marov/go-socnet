@@ -6,7 +6,7 @@ type ProfileResponse struct {
 	Id         string `json:"id"`
 	Username   string `json:"username"`
 	About      string `json:"about"`
-	AvatarPath string `json:"avatar_path"`
+	AvatarURL  string `json:"avatar_url"`
 	Follows    int    `json:"follows"`
 	Followers  int    `json:"followers"`
 	IsMine     bool   `json:"is_mine"`
@@ -18,7 +18,7 @@ func NewProfileResponse(profile entities.ContextedProfile) ProfileResponse {
 		Id:         profile.Id,
 		Username:   profile.Username,
 		About:      profile.About,
-		AvatarPath: profile.AvatarPath,
+		AvatarURL:  profile.AvatarURL,
 		Follows:    profile.Follows,
 		Followers:  profile.Followers,
 		IsMine:     profile.IsMine,
