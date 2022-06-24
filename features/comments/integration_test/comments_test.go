@@ -32,7 +32,6 @@ func TestComments(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error while opening in-memory database: %v", err)
 	}
-
 	r := chi.NewRouter()
 	// profiles
 	fakeRegisterProfile := profiles.NewRegisterCallback(sql)
@@ -54,8 +53,6 @@ func TestComments(t *testing.T) {
 		t.Helper()
 		AssertFatal(t, len(got), len(want), "number of returned comments")
 		for i, comment := range got {
-			Assert(t, TimeAlmostEqual(comment.CreatedAt, want[i].CreatedAt), true, "createdAt")
-			comment.CreatedAt = want[i].CreatedAt
 			Assert(t, comment, want[i], "comment")
 		}
 	}
@@ -78,7 +75,7 @@ func TestComments(t *testing.T) {
 			Id:        returnedComment.Id,
 			Author:    profile_responses.NewProfileResponse(wantAuthor),
 			Text:      newComment.Text,
-			CreatedAt: time.Now(),
+			CreatedAt: time.Now().Unix(),
 			Likes:     0,
 			IsLiked:   false,
 			IsMine:    true,
