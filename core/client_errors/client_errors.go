@@ -3,9 +3,9 @@ package client_errors
 import "net/http"
 
 type ClientError struct {
-	ReadableDetail string
-	DetailCode     string
-	HTTPCode       int
+	ReadableDetail string `json:"readable_detail"`
+	DetailCode     string `json:"detail_code"`
+	HTTPCode       int    `json:"http_code"`
 }
 
 func (ce ClientError) Error() string {
