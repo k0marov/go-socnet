@@ -125,7 +125,7 @@ func TestProfiles(t *testing.T) {
 		response := httptest.NewRecorder()
 
 		r.ServeHTTP(response, request)
-		AssertJSONData(t, response, wantAvatarURL)
+		AssertJSONData(t, response, responses.AvatarURLResponse{AvatarURL: wantAvatarURL})
 
 		// assert that it was updated
 		wantUpdatedProfile1 := entities.Profile{

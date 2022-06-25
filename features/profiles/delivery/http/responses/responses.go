@@ -2,11 +2,15 @@ package responses
 
 import "github.com/k0marov/go-socnet/features/profiles/domain/entities"
 
+type AvatarURLResponse struct {
+	AvatarURL string `json:"avatar_url,omitempty"`
+}
+
 type ProfileResponse struct {
 	Id         string `json:"id"`
 	Username   string `json:"username"`
 	About      string `json:"about"`
-	AvatarURL  string `json:"avatar_url"`
+	AvatarURL  string `json:"avatar_url,omitempty"`
 	Follows    int    `json:"follows"`
 	Followers  int    `json:"followers"`
 	IsMine     bool   `json:"is_mine"`

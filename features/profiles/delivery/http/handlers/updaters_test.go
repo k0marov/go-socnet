@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/k0marov/go-socnet/features/profiles/delivery/http/responses"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -132,7 +133,7 @@ func TestUpdateAvatarHandler(t *testing.T) {
 			handlers.NewUpdateAvatarHandler(updateAvatar).ServeHTTP(response, createRequestWithAuth())
 
 			AssertStatusCode(t, response, http.StatusOK)
-			AssertJSONData(t, response, avatarURL)
+			AssertJSONData(t, response, responses.AvatarURLResponse{AvatarURL: avatarURL})
 		})
 		t.Run("error case - avatar file is not provided", func(t *testing.T) {
 			response := httptest.NewRecorder()

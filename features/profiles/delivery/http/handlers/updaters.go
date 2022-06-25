@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/k0marov/go-socnet/features/profiles/delivery/http/responses"
 	"net/http"
 
 	"github.com/k0marov/go-socnet/features/profiles/domain/service"
@@ -78,6 +79,6 @@ func NewUpdateAvatarHandler(avatarUpdater service.AvatarUpdater) http.HandlerFun
 			return
 		}
 
-		helpers.WriteJson(w, url)
+		helpers.WriteJson(w, responses.AvatarURLResponse{AvatarURL: url})
 	})
 }
