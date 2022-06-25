@@ -5,7 +5,7 @@ import "net/http"
 type ClientError struct {
 	ReadableDetail string `json:"readable_detail"`
 	DetailCode     string `json:"detail_code"`
-	HTTPCode       int    `json:"http_code"`
+	HTTPCode       int    `json:"-"`
 }
 
 func (ce ClientError) Error() string {

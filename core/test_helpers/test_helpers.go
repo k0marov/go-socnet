@@ -82,7 +82,8 @@ func AssertClientError(t testing.TB, response *httptest.ResponseRecorder, err cl
 	json.NewDecoder(response.Body).Decode(&got)
 
 	AssertJSON(t, response)
-	Assert(t, got, err, "error response")
+	Assert(t, got.ReadableDetail, err.ReadableDetail, "readable detail")
+	Assert(t, got.DetailCode, err.DetailCode, "detail code")
 	Assert(t, response.Code, err.HTTPCode, "status code")
 }
 
