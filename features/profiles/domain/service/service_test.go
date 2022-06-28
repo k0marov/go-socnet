@@ -124,23 +124,9 @@ func TestProfileUpdater(t *testing.T) {
 	testUpdateData := values.ProfileUpdateData{
 		About: RandomString(),
 	}
-	silentValidator := func(values.ProfileUpdateData) (client_errors.ClientError, bool) {
+	validator := func(values.ProfileUpdateData) (client_errors.ClientError, bool) {
 		return client_errors.ClientError{}, true
 	}
-	t.Run("happy case", func(t *testing.T) {
-		wantUpdatedProfile := RandomProfile()
-		storeUpdater := func(id string, updData values.ProfileUpdateData) (entities.Profile, error) {
-			if id == user.Id && updData == testUpdateData {
-				return wantUpdatedProfile, nil
-			}
-			panic(fmt.Sprintf("update called with unexpected arguments: id: %v and updateData: %v", id, updData))
-		}
-		sut := service.NewProfileUpdater(silentValidator, storeUpdater)
-
-		gotUpdatedProfile, err := sut(user, testUpdateData)
-		AssertNoError(t, err)
-		Assert(t, gotUpdatedProfile, wantUpdatedProfile, "the returned profile")
-	})
 	t.Run("error case - validator throws", func(t *testing.T) {
 		clientError := RandomClientError()
 		validator := func(updData values.ProfileUpdateData) (client_errors.ClientError, bool) {
@@ -149,17 +135,45 @@ func TestProfileUpdater(t *testing.T) {
 			}
 			panic(fmt.Sprintf("validator called with unexpected args, updData=%v", updData))
 		}
-		sut := service.NewProfileUpdater(validator, nil) // store is nil, since it shouldn't be accessed
+		sut := service.NewProfileUpdater(validator, nil, nil) // store is nil, since it shouldn't be accessed
 		_, gotErr := sut(user, testUpdateData)
 		AssertError(t, gotErr, clientError)
 	})
-	t.Run("error case - store throws an error", func(t *testing.T) {
-		storeUpdater := func(string, values.ProfileUpdateData) (entities.Profile, error) {
-			return entities.Profile{}, RandomError()
+	storeUpdater := func(id string, updData values.ProfileUpdateData) error {
+		if id == user.Id && updData == testUpdateData {
+			return nil
 		}
-		sut := service.NewProfileUpdater(silentValidator, storeUpdater)
+		panic(fmt.Sprintf("update called with unexpected arguments: id: %v and updateData: %v", id, updData))
+	}
+	t.Run("error case - store throws an error", func(t *testing.T) {
+		storeUpdater := func(string, values.ProfileUpdateData) error {
+			return RandomError()
+		}
+		sut := service.NewProfileUpdater(validator, storeUpdater, nil)
 		_, err := sut(user, testUpdateData)
 		AssertSomeError(t, err)
+	})
+	wantUpdatedProfile := RandomContextedProfile()
+	profileGetter := func(target, caller core_values.UserId) (entities.ContextedProfile, error) {
+		if target == user.Id && caller == user.Id {
+			return wantUpdatedProfile, nil
+		}
+		panic("unexpected args")
+	}
+	t.Run("error case - getting updated profile throws", func(t *testing.T) {
+		tErr := RandomError()
+		profileGetter := func(target, caller core_values.UserId) (entities.ContextedProfile, error) {
+			return entities.ContextedProfile{}, tErr
+		}
+		_, err := service.NewProfileUpdater(validator, storeUpdater, profileGetter)(user, testUpdateData)
+		AssertError(t, err, tErr)
+	})
+	t.Run("happy case", func(t *testing.T) {
+		sut := service.NewProfileUpdater(validator, storeUpdater, profileGetter)
+
+		gotUpdatedProfile, err := sut(user, testUpdateData)
+		AssertNoError(t, err)
+		Assert(t, gotUpdatedProfile, wantUpdatedProfile, "the returned profile")
 	})
 }
 

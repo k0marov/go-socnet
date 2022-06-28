@@ -34,7 +34,7 @@ func NewUpdateMeHandler(profileUpdater service.ProfileUpdater) http.HandlerFunc 
 			return
 		}
 
-		helpers.WriteJson(w, updatedProfile)
+		helpers.WriteJson(w, responses.NewProfileResponse(updatedProfile))
 	})
 }
 

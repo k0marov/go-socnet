@@ -72,7 +72,7 @@ func NewProfilesRouterImpl(db *sql.DB) func(chi.Router) {
 
 	// store
 	storeProfileGetter := store.NewStoreProfileGetter(sqlDB.GetProfile, likeableProfile.GetLikesCount, likeableProfile.GetUserLikesCount)
-	storeProfileUpdater := store.NewStoreProfileUpdater(sqlDB.UpdateProfile, storeProfileGetter)
+	storeProfileUpdater := store.NewStoreProfileUpdater(sqlDB.UpdateProfile)
 	storeAvatarUpdater := store.NewStoreAvatarUpdater(avatarFileCreator, sqlDB.UpdateProfile)
 
 	// domain
@@ -81,9 +81,9 @@ func NewProfilesRouterImpl(db *sql.DB) func(chi.Router) {
 
 	addContext := contexters.NewProfileContextAdder(likeable_contexters.NewLikeableContextGetter(likeableProfile.IsLiked))
 
-	profileUpdater := service.NewProfileUpdater(profileUpdateValidator, storeProfileUpdater)
-	avatarUpdater := service.NewAvatarUpdater(avatarValidator, storeAvatarUpdater)
 	profileGetter := service.NewProfileGetter(storeProfileGetter, addContext)
+	profileUpdater := service.NewProfileUpdater(profileUpdateValidator, storeProfileUpdater, profileGetter)
+	avatarUpdater := service.NewAvatarUpdater(avatarValidator, storeAvatarUpdater)
 	followToggler := service.NewFollowToggler(likeableProfile.ToggleLike)
 	followsGetter := service.NewFollowsGetter(likeableProfile.GetUserLikes)
 

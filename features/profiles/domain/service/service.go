@@ -21,7 +21,7 @@ import (
 
 type (
 	ProfileGetter  func(id, caller core_values.UserId) (entities.ContextedProfile, error)
-	ProfileUpdater func(core_entities.User, values.ProfileUpdateData) (entities.Profile, error)
+	ProfileUpdater func(core_entities.User, values.ProfileUpdateData) (entities.ContextedProfile, error)
 	AvatarUpdater  func(core_entities.User, values.AvatarData) (core_values.FileURL, error)
 	ProfileCreator func(core_entities.User) (entities.Profile, error)
 	FollowToggler  func(target, follower core_values.UserId) error
@@ -55,14 +55,18 @@ func NewFollowsGetter(getUserLikes likeable.UserLikesGetter) FollowsGetter {
 	return FollowsGetter(getUserLikes)
 }
 
-func NewProfileUpdater(validator validators.ProfileUpdateValidator, storeProfileUpdater store.StoreProfileUpdater) ProfileUpdater {
-	return func(user core_entities.User, updateData values.ProfileUpdateData) (entities.Profile, error) {
-		if clientError, ok := validator(updateData); !ok {
-			return entities.Profile{}, clientError
+func NewProfileUpdater(validate validators.ProfileUpdateValidator, update store.StoreProfileUpdater, get ProfileGetter) ProfileUpdater {
+	return func(user core_entities.User, updateData values.ProfileUpdateData) (entities.ContextedProfile, error) {
+		if clientError, ok := validate(updateData); !ok {
+			return entities.ContextedProfile{}, clientError
 		}
-		updatedProfile, err := storeProfileUpdater(user.Id, updateData)
+		err := update(user.Id, updateData)
 		if err != nil {
-			return entities.Profile{}, fmt.Errorf("got an error while updating profile in a service: %w", err)
+			return entities.ContextedProfile{}, fmt.Errorf("got an error while updating profile in a service: %w", err)
+		}
+		updatedProfile, err := get(user.Id, user.Id)
+		if err != nil {
+			return entities.ContextedProfile{}, err
 		}
 		return updatedProfile, nil
 	}

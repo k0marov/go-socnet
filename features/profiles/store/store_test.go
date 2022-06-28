@@ -18,58 +18,31 @@ import (
 )
 
 func TestStoreProfileUpdater(t *testing.T) {
-	testDetailedProfile := RandomProfile()
+	target := RandomId()
 	testUpdData := values.ProfileUpdateData{About: RandomString()}
 	testDBUpdData := store.DBUpdateData{About: testUpdData.About}
-	wantUpdatedProfile := entities.Profile{
-		ProfileModel: models.ProfileModel{
-			Id:         testDetailedProfile.Id,
-			Username:   testDetailedProfile.Username,
-			AvatarPath: testDetailedProfile.AvatarPath,
-			About:      testUpdData.About,
-		},
-	}
 	t.Run("happy case", func(t *testing.T) {
 		updaterCalled := false
 		dbUpdater := func(id string, updData store.DBUpdateData) error {
-			if id == testDetailedProfile.Id && updData == testDBUpdData {
+			if id == target && updData == testDBUpdData {
 				updaterCalled = true
 				return nil
 			}
 			panic(fmt.Sprintf("called with unexpected arguments, id=%v, updData=%v", id, updData))
 		}
-		profileGetter := func(id string) (entities.Profile, error) {
-			if id == testDetailedProfile.Id {
-				return wantUpdatedProfile, nil
-			}
-			panic(fmt.Sprintf("called with unexpected arguments, id=%v", id))
-		}
-		sut := store.NewStoreProfileUpdater(dbUpdater, profileGetter)
+		sut := store.NewStoreProfileUpdater(dbUpdater)
 
-		gotProfile, err := sut(testDetailedProfile.Id, testUpdData)
+		err := sut(target, testUpdData)
 		AssertNoError(t, err)
 		Assert(t, updaterCalled, true, "db updater called")
-		Assert(t, gotProfile, wantUpdatedProfile, "returned updated profile")
 	})
 	t.Run("error case - updater returns an error", func(t *testing.T) {
 		dbUpdater := func(string, store.DBUpdateData) error {
 			return RandomError()
 		}
-		sut := store.NewStoreProfileUpdater(dbUpdater, nil) // getter is nil, since it shouldn't be called
-		_, err := sut(testDetailedProfile.Id, testUpdData)
+		sut := store.NewStoreProfileUpdater(dbUpdater)
+		err := sut(target, testUpdData)
 		AssertSomeError(t, err)
-	})
-	t.Run("error case - getter returns an error", func(t *testing.T) {
-		tErr := RandomError()
-		dbUpdater := func(string, store.DBUpdateData) error {
-			return nil
-		}
-		profileGetter := func(string) (entities.Profile, error) {
-			return entities.Profile{}, tErr
-		}
-		sut := store.NewStoreProfileUpdater(dbUpdater, profileGetter)
-		_, err := sut(testDetailedProfile.Id, testUpdData)
-		AssertError(t, err, tErr)
 	})
 }
 

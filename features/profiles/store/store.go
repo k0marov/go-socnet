@@ -35,13 +35,13 @@ func NewStoreAvatarUpdater(createFile AvatarFileCreator, updateDBProfile DBProfi
 	}
 }
 
-func NewStoreProfileUpdater(updateDBProfile DBProfileUpdater, getProfile store.StoreProfileGetter) store.StoreProfileUpdater {
-	return func(id core_values.UserId, upd values.ProfileUpdateData) (entities.Profile, error) {
+func NewStoreProfileUpdater(updateDBProfile DBProfileUpdater) store.StoreProfileUpdater {
+	return func(id core_values.UserId, upd values.ProfileUpdateData) error {
 		err := updateDBProfile(id, DBUpdateData{About: upd.About})
 		if err != nil {
-			return entities.Profile{}, fmt.Errorf("error while updating profile in db: %w", err)
+			return fmt.Errorf("error while updating profile in db: %w", err)
 		}
-		return getProfile(id)
+		return nil
 	}
 }
 
