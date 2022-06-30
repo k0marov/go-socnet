@@ -4,7 +4,9 @@ FROM golang:alpine
 
 WORKDIR /app 
 
-COPY * ./ 
+COPY * ./
+
+ENV GOPATH=/app
 
 RUN go mod tidy
 RUN go get -u ./...
