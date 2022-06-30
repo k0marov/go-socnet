@@ -34,7 +34,7 @@ func NewPostContextAdder(getProfile profile_service.ProfileGetter, getContext li
 
 func NewPostListContextAdder(addContext PostContextAdder) PostListContextAdder {
 	return func(posts []entities.Post, caller core_values.UserId) ([]entities.ContextedPost, error) {
-		return helpers.MapForEach(posts, func(post entities.Post) (entities.ContextedPost, error) {
+		return helpers.MapForEachWithErr(posts, func(post entities.Post) (entities.ContextedPost, error) {
 			return addContext(post, caller)
 		})
 	}

@@ -33,7 +33,7 @@ func NewCommentContextAdder(getProfile profile_service.ProfileGetter, getContext
 
 func NewCommentListContextAdder(addContext CommentContextAdder) CommentListContextAdder {
 	return func(comments []entities.Comment, caller core_values.UserId) (ctxComments []entities.ContextedComment, err error) {
-		return helpers.MapForEach(comments, func(comm entities.Comment) (entities.ContextedComment, error) {
+		return helpers.MapForEachWithErr(comments, func(comm entities.Comment) (entities.ContextedComment, error) {
 			return addContext(comm, caller)
 		})
 	}

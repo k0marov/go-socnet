@@ -5,8 +5,8 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"github.com/k0marov/go-socnet/core/helpers"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -19,7 +19,6 @@ import (
 	"github.com/k0marov/go-socnet/features/profiles/domain/models"
 
 	"github.com/k0marov/go-socnet/features/profiles"
-	"github.com/k0marov/go-socnet/features/profiles/delivery/http/handlers"
 	"github.com/k0marov/go-socnet/features/profiles/domain/entities"
 	"github.com/k0marov/go-socnet/features/profiles/domain/values"
 
@@ -171,8 +170,13 @@ func TestProfiles(t *testing.T) {
 			request := addAuthToReq(httptest.NewRequest(http.MethodGet, "/profiles/"+id+"/follows", nil), RandomUser())
 			response := httptest.NewRecorder()
 			r.ServeHTTP(response, request)
-			log.Print(response.Body)
-			AssertJSONData(t, response, handlers.FollowsResponse{Profiles: wantFollows})
+			var gotProfiles responses.ProfilesResponse
+			json.NewDecoder(response.Body).Decode(&gotProfiles)
+			gotProfileIds := helpers.MapForEach(
+				gotProfiles.Profiles,
+				func(profile responses.ProfileResponse) core_values.UserId { return profile.Id },
+			)
+			Assert(t, gotProfileIds, wantFollows, "returned follows' ids")
 		}
 		assertIsFollowed := func(t testing.TB, target core_values.UserId, caller core_entities.User, isFollowed bool) {
 			t.Helper()

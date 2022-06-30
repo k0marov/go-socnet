@@ -92,33 +92,36 @@ func TestGetByIdHandler(t *testing.T) {
 }
 
 func TestFollowsHandler(t *testing.T) {
+	caller := RandomAuthUser()
+	helpers.BaseTest401(t, handlers.NewGetFollowsHandler(nil))
 	t.Run("should return 200 and a list of profiles if profile with given id exists", func(t *testing.T) {
 		randomId := RandomString()
-		randomProfiles := []core_values.UserId{RandomString(), RandomString(), RandomString()}
-		followsGetter := func(userId core_values.UserId) ([]core_values.UserId, error) {
-			if userId == randomId {
+		randomProfiles := []entities.ContextedProfile{RandomContextedProfile(), RandomContextedProfile()}
+		followsGetter := func(userId, callerId core_values.UserId) ([]entities.ContextedProfile, error) {
+			if userId == randomId && callerId == caller.Id {
 				return randomProfiles, nil
 			}
 			panic("called with unexpected arguments")
 		}
 
-		request := createRequestWithId(randomId)
+		request := helpers.AddAuthDataToRequest(createRequestWithId(randomId), caller)
 		response := httptest.NewRecorder()
 
 		handlers.NewGetFollowsHandler(followsGetter).ServeHTTP(response, request)
 
-		randomProfilesResp := handlers.FollowsResponse{Profiles: randomProfiles}
-		AssertJSONData(t, response, randomProfilesResp)
+		AssertJSONData(t, response, responses.NewProfilesResponse(randomProfiles))
 	})
 	t.Run("error case - id is not provided", func(t *testing.T) {
 		response := httptest.NewRecorder()
-		handlers.NewGetFollowsHandler(nil).ServeHTTP(response, helpers.CreateRequest(nil)) // getter is nil, since it shouldn't be called
+		request := helpers.AddAuthDataToRequest(helpers.CreateRequest(nil), RandomAuthUser())
+		handlers.NewGetFollowsHandler(nil).ServeHTTP(response, request)
 		AssertClientError(t, response, client_errors.IdNotProvided)
 	})
 	helpers.BaseTestServiceErrorHandling(t, func(err error, rr *httptest.ResponseRecorder) {
-		getter := func(userId core_values.UserId) ([]core_values.UserId, error) {
+		getter := func(userId, callerId core_values.UserId) ([]entities.ContextedProfile, error) {
 			return nil, err
 		}
-		handlers.NewGetFollowsHandler(getter).ServeHTTP(rr, createRequestWithId("42"))
+		request := helpers.AddAuthDataToRequest(createRequestWithId("42"), RandomAuthUser())
+		handlers.NewGetFollowsHandler(getter).ServeHTTP(rr, request)
 	})
 }

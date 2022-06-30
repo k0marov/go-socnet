@@ -25,7 +25,7 @@ type (
 	AvatarUpdater  func(core_entities.User, values.AvatarData) (core_values.FileURL, error)
 	ProfileCreator func(core_entities.User) (entities.Profile, error)
 	FollowToggler  func(target, follower core_values.UserId) error
-	FollowsGetter  func(target core_values.UserId) ([]core_values.UserId, error)
+	FollowsGetter  func(target, caller core_values.UserId) ([]entities.ContextedProfile, error)
 )
 
 func NewProfileGetter(getProfile store.StoreProfileGetter, addContext contexters.ProfileContextAdder) ProfileGetter {
@@ -51,8 +51,22 @@ func NewFollowToggler(toggleLike likeable.LikeToggler) FollowToggler {
 	}
 }
 
-func NewFollowsGetter(getUserLikes likeable.UserLikesGetter) FollowsGetter {
-	return FollowsGetter(getUserLikes)
+func NewFollowsGetter(getUserLikes likeable.UserLikesGetter, getProfile ProfileGetter) FollowsGetter {
+	return func(target, caller core_values.UserId) ([]entities.ContextedProfile, error) {
+		followIds, err := getUserLikes(target)
+		if err != nil {
+			return []entities.ContextedProfile{}, fmt.Errorf("while getting a list of profile ids that target follows: %w", err)
+		}
+		var follows []entities.ContextedProfile
+		for _, followId := range followIds {
+			follow, err := getProfile(followId, caller)
+			if err != nil {
+				return []entities.ContextedProfile{}, fmt.Errorf("while getting profile details for a follow %s: %w", followId, err)
+			}
+			follows = append(follows, follow)
+		}
+		return follows, nil
+	}
 }
 
 func NewProfileUpdater(validate validators.ProfileUpdateValidator, update store.StoreProfileUpdater, get ProfileGetter) ProfileUpdater {

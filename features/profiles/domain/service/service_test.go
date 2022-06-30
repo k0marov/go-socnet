@@ -81,6 +81,48 @@ func TestProfileGetter(t *testing.T) {
 	})
 }
 
+func TestFollowsGetter(t *testing.T) {
+	target := RandomId()
+	caller := RandomId()
+	follows := []core_values.UserId{RandomId()}
+	wantFollows := []entities.ContextedProfile{RandomContextedProfile()}
+
+	getFollows := func(id core_values.UserId) ([]core_values.UserId, error) {
+		if id == target {
+			return follows, nil
+		}
+		panic("unexpected args")
+	}
+	t.Run("error case - getting follows throws", func(t *testing.T) {
+		getFollows := func(core_values.UserId) ([]core_values.UserId, error) {
+			return nil, RandomError()
+		}
+		_, err := service.NewFollowsGetter(getFollows, nil)(target, caller)
+		AssertSomeError(t, err)
+
+	})
+	getProfile := func(targetId, callerId core_values.UserId) (entities.ContextedProfile, error) {
+		if targetId == follows[0] && callerId == caller {
+			return wantFollows[0], nil
+		}
+		panic("unexpected args")
+	}
+	t.Run("error case - getting profile throws", func(t *testing.T) {
+		getProfile := func(target, caller core_values.UserId) (entities.ContextedProfile, error) {
+			return entities.ContextedProfile{}, RandomError()
+		}
+		_, err := service.NewFollowsGetter(getFollows, getProfile)(target, caller)
+		AssertSomeError(t, err)
+	})
+
+	t.Run("happy case", func(t *testing.T) {
+		sut := service.NewFollowsGetter(getFollows, getProfile)
+		gotFollows, err := sut(target, caller)
+		AssertNoError(t, err)
+		Assert(t, gotFollows, wantFollows, "returned follows")
+	})
+}
+
 func TestProfileCreator(t *testing.T) {
 	user := RandomUser()
 	t.Run("happy case", func(t *testing.T) {

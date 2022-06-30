@@ -1,6 +1,9 @@
 package responses
 
-import "github.com/k0marov/go-socnet/features/profiles/domain/entities"
+import (
+	"github.com/k0marov/go-socnet/core/helpers"
+	"github.com/k0marov/go-socnet/features/profiles/domain/entities"
+)
 
 type AvatarURLResponse struct {
 	AvatarURL string `json:"avatar_url,omitempty"`
@@ -17,6 +20,10 @@ type ProfileResponse struct {
 	IsFollowed bool   `json:"is_followed"`
 }
 
+type ProfilesResponse struct {
+	Profiles []ProfileResponse `json:"profiles"`
+}
+
 func NewProfileResponse(profile entities.ContextedProfile) ProfileResponse {
 	return ProfileResponse{
 		Id:         profile.Id,
@@ -27,5 +34,11 @@ func NewProfileResponse(profile entities.ContextedProfile) ProfileResponse {
 		Followers:  profile.Followers,
 		IsMine:     profile.IsMine,
 		IsFollowed: profile.IsLiked,
+	}
+}
+
+func NewProfilesResponse(profiles []entities.ContextedProfile) ProfilesResponse {
+	return ProfilesResponse{
+		Profiles: helpers.MapForEach(profiles, NewProfileResponse),
 	}
 }

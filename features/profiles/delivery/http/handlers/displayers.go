@@ -3,7 +3,6 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/k0marov/go-socnet/core/core_values"
 	"github.com/k0marov/go-socnet/features/profiles/delivery/http/responses"
 
 	"github.com/k0marov/go-socnet/features/profiles/domain/service"
@@ -49,22 +48,22 @@ func NewGetByIdHandler(profileGetter service.ProfileGetter) http.HandlerFunc {
 	})
 }
 
-type FollowsResponse struct {
-	Profiles []core_values.UserId
-}
-
 func NewGetFollowsHandler(followsGetter service.FollowsGetter) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		caller, ok := helpers.GetUserOrAddUnauthorized(w, r)
+		if !ok {
+			return
+		}
 		id := chi.URLParam(r, "id")
 		if id == "" {
 			helpers.ThrowClientError(w, client_errors.IdNotProvided)
 			return
 		}
-		follows, err := followsGetter(id)
+		follows, err := followsGetter(id, caller.Id)
 		if err != nil {
 			helpers.HandleServiceError(w, err)
 			return
 		}
-		helpers.WriteJson(w, FollowsResponse{follows})
+		helpers.WriteJson(w, responses.NewProfilesResponse(follows))
 	})
 }
