@@ -2,11 +2,11 @@
 
 FROM golang:alpine 
 
-WORKDIR /app 
+WORKDIR /go/src/github.com/k0marov/go-socnet
 
 COPY * ./
 
-ENV GOPATH=/app
+ENV GOPATH=/go
 
 RUN go mod tidy
 RUN go get -u ./...
