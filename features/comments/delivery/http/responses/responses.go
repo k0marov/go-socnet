@@ -32,7 +32,7 @@ func NewCommentResponse(comment entities.ContextedComment) CommentResponse {
 }
 
 func NewCommentListResponse(comments []entities.ContextedComment) CommentsResponse {
-	var commentsResp []CommentResponse
+	commentsResp := make([]CommentResponse, 0)
 	for _, comment := range comments {
 		commentsResp = append(commentsResp, NewCommentResponse(comment))
 	}

@@ -11,7 +11,8 @@ type PostImageResponse struct {
 	Url   string `json:"url"`
 }
 
-func newPostImageListResponse(images []values.PostImage) (respList []PostImageResponse) {
+func newPostImageListResponse(images []values.PostImage) []PostImageResponse {
+	respList := make([]PostImageResponse, 0)
 	for _, img := range images {
 		resp := PostImageResponse{
 			Index: img.Index,
@@ -37,7 +38,7 @@ type PostsResponse struct {
 }
 
 func NewPostListResponse(posts []entities.ContextedPost) PostsResponse {
-	var postResponses []PostResponse
+	postResponses := make([]PostResponse, 0)
 	for _, post := range posts {
 		resp := PostResponse{
 			Id:        post.Id,
