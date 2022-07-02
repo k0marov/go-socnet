@@ -10,6 +10,7 @@ import (
 type StoreDeleter func(targetId string) error
 
 type Deleter func(targetId string, caller core_values.UserId) error
+type ForceDeleter func(targetId string) error
 
 func NewDeleter(getOwner ownable.OwnerGetter, delete StoreDeleter) Deleter {
 	return func(targetId string, caller core_values.UserId) error {
@@ -26,4 +27,8 @@ func NewDeleter(getOwner ownable.OwnerGetter, delete StoreDeleter) Deleter {
 		}
 		return nil
 	}
+}
+
+func NewForceDeleter(delete StoreDeleter) ForceDeleter {
+	return ForceDeleter(delete)
 }

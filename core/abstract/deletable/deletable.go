@@ -10,11 +10,13 @@ import (
 )
 
 type (
-	Deleter = service.Deleter
+	Deleter      = service.Deleter
+	ForceDeleter service.ForceDeleter
 )
 
 type deletable struct {
-	Delete Deleter
+	Delete      Deleter
+	ForceDelete service.ForceDeleter
 }
 
 func NewDeletable(db *sql.DB, tableName table_name.TableName, ownerGetter ownable.OwnerGetter) (deletable, error) {
@@ -25,8 +27,10 @@ func NewDeletable(db *sql.DB, tableName table_name.TableName, ownerGetter ownabl
 	}
 	// service
 	deleter := service.NewDeleter(ownerGetter, sqlDB.Delete)
+	forceDeleter := service.NewForceDeleter(sqlDB.Delete)
 
 	return deletable{
-		Delete: deleter,
+		Delete:      deleter,
+		ForceDelete: forceDeleter,
 	}, nil
 }
