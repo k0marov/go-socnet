@@ -6,6 +6,7 @@ import (
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
 	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
 	"github.com/k0marov/go-socnet/core/abstract/ownable"
+	"github.com/k0marov/go-socnet/core/abstract/ownable_likeable"
 	"log"
 
 	"github.com/go-chi/chi/v5"
@@ -35,6 +36,9 @@ func NewCommentsRouterImpl(db *sql.DB, getProfile profile_service.ProfileGetter)
 	if err != nil {
 		log.Fatalf("error while creating comment ownable: %v", err)
 	}
+	// ownable-likeable
+	ownableLikeableComment := ownable_likeable.NewOwnableLikeable(ownableComment.GetOwner, likeableComment.ToggleLike)
+
 	// deletable
 	deletableComment, err := deletable.NewDeletable(db, sqlDB.TableName, ownableComment.GetOwner)
 	if err != nil {
@@ -51,7 +55,7 @@ func NewCommentsRouterImpl(db *sql.DB, getProfile profile_service.ProfileGetter)
 
 	getComments := service.NewPostCommentsGetter(storeGetComments, contextAdder)
 	createComment := service.NewCommentCreator(validator, getProfile, storeCreateComment)
-	toggleLike := service.NewCommentLikeToggler(ownableComment.GetOwner, likeableComment.ToggleLike)
+	toggleLike := service.NewCommentLikeToggler(ownableLikeableComment.SafeToggleLike)
 	delete := service.NewCommentDeleter(deletableComment.Delete)
 	// handlers
 	getCommentsHandler := handlers.NewGetCommentsHandler(getComments)

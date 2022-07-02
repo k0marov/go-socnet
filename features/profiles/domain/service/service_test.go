@@ -17,22 +17,6 @@ import (
 	"github.com/k0marov/go-socnet/features/profiles/domain/values"
 )
 
-func TestFollowToggler(t *testing.T) {
-	testTarget := RandomString()
-	testFollower := RandomString()
-	t.Run("should forward the call to likeable.LikeToggler with owner set to target", func(t *testing.T) {
-		wantErr := RandomError()
-		likeToggler := func(target string, owner, caller core_values.UserId) error {
-			if target == testTarget && owner == testTarget && caller == testFollower {
-				return wantErr
-			}
-			panic("unexpected args")
-		}
-		gotErr := service.NewFollowToggler(likeToggler)(testTarget, testFollower)
-		AssertError(t, gotErr, wantErr)
-	})
-}
-
 func TestProfileGetter(t *testing.T) {
 	target := RandomString()
 	caller := RandomString()

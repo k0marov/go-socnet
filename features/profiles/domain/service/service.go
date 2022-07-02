@@ -45,9 +45,7 @@ func NewProfileGetter(getProfile store.StoreProfileGetter, addContext contexters
 }
 
 func NewFollowToggler(toggleLike likeable.LikeToggler) FollowToggler {
-	return func(target, follower core_values.UserId) error {
-		return toggleLike(target, target, follower)
-	}
+	return FollowToggler(toggleLike)
 }
 
 func NewFollowsGetter(getUserLikes likeable.UserLikesGetter, getProfile ProfileGetter) FollowsGetter {

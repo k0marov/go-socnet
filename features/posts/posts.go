@@ -6,6 +6,7 @@ import (
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
 	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
 	"github.com/k0marov/go-socnet/core/abstract/ownable"
+	"github.com/k0marov/go-socnet/core/abstract/ownable_likeable"
 	"github.com/k0marov/go-socnet/core/general/image_decoder"
 	static_store2 "github.com/k0marov/go-socnet/core/general/static_store"
 	"log"
@@ -41,6 +42,9 @@ func NewPostsRouterImpl(db *sql.DB, getContextedProfile profile_service.ProfileG
 		log.Fatalf("error while creating a Post ownable: %v", err)
 	}
 
+	// OwnableLikeable
+	ownableLikeablePost := ownable_likeable.NewOwnableLikeable(ownablePost.GetOwner, likeablePost.ToggleLike)
+
 	// deletable
 	deletablePost, err := deletable.NewDeletable(db, sqlDB.TableName, ownablePost.GetOwner)
 	if err != nil {
@@ -65,7 +69,7 @@ func NewPostsRouterImpl(db *sql.DB, getContextedProfile profile_service.ProfileG
 	createPost := service.NewPostCreator(validatePost, storeCreatePost)
 	deletePost := service.NewPostDeleter(ownablePost.GetOwner, storeDeletePost)
 	getPosts := service.NewPostsGetter(storeGetPosts, addContext)
-	toggleLike := service.NewPostLikeToggler(ownablePost.GetOwner, likeablePost.ToggleLike)
+	toggleLike := service.NewPostLikeToggler(ownableLikeablePost.SafeToggleLike)
 
 	// handlers
 	createPostHandler := handlers.NewCreateHandler(createPost)

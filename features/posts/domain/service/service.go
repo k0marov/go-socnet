@@ -2,8 +2,8 @@ package service
 
 import (
 	"fmt"
-	"github.com/k0marov/go-socnet/core/abstract/likeable"
 	"github.com/k0marov/go-socnet/core/abstract/ownable"
+	"github.com/k0marov/go-socnet/core/abstract/ownable_likeable"
 	"github.com/k0marov/go-socnet/core/general/client_errors"
 	"github.com/k0marov/go-socnet/core/general/core_errors"
 	"github.com/k0marov/go-socnet/core/general/core_values"
@@ -45,23 +45,8 @@ func NewPostDeleter(getAuthor ownable.OwnerGetter, deletePost store.PostDeleter)
 	}
 }
 
-func NewPostLikeToggler(getAuthor ownable.OwnerGetter, toggleLike likeable.LikeToggler) PostLikeToggler {
-	return func(postId values.PostId, caller core_values.UserId) error {
-		author, err := getAuthor(postId)
-		if err == core_errors.ErrNotFound {
-			return client_errors.NotFound
-		}
-		if err != nil {
-			return fmt.Errorf("while getting post author: %w", err)
-		}
-
-		err = toggleLike(postId, author, caller)
-		if err != nil {
-			return err
-		}
-
-		return nil
-	}
+func NewPostLikeToggler(safeToggleLike ownable_likeable.SafeLikeToggler) PostLikeToggler {
+	return PostLikeToggler(safeToggleLike)
 }
 
 func NewPostCreator(validate validators.PostValidator, createPost store.PostCreator) PostCreator {

@@ -3,7 +3,6 @@ package service_test
 import (
 	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
 	"github.com/k0marov/go-socnet/core/general/client_errors"
-	"github.com/k0marov/go-socnet/core/general/core_errors"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"reflect"
@@ -88,51 +87,6 @@ func TestCommentCreator(t *testing.T) {
 	gotCreated.CreatedAt = createdComment.CreatedAt
 	Assert(t, gotCreated, createdComment, "the returned created comment")
 }
-
-func TestCommentLikeToggler(t *testing.T) {
-	comment := RandomId()
-	author := RandomId()
-	caller := RandomId()
-	authorGetter := func(commentId values.CommentId) (core_values.UserId, error) {
-		if commentId == comment {
-			return author, nil
-		}
-		panic("unexpected args")
-	}
-	t.Run("error case - getting author throws", func(t *testing.T) {
-		t.Run("not found error", func(t *testing.T) {
-			authorGetter := func(id values.CommentId) (core_values.UserId, error) {
-				return "", core_errors.ErrNotFound
-			}
-			err := service.NewCommentLikeToggler(authorGetter, nil)(comment, caller)
-			AssertError(t, err, client_errors.NotFound)
-		})
-		t.Run("some other error", func(t *testing.T) {
-			authorGetter := func(values.CommentId) (core_values.UserId, error) {
-				return "", RandomError()
-			}
-			err := service.NewCommentLikeToggler(authorGetter, nil)(comment, caller)
-			AssertSomeError(t, err)
-		})
-	})
-	likeToggler := func(target string, authorId, callerId core_values.UserId) error {
-		if target == comment && authorId == author && callerId == caller {
-			return nil
-		}
-		panic("unexected args")
-	}
-	t.Run("error case - like toggler throws, should FORWARD the error (since it can be a client error)", func(t *testing.T) {
-		wantErr := RandomError()
-		likeToggler := func(target string, authorId, callerId core_values.UserId) error {
-			return wantErr
-		}
-		err := service.NewCommentLikeToggler(authorGetter, likeToggler)(comment, caller)
-		AssertError(t, err, wantErr)
-	})
-	err := service.NewCommentLikeToggler(authorGetter, likeToggler)(comment, caller)
-	AssertNoError(t, err)
-}
-
 func TestPostCommentsGetter(t *testing.T) {
 	post := RandomString()
 	caller := RandomId()

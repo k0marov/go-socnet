@@ -112,50 +112,6 @@ func TestPostDeleter(t *testing.T) {
 	})
 }
 
-func TestPostLikeToggler(t *testing.T) {
-	post := RandomString()
-	author := RandomString()
-	caller := RandomString()
-	getAuthor := func(postId values.PostId) (core_values.UserId, error) {
-		if postId == post {
-			return author, nil
-		}
-		panic("unexpected args")
-	}
-	t.Run("error case - getting author throws", func(t *testing.T) {
-		t.Run("post does not exist", func(t *testing.T) {
-			getAuthor := func(postId values.PostId) (core_values.UserId, error) {
-				return "", core_errors.ErrNotFound
-			}
-			err := service.NewPostLikeToggler(getAuthor, nil)(post, caller)
-			AssertError(t, err, client_errors.NotFound)
-		})
-		t.Run("some other error", func(t *testing.T) {
-			getAuthor := func(values.PostId) (core_values.UserId, error) {
-				return "", RandomError()
-			}
-			err := service.NewPostLikeToggler(getAuthor, nil)(post, caller)
-			AssertSomeError(t, err)
-		})
-	})
-	toggleLike := func(target string, owner, callerId core_values.UserId) error {
-		if target == post && owner == author && callerId == caller {
-			return nil
-		}
-		panic("unexpected args")
-	}
-	t.Run("error case - toggling like throws, should FORWARD the error, since it can be a client error", func(t *testing.T) {
-		wantErr := RandomError()
-		toggleLike := func(target string, owner, callerId core_values.UserId) error {
-			return wantErr
-		}
-		err := service.NewPostLikeToggler(getAuthor, toggleLike)(post, caller)
-		AssertError(t, err, wantErr)
-	})
-	err := service.NewPostLikeToggler(getAuthor, toggleLike)(post, caller)
-	AssertNoError(t, err)
-}
-
 func TestPostCreator(t *testing.T) {
 	tNewPost := RandomNewPostData()
 	t.Run("happy case", func(t *testing.T) {
