@@ -24,7 +24,7 @@ func TestLikeableContextAdder(t *testing.T) {
 				checkLiked := func(string, core_values.UserId) (bool, error) {
 					return false, RandomError()
 				}
-				_, err := contexters.NewOwnLikeContextGetter(checkLiked, nil)(target, caller)
+				_, err := contexters.NewOwnLikeContextGetter(checkLiked)(target, "", caller)
 				AssertSomeError(t, err)
 			})
 			t.Run("happy case", func(t *testing.T) {
@@ -34,27 +34,13 @@ func TestLikeableContextAdder(t *testing.T) {
 				} else {
 					owner = RandomId()
 				}
-				getOwner := func(targetId string) (core_values.UserId, error) {
-					if targetId == target {
-						return owner, nil
-					}
-					panic("unexpected args")
-				}
-				gotContext, err := contexters.NewOwnLikeContextGetter(checkLiked, getOwner)(target, caller)
+				gotContext, err := contexters.NewOwnLikeContextGetter(checkLiked)(target, owner, caller)
 				AssertNoError(t, err)
 				wantContext := contexters.OwnLikeContext{
 					IsLiked: isLiked,
 					IsMine:  isMine,
 				}
 				Assert(t, gotContext, wantContext, "returned context")
-			})
-
-			t.Run("error case - getting owner throws", func(t *testing.T) {
-				getOwner := func(string) (core_values.UserId, error) {
-					return "", RandomError()
-				}
-				_, err := contexters.NewOwnLikeContextGetter(checkLiked, getOwner)(target, caller)
-				AssertSomeError(t, err)
 			})
 		})
 	}
