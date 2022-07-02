@@ -6,6 +6,8 @@ import (
 	"github.com/k0marov/go-socnet/core/general/core_values"
 )
 
+// TODO: add checks for core_errors.ErrNotFound to all services
+
 type (
 	StoreLikeChecker          func(targetId string, fromUser core_values.UserId) (bool, error)
 	StoreLike                 func(targetId string, fromUser core_values.UserId) error
