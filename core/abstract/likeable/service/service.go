@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"github.com/k0marov/go-socnet/core/general/client_errors"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 )
 
@@ -18,7 +17,7 @@ type (
 )
 
 type (
-	LikeToggler          func(target string, owner, liker core_values.UserId) error
+	LikeToggler          func(target string, liker core_values.UserId) error
 	LikesCountGetter     func(targetId string) (int, error)
 	UserLikesCountGetter func(core_values.UserId) (int, error)
 	UserLikesGetter      func(core_values.UserId) ([]string, error)
@@ -26,10 +25,7 @@ type (
 )
 
 func NewLikeToggler(checkLiked StoreLikeChecker, like StoreLike, unlike StoreUnlike) LikeToggler {
-	return func(target string, owner, fromUser core_values.UserId) error {
-		if owner == fromUser {
-			return client_errors.LikingYourself
-		}
+	return func(target string, fromUser core_values.UserId) error {
 		isLiked, err := checkLiked(target, fromUser)
 		if err != nil {
 			return fmt.Errorf("while checking if the target Likeable is liked: %w", err)
