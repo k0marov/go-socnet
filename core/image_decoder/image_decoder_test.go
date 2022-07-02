@@ -27,7 +27,7 @@ func TestImageDecoderImpl(t *testing.T) {
 		wantImg     image_decoder.Image
 		shouldErr   bool
 	}{
-		{"test_avatar.jpg", image_decoder.Image{Width: 640, Height: 640}, false},
+		{"test_avatar.png", image_decoder.Image{Width: 640, Height: 640}, false},
 		{"test_non_square_avatar.png", image_decoder.Image{Width: 640, Height: 480}, false},
 		{"test_js_injection.js", image_decoder.Image{}, true},
 		{"test_text.txt", image_decoder.Image{}, true},
