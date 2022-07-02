@@ -9,6 +9,5 @@ import (
 )
 
 type PostsGetter func(authorId core_values.UserId) ([]entities.Post, error)
-type AuthorGetter func(postId values.PostId) (core_values.UserId, error)
 type PostDeleter func(postId values.PostId, authorId core_values.UserId) error
 type PostCreator func(post values.NewPostData, createdAt time.Time) error

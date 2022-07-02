@@ -40,10 +40,6 @@ func NewCommentsGetter(getComments DBCommentsGetter, getLikes likeable.LikesCoun
 	}
 }
 
-func NewAuthorGetter(getAuthor DBAuthorGetter) store.AuthorGetter {
-	return store.AuthorGetter(getAuthor)
-}
-
 func NewCommentCreator(createComment DBCommentCreator) store.Creator {
 	return store.Creator(createComment)
 }

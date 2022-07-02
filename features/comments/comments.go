@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
 	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
+	"github.com/k0marov/go-socnet/core/abstract/ownable"
 	"log"
 
 	"github.com/go-chi/chi/v5"
@@ -28,10 +29,14 @@ func NewCommentsRouterImpl(db *sql.DB, getProfile profile_service.ProfileGetter)
 	if err != nil {
 		log.Fatalf("error while creating comment likeable: %v", err)
 	}
+	// ownable
+	ownableComment, err := ownable.NewOwnable(db, sqlDB.TableName)
+	if err != nil {
+		log.Fatalf("error while creating comment ownable: %v", err)
+	}
 
 	// store
 	storeCreateComment := store.NewCommentCreator(sqlDB.Create)
-	storeGetAuthor := store.NewAuthorGetter(sqlDB.GetAuthor)
 	storeGetComments := store.NewCommentsGetter(sqlDB.GetComments, likeableComment.GetLikesCount)
 
 	// service
@@ -40,7 +45,7 @@ func NewCommentsRouterImpl(db *sql.DB, getProfile profile_service.ProfileGetter)
 
 	getComments := service.NewPostCommentsGetter(storeGetComments, contextAdder)
 	createComment := service.NewCommentCreator(validator, getProfile, storeCreateComment)
-	toggleLike := service.NewCommentLikeToggler(storeGetAuthor, likeableComment.ToggleLike)
+	toggleLike := service.NewCommentLikeToggler(ownableComment.GetOwner, likeableComment.ToggleLike)
 	// handlers
 	getCommentsHandler := handlers.NewGetCommentsHandler(getComments)
 	createCommentHandler := handlers.NewCreateCommentHandler(createComment)

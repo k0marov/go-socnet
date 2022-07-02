@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
+	"github.com/k0marov/go-socnet/core/abstract/ownable"
 	"github.com/k0marov/go-socnet/core/general/client_errors"
 	"github.com/k0marov/go-socnet/core/general/core_errors"
 	"github.com/k0marov/go-socnet/core/general/core_values"
@@ -24,7 +25,7 @@ type (
 	PostsGetter     func(fromAuthor, caller core_values.UserId) ([]entities.ContextedPost, error)
 )
 
-func NewPostDeleter(getAuthor store.AuthorGetter, deletePost store.PostDeleter) PostDeleter {
+func NewPostDeleter(getAuthor ownable.OwnerGetter, deletePost store.PostDeleter) PostDeleter {
 	return func(post values.PostId, caller core_values.UserId) error {
 		author, err := getAuthor(post)
 		if err == core_errors.ErrNotFound {
@@ -44,7 +45,7 @@ func NewPostDeleter(getAuthor store.AuthorGetter, deletePost store.PostDeleter) 
 	}
 }
 
-func NewPostLikeToggler(getAuthor store.AuthorGetter, toggleLike likeable.LikeToggler) PostLikeToggler {
+func NewPostLikeToggler(getAuthor ownable.OwnerGetter, toggleLike likeable.LikeToggler) PostLikeToggler {
 	return func(postId values.PostId, caller core_values.UserId) error {
 		author, err := getAuthor(postId)
 		if err == core_errors.ErrNotFound {

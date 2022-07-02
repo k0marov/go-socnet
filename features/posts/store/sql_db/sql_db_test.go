@@ -1,14 +1,12 @@
 package sql_db_test
 
 import (
-	"github.com/k0marov/go-socnet/core/general/core_errors"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"testing"
 	"time"
 
 	"github.com/k0marov/go-socnet/features/posts/domain/models"
-	"github.com/k0marov/go-socnet/features/posts/domain/values"
 	"github.com/k0marov/go-socnet/features/posts/store/sql_db"
 	profiles_db "github.com/k0marov/go-socnet/features/profiles/store/sql_db"
 	_ "github.com/mattn/go-sqlite3"
@@ -25,10 +23,6 @@ func TestSqlDB_ErrorHandling(t *testing.T) {
 	})
 	t.Run("CreatePost", func(t *testing.T) {
 		_, err := sut.CreatePost(models.PostToCreate{})
-		AssertSomeError(t, err)
-	})
-	t.Run("GetAuthor", func(t *testing.T) {
-		_, err := sut.GetAuthor(RandomString())
 		AssertSomeError(t, err)
 	})
 	t.Run("AddPostImages", func(t *testing.T) {
@@ -75,12 +69,6 @@ func TestSqlDB(t *testing.T) {
 		profiles, err := profiles_db.NewSqlDB(driver)
 		AssertNoError(t, err)
 
-		assertAuthor := func(t testing.TB, postId values.PostId, author core_values.UserId) {
-			t.Helper()
-			gotAuthor, err := sut.GetAuthor(postId)
-			AssertNoError(t, err)
-			Assert(t, gotAuthor, author, "the stored post author")
-		}
 		// create two profiles
 		user1 := RandomProfileModel()
 		user2 := RandomProfileModel()
@@ -89,7 +77,6 @@ func TestSqlDB(t *testing.T) {
 
 		// create a post for the first profile
 		wantPost1 := createRandomPost(t, sut, user1.Id)
-		assertAuthor(t, wantPost1.Id, user1.Id)
 		assertPosts(t, sut, user1.Id, []models.PostModel{wantPost1})
 		// add images to that post
 		wantPost1.Images = RandomPostImageModels()
@@ -101,8 +88,6 @@ func TestSqlDB(t *testing.T) {
 			createRandomPost(t, sut, user2.Id),
 			createRandomPost(t, sut, user2.Id),
 		}
-		assertAuthor(t, user2Posts[0].Id, user2.Id)
-		assertAuthor(t, user2Posts[1].Id, user2.Id)
 		assertPosts(t, sut, user2.Id, user2Posts)
 
 		// delete the second post
@@ -110,11 +95,6 @@ func TestSqlDB(t *testing.T) {
 		AssertNoError(t, err)
 		// assert it was deleted
 		assertPosts(t, sut, user2.Id, user2Posts[:1])
-
-		// getting author of non existing post should return not found
-		_, err = sut.GetAuthor("9999")
-		AssertError(t, err, core_errors.ErrNotFound)
-
 	})
 	t.Run("returning posts ordered by createdAt", func(t *testing.T) {
 		driver := OpenSqliteDB(t)

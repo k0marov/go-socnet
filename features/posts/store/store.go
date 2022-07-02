@@ -14,8 +14,7 @@ import (
 )
 
 type (
-	DBPostsGetter  func(core_values.UserId) ([]models.PostModel, error)
-	DBAuthorGetter func(values.PostId) (core_values.UserId, error)
+	DBPostsGetter func(core_values.UserId) ([]models.PostModel, error)
 
 	DBPostCreator     func(newPost models.PostToCreate) (values.PostId, error)
 	DBPostImagesAdder func(values.PostId, []models.PostImageModel) error
@@ -91,8 +90,4 @@ func NewStorePostsGetter(getter DBPostsGetter, likesGetter likeable.LikesCountGe
 		}
 		return
 	}
-}
-
-func NewStoreAuthorGetter(authorGetter DBAuthorGetter) store.AuthorGetter {
-	return store.AuthorGetter(authorGetter)
 }

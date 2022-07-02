@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
 	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
+	"github.com/k0marov/go-socnet/core/abstract/ownable"
 	"github.com/k0marov/go-socnet/core/general/image_decoder"
 	static_store2 "github.com/k0marov/go-socnet/core/general/static_store"
 	"log"
@@ -33,13 +34,18 @@ func NewPostsRouterImpl(db *sql.DB, getContextedProfile profile_service.ProfileG
 		log.Fatalf("error while creating a Post likeable: %v", err)
 	}
 
+	// ownable
+	ownablePost, err := ownable.NewOwnable(db, sqlDB.TableName)
+	if err != nil {
+		log.Fatalf("error while creating a Post ownable: %v", err)
+	}
+
 	// file storage
 	storeImages := file_storage.NewPostImageFilesCreator(static_store2.NewStaticFileCreatorImpl())
 	deleteFiles := file_storage.NewPostFilesDeleter(static_store2.NewStaticDirDeleterImpl())
 
 	// store
 	storeCreatePost := store.NewStorePostCreator(sqlDB.CreatePost, storeImages, sqlDB.AddPostImages, sqlDB.DeletePost, deleteFiles)
-	storeGetAuthor := store.NewStoreAuthorGetter(sqlDB.GetAuthor)
 	storeDeletePost := store.NewStorePostDeleter(sqlDB.DeletePost, deleteFiles)
 	storeGetPosts := store.NewStorePostsGetter(sqlDB.GetPosts, likeablePost.GetLikesCount)
 
@@ -50,9 +56,9 @@ func NewPostsRouterImpl(db *sql.DB, getContextedProfile profile_service.ProfileG
 	addContext := contexters.NewPostListContextAdder(contexters.NewPostContextAdder(getContextedProfile, likeable_contexters.NewLikeableContextGetter(likeablePost.IsLiked)))
 
 	createPost := service.NewPostCreator(validatePost, storeCreatePost)
-	deletePost := service.NewPostDeleter(storeGetAuthor, storeDeletePost)
+	deletePost := service.NewPostDeleter(ownablePost.GetOwner, storeDeletePost)
 	getPosts := service.NewPostsGetter(storeGetPosts, addContext)
-	toggleLike := service.NewPostLikeToggler(storeGetAuthor, likeablePost.ToggleLike)
+	toggleLike := service.NewPostLikeToggler(ownablePost.GetOwner, likeablePost.ToggleLike)
 
 	// handlers
 	createPostHandler := handlers.NewCreateHandler(createPost)

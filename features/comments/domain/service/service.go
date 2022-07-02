@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
 	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
+	"github.com/k0marov/go-socnet/core/abstract/ownable"
 	"github.com/k0marov/go-socnet/core/general/client_errors"
 	"github.com/k0marov/go-socnet/core/general/core_errors"
 	"github.com/k0marov/go-socnet/core/general/core_values"
@@ -77,7 +78,7 @@ func NewCommentCreator(validate validators.CommentValidator, getProfile profile_
 	}
 }
 
-func NewCommentLikeToggler(getAuthor store.AuthorGetter, toggleLike likeable.LikeToggler) CommentLikeToggler {
+func NewCommentLikeToggler(getAuthor ownable.OwnerGetter, toggleLike likeable.LikeToggler) CommentLikeToggler {
 	return func(comment values.CommentId, caller core_values.UserId) error {
 		author, err := getAuthor(comment)
 		if err == core_errors.ErrNotFound {

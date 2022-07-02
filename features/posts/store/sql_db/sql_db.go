@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
-	"github.com/k0marov/go-socnet/core/general/core_errors"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	"time"
 
@@ -29,10 +28,10 @@ func initSQL(sql *sql.DB) error {
 	_, err := sql.Exec(`
 		CREATE TABLE IF NOT EXISTS Post(
 		    id INTEGER PRIMARY KEY, 
-			author_id INT NOT NULL, 
+			owner_id INT NOT NULL, 
 			textContent TEXT NOT NULL, 
 			createdAt INT NOT NULL, 
-			FOREIGN KEY(author_id) REFERENCES Profile(id) ON DELETE CASCADE
+			FOREIGN KEY(owner_id) REFERENCES Profile(id) ON DELETE CASCADE
 		)
 	`)
 	if err != nil {
@@ -54,9 +53,9 @@ func initSQL(sql *sql.DB) error {
 
 func (db *SqlDB) GetPosts(author core_values.UserId) (posts []models.PostModel, err error) {
 	rows, err := db.sql.Query(`
-		SELECT id, author_id, textContent, createdAt
+		SELECT id, owner_id, textContent, createdAt
 		FROM Post 
-		WHERE author_id = ?
+		WHERE owner_id = ?
 		ORDER BY createdAt DESC
 	`, author)
 	if err != nil {
@@ -80,25 +79,9 @@ func (db *SqlDB) GetPosts(author core_values.UserId) (posts []models.PostModel, 
 	return posts, nil
 }
 
-func (db *SqlDB) GetAuthor(post values.PostId) (core_values.UserId, error) {
-	row := db.sql.QueryRow(`
-		SELECT author_id FROM Post 
-		WHERE id = ?
-    `, post)
-	var authorId int
-	err := row.Scan(&authorId)
-	if err == sql.ErrNoRows {
-		return "", core_errors.ErrNotFound
-	}
-	if err != nil {
-		return "", fmt.Errorf("while SELECTing a post author: %w", err)
-	}
-	return fmt.Sprintf("%d", authorId), nil
-}
-
 func (db *SqlDB) CreatePost(newPost models.PostToCreate) (values.PostId, error) {
 	res, err := db.sql.Exec(`
-		INSERT INTO Post(author_id, textContent, createdAt) VALUES (?, ?, ?)
+		INSERT INTO Post(owner_id, textContent, createdAt) VALUES (?, ?, ?)
 	`, newPost.Author, newPost.Text, newPost.CreatedAt.Unix())
 	if err != nil {
 		return "", fmt.Errorf("while inserting a post: %w", err)
