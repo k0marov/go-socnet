@@ -2,14 +2,13 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/k0marov/go-socnet/core/general/client_errors"
+	helpers "github.com/k0marov/go-socnet/core/helpers/http_helpers"
 	"github.com/k0marov/go-socnet/features/profiles/delivery/http/responses"
 	"net/http"
 
 	"github.com/k0marov/go-socnet/features/profiles/domain/service"
 	"github.com/k0marov/go-socnet/features/profiles/domain/values"
-
-	"github.com/k0marov/go-socnet/core/client_errors"
-	helpers "github.com/k0marov/go-socnet/core/http_helpers"
 
 	"github.com/go-chi/chi/v5"
 )

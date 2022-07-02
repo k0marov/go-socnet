@@ -1,13 +1,13 @@
 package file_storage_test
 
 import (
+	"github.com/k0marov/go-socnet/core/general/core_values"
+	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"path/filepath"
 	"reflect"
 	"strconv"
 	"testing"
 
-	"github.com/k0marov/go-socnet/core/core_values"
-	. "github.com/k0marov/go-socnet/core/test_helpers"
 	"github.com/k0marov/go-socnet/features/posts/domain/values"
 	"github.com/k0marov/go-socnet/features/posts/store/file_storage"
 	profiles "github.com/k0marov/go-socnet/features/profiles/store/file_storage"

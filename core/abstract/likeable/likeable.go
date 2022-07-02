@@ -3,10 +3,9 @@ package likeable
 import (
 	"database/sql"
 	"fmt"
-
-	"github.com/k0marov/go-socnet/core/likeable/service"
-	"github.com/k0marov/go-socnet/core/likeable/store/sql_db"
-	"github.com/k0marov/go-socnet/core/likeable/table_name"
+	"github.com/k0marov/go-socnet/core/abstract/likeable/service"
+	"github.com/k0marov/go-socnet/core/abstract/likeable/store/sql_db"
+	"github.com/k0marov/go-socnet/core/abstract/likeable/table_name"
 )
 
 type (

@@ -1,11 +1,10 @@
 package file_storage
 
 import (
-	"github.com/k0marov/go-socnet/core/core_values"
+	"github.com/k0marov/go-socnet/core/general/core_values"
+	"github.com/k0marov/go-socnet/core/general/core_values/ref"
+	"github.com/k0marov/go-socnet/core/general/static_store"
 	"github.com/k0marov/go-socnet/features/profiles/store"
-
-	"github.com/k0marov/go-socnet/core/ref"
-	"github.com/k0marov/go-socnet/core/static_store"
 )
 
 const ProfilePrefix = "profile_"

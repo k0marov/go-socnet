@@ -1,7 +1,7 @@
 package validators
 
 import (
-	"github.com/k0marov/go-socnet/core/client_errors"
+	"github.com/k0marov/go-socnet/core/general/client_errors"
 	"github.com/k0marov/go-socnet/features/comments/domain/values"
 )
 

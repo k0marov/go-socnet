@@ -1,13 +1,13 @@
 package validators_test
 
 import (
+	"github.com/k0marov/go-socnet/core/general/client_errors"
+	"github.com/k0marov/go-socnet/core/general/image_decoder"
+	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"reflect"
 	"strings"
 	"testing"
 
-	"github.com/k0marov/go-socnet/core/client_errors"
-	"github.com/k0marov/go-socnet/core/image_decoder"
-	. "github.com/k0marov/go-socnet/core/test_helpers"
 	"github.com/k0marov/go-socnet/features/posts/domain/validators"
 	"github.com/k0marov/go-socnet/features/posts/domain/values"
 )

@@ -2,13 +2,13 @@ package posts
 
 import (
 	"database/sql"
+	"github.com/k0marov/go-socnet/core/abstract/likeable"
+	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
+	"github.com/k0marov/go-socnet/core/general/image_decoder"
+	static_store2 "github.com/k0marov/go-socnet/core/general/static_store"
 	"log"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/k0marov/go-socnet/core/image_decoder"
-	"github.com/k0marov/go-socnet/core/likeable"
-	likeable_contexters "github.com/k0marov/go-socnet/core/likeable/contexters"
-	"github.com/k0marov/go-socnet/core/static_store"
 	"github.com/k0marov/go-socnet/features/posts/delivery/http/handlers"
 	"github.com/k0marov/go-socnet/features/posts/delivery/http/router"
 	"github.com/k0marov/go-socnet/features/posts/domain/contexters"
@@ -34,8 +34,8 @@ func NewPostsRouterImpl(db *sql.DB, getContextedProfile profile_service.ProfileG
 	}
 
 	// file storage
-	storeImages := file_storage.NewPostImageFilesCreator(static_store.NewStaticFileCreatorImpl())
-	deleteFiles := file_storage.NewPostFilesDeleter(static_store.NewStaticDirDeleterImpl())
+	storeImages := file_storage.NewPostImageFilesCreator(static_store2.NewStaticFileCreatorImpl())
+	deleteFiles := file_storage.NewPostFilesDeleter(static_store2.NewStaticDirDeleterImpl())
 
 	// store
 	storeCreatePost := store.NewStorePostCreator(sqlDB.CreatePost, storeImages, sqlDB.AddPostImages, sqlDB.DeletePost, deleteFiles)

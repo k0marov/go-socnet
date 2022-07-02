@@ -2,11 +2,11 @@ package comments
 
 import (
 	"database/sql"
+	"github.com/k0marov/go-socnet/core/abstract/likeable"
+	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
 	"log"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/k0marov/go-socnet/core/likeable"
-	likeable_contexters "github.com/k0marov/go-socnet/core/likeable/contexters"
 	"github.com/k0marov/go-socnet/features/comments/delivery/http/handlers"
 	"github.com/k0marov/go-socnet/features/comments/delivery/http/router"
 	"github.com/k0marov/go-socnet/features/comments/domain/contexters"

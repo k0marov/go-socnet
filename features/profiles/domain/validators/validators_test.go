@@ -2,17 +2,16 @@ package validators_test
 
 import (
 	"fmt"
+	"github.com/k0marov/go-socnet/core/general/client_errors"
+	"github.com/k0marov/go-socnet/core/general/core_values/ref"
+	"github.com/k0marov/go-socnet/core/general/image_decoder"
+	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/k0marov/go-socnet/features/profiles/domain/validators"
 	"github.com/k0marov/go-socnet/features/profiles/domain/values"
-
-	"github.com/k0marov/go-socnet/core/client_errors"
-	"github.com/k0marov/go-socnet/core/image_decoder"
-	"github.com/k0marov/go-socnet/core/ref"
-	. "github.com/k0marov/go-socnet/core/test_helpers"
 )
 
 func TestProfileUpdateValidator(t *testing.T) {

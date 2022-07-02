@@ -2,15 +2,13 @@ package store
 
 import (
 	"fmt"
-
-	"github.com/k0marov/go-socnet/core/likeable"
-	"github.com/k0marov/go-socnet/core/static_store"
+	"github.com/k0marov/go-socnet/core/abstract/likeable"
+	"github.com/k0marov/go-socnet/core/general/core_values"
+	"github.com/k0marov/go-socnet/core/general/static_store"
 
 	"github.com/k0marov/go-socnet/features/profiles/domain/entities"
 	"github.com/k0marov/go-socnet/features/profiles/domain/store"
 	"github.com/k0marov/go-socnet/features/profiles/domain/values"
-
-	"github.com/k0marov/go-socnet/core/core_values"
 )
 
 type DBUpdateData struct {

@@ -2,11 +2,11 @@ package file_storage
 
 import (
 	"fmt"
+	"github.com/k0marov/go-socnet/core/general/core_values"
+	"github.com/k0marov/go-socnet/core/general/static_store"
 	"path/filepath"
 	"strconv"
 
-	"github.com/k0marov/go-socnet/core/core_values"
-	"github.com/k0marov/go-socnet/core/static_store"
 	"github.com/k0marov/go-socnet/features/posts/domain/values"
 
 	profiles "github.com/k0marov/go-socnet/features/profiles/store/file_storage"

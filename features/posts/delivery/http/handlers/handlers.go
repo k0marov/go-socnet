@@ -1,15 +1,14 @@
 package handlers
 
 import (
+	"github.com/k0marov/go-socnet/core/general/client_errors"
+	helpers "github.com/k0marov/go-socnet/core/helpers/http_helpers"
 	"net/http"
 	"strconv"
 
 	"github.com/k0marov/go-socnet/features/posts/delivery/http/responses"
 	"github.com/k0marov/go-socnet/features/posts/domain/service"
 	"github.com/k0marov/go-socnet/features/posts/domain/values"
-
-	"github.com/k0marov/go-socnet/core/client_errors"
-	helpers "github.com/k0marov/go-socnet/core/http_helpers"
 
 	"github.com/go-chi/chi/v5"
 )

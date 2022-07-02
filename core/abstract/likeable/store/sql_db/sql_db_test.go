@@ -2,11 +2,11 @@ package sql_db_test
 
 import (
 	"database/sql"
+	"github.com/k0marov/go-socnet/core/abstract/likeable/store/sql_db"
+	"github.com/k0marov/go-socnet/core/abstract/likeable/table_name"
+	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"testing"
 
-	"github.com/k0marov/go-socnet/core/likeable/store/sql_db"
-	"github.com/k0marov/go-socnet/core/likeable/table_name"
-	. "github.com/k0marov/go-socnet/core/test_helpers"
 	profiles_db "github.com/k0marov/go-socnet/features/profiles/store/sql_db"
 	_ "github.com/mattn/go-sqlite3"
 )

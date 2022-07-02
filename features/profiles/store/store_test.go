@@ -2,19 +2,18 @@ package store_test
 
 import (
 	"fmt"
+	"github.com/k0marov/go-socnet/core/general/core_values"
+	"github.com/k0marov/go-socnet/core/general/core_values/ref"
+	"github.com/k0marov/go-socnet/core/general/static_store"
+	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"reflect"
 	"testing"
 
-	"github.com/k0marov/go-socnet/core/core_values"
-	"github.com/k0marov/go-socnet/core/static_store"
 	"github.com/k0marov/go-socnet/features/profiles/domain/models"
 
 	"github.com/k0marov/go-socnet/features/profiles/domain/entities"
 	"github.com/k0marov/go-socnet/features/profiles/domain/values"
 	"github.com/k0marov/go-socnet/features/profiles/store"
-
-	"github.com/k0marov/go-socnet/core/ref"
-	. "github.com/k0marov/go-socnet/core/test_helpers"
 )
 
 func TestStoreProfileUpdater(t *testing.T) {

@@ -2,9 +2,9 @@ package contexters
 
 import (
 	"fmt"
+	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
+	"github.com/k0marov/go-socnet/core/general/core_values"
 
-	"github.com/k0marov/go-socnet/core/core_values"
-	likeable_contexters "github.com/k0marov/go-socnet/core/likeable/contexters"
 	"github.com/k0marov/go-socnet/features/profiles/domain/entities"
 )
 

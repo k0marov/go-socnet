@@ -3,9 +3,8 @@ package sql_db
 import (
 	"database/sql"
 	"fmt"
-
-	"github.com/k0marov/go-socnet/core/core_values"
-	"github.com/k0marov/go-socnet/core/likeable/table_name"
+	"github.com/k0marov/go-socnet/core/abstract/likeable/table_name"
+	"github.com/k0marov/go-socnet/core/general/core_values"
 )
 
 type SqlDB struct {

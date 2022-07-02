@@ -2,12 +2,11 @@ package http_test_helpers
 
 import (
 	"context"
+	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-
-	. "github.com/k0marov/go-socnet/core/test_helpers"
 
 	auth "github.com/k0marov/golang-auth"
 )

@@ -1,11 +1,10 @@
 package contexters_test
 
 import (
+	"github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
+	"github.com/k0marov/go-socnet/core/general/core_values"
+	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"testing"
-
-	"github.com/k0marov/go-socnet/core/core_values"
-	"github.com/k0marov/go-socnet/core/likeable/contexters"
-	. "github.com/k0marov/go-socnet/core/test_helpers"
 )
 
 func TestLikeableContextAdder(t *testing.T) {

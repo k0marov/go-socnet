@@ -2,9 +2,13 @@ package service
 
 import (
 	"fmt"
+	"github.com/k0marov/go-socnet/core/abstract/likeable"
+	"github.com/k0marov/go-socnet/core/general/client_errors"
+	"github.com/k0marov/go-socnet/core/general/core_entities"
+	"github.com/k0marov/go-socnet/core/general/core_errors"
+	"github.com/k0marov/go-socnet/core/general/core_values"
+	"github.com/k0marov/go-socnet/core/general/static_store"
 
-	"github.com/k0marov/go-socnet/core/likeable"
-	"github.com/k0marov/go-socnet/core/static_store"
 	"github.com/k0marov/go-socnet/features/profiles/domain/contexters"
 	"github.com/k0marov/go-socnet/features/profiles/domain/models"
 
@@ -12,11 +16,6 @@ import (
 	"github.com/k0marov/go-socnet/features/profiles/domain/store"
 	"github.com/k0marov/go-socnet/features/profiles/domain/validators"
 	"github.com/k0marov/go-socnet/features/profiles/domain/values"
-
-	"github.com/k0marov/go-socnet/core/client_errors"
-	core_entities "github.com/k0marov/go-socnet/core/core_entities"
-	"github.com/k0marov/go-socnet/core/core_errors"
-	"github.com/k0marov/go-socnet/core/core_values"
 )
 
 type (

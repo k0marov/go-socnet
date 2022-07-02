@@ -2,13 +2,12 @@ package image_decoder_test
 
 import (
 	"fmt"
+	"github.com/k0marov/go-socnet/core/general/image_decoder"
+	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"io"
 	"os"
 	"path/filepath"
 	"testing"
-
-	"github.com/k0marov/go-socnet/core/image_decoder"
-	. "github.com/k0marov/go-socnet/core/test_helpers"
 )
 
 func TestImageDecoderImpl(t *testing.T) {

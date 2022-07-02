@@ -5,7 +5,11 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"github.com/k0marov/go-socnet/core/general/core_entities"
+	"github.com/k0marov/go-socnet/core/general/core_values"
+	"github.com/k0marov/go-socnet/core/general/static_store"
 	"github.com/k0marov/go-socnet/core/helpers"
+	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -14,17 +18,12 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/k0marov/go-socnet/core/static_store"
 	"github.com/k0marov/go-socnet/features/profiles/delivery/http/responses"
 	"github.com/k0marov/go-socnet/features/profiles/domain/models"
 
 	"github.com/k0marov/go-socnet/features/profiles"
 	"github.com/k0marov/go-socnet/features/profiles/domain/entities"
 	"github.com/k0marov/go-socnet/features/profiles/domain/values"
-
-	core_entities "github.com/k0marov/go-socnet/core/core_entities"
-	"github.com/k0marov/go-socnet/core/core_values"
-	. "github.com/k0marov/go-socnet/core/test_helpers"
 
 	_ "github.com/mattn/go-sqlite3"
 

@@ -1,8 +1,8 @@
 package validators
 
 import (
-	"github.com/k0marov/go-socnet/core/client_errors"
-	"github.com/k0marov/go-socnet/core/image_decoder"
+	"github.com/k0marov/go-socnet/core/general/client_errors"
+	"github.com/k0marov/go-socnet/core/general/image_decoder"
 	"github.com/k0marov/go-socnet/features/posts/domain/values"
 )
 

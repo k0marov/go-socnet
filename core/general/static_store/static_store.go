@@ -1,8 +1,8 @@
 package static_store
 
 import (
-	"github.com/k0marov/go-socnet/core/core_values"
-	"github.com/k0marov/go-socnet/core/ref"
+	"github.com/k0marov/go-socnet/core/general/core_values"
+	"github.com/k0marov/go-socnet/core/general/core_values/ref"
 	"log"
 	"os"
 )

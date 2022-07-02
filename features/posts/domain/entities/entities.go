@@ -1,8 +1,8 @@
 package entities
 
 import (
-	"github.com/k0marov/go-socnet/core/likeable/contexters"
-	"github.com/k0marov/go-socnet/core/static_store"
+	"github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
+	"github.com/k0marov/go-socnet/core/general/static_store"
 	"github.com/k0marov/go-socnet/features/posts/domain/models"
 	"github.com/k0marov/go-socnet/features/posts/domain/values"
 	profile_entities "github.com/k0marov/go-socnet/features/profiles/domain/entities"

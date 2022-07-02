@@ -1,9 +1,9 @@
 package store
 
 import (
+	"github.com/k0marov/go-socnet/core/general/core_values"
 	"time"
 
-	"github.com/k0marov/go-socnet/core/core_values"
 	"github.com/k0marov/go-socnet/features/comments/domain/entities"
 	"github.com/k0marov/go-socnet/features/comments/domain/values"
 	post_values "github.com/k0marov/go-socnet/features/posts/domain/values"

@@ -2,14 +2,13 @@ package http_helpers
 
 import (
 	"encoding/json"
+	"github.com/k0marov/go-socnet/core/general/client_errors"
+	"github.com/k0marov/go-socnet/core/general/core_entities"
+	"github.com/k0marov/go-socnet/core/general/core_values"
+	"github.com/k0marov/go-socnet/core/general/core_values/ref"
 	"io"
 	"log"
 	"net/http"
-
-	"github.com/k0marov/go-socnet/core/client_errors"
-	core_entities "github.com/k0marov/go-socnet/core/core_entities"
-	"github.com/k0marov/go-socnet/core/core_values"
-	"github.com/k0marov/go-socnet/core/ref"
 
 	auth "github.com/k0marov/golang-auth"
 )

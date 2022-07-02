@@ -2,13 +2,13 @@ package service
 
 import (
 	"fmt"
+	"github.com/k0marov/go-socnet/core/abstract/likeable"
+	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
+	"github.com/k0marov/go-socnet/core/general/client_errors"
+	"github.com/k0marov/go-socnet/core/general/core_errors"
+	"github.com/k0marov/go-socnet/core/general/core_values"
 	"time"
 
-	"github.com/k0marov/go-socnet/core/client_errors"
-	"github.com/k0marov/go-socnet/core/core_errors"
-	"github.com/k0marov/go-socnet/core/core_values"
-	"github.com/k0marov/go-socnet/core/likeable"
-	likeable_contexters "github.com/k0marov/go-socnet/core/likeable/contexters"
 	"github.com/k0marov/go-socnet/features/comments/domain/contexters"
 	"github.com/k0marov/go-socnet/features/comments/domain/entities"
 	"github.com/k0marov/go-socnet/features/comments/domain/models"

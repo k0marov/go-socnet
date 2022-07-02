@@ -4,6 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/k0marov/go-socnet/core/general/client_errors"
+	"github.com/k0marov/go-socnet/core/general/core_entities"
+	"github.com/k0marov/go-socnet/core/general/core_values"
+	helpers "github.com/k0marov/go-socnet/core/helpers/http_test_helpers"
+	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"github.com/k0marov/go-socnet/features/profiles/delivery/http/responses"
 	"mime/multipart"
 	"net/http"
@@ -14,12 +19,6 @@ import (
 	"github.com/k0marov/go-socnet/features/profiles/delivery/http/handlers"
 	"github.com/k0marov/go-socnet/features/profiles/domain/entities"
 	"github.com/k0marov/go-socnet/features/profiles/domain/values"
-
-	"github.com/k0marov/go-socnet/core/client_errors"
-	core_entities "github.com/k0marov/go-socnet/core/core_entities"
-	"github.com/k0marov/go-socnet/core/core_values"
-	helpers "github.com/k0marov/go-socnet/core/http_test_helpers"
-	. "github.com/k0marov/go-socnet/core/test_helpers"
 )
 
 func TestUpdateMeHandler(t *testing.T) {

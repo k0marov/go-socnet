@@ -2,11 +2,10 @@ package static_store
 
 import (
 	"fmt"
+	"github.com/k0marov/go-socnet/core/general/core_values/ref"
 	"io/fs"
 	"os"
 	"path/filepath"
-
-	"github.com/k0marov/go-socnet/core/ref"
 )
 
 // RecursiveDirCreator os.MkdirAll implements this

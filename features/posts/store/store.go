@@ -2,10 +2,10 @@ package store
 
 import (
 	"fmt"
+	"github.com/k0marov/go-socnet/core/abstract/likeable"
+	"github.com/k0marov/go-socnet/core/general/core_values"
 	"time"
 
-	"github.com/k0marov/go-socnet/core/core_values"
-	"github.com/k0marov/go-socnet/core/likeable"
 	"github.com/k0marov/go-socnet/features/posts/domain/entities"
 	"github.com/k0marov/go-socnet/features/posts/domain/models"
 	"github.com/k0marov/go-socnet/features/posts/domain/store"

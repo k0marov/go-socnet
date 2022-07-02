@@ -1,15 +1,15 @@
 package service_test
 
 import (
+	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
+	"github.com/k0marov/go-socnet/core/general/client_errors"
+	"github.com/k0marov/go-socnet/core/general/core_errors"
+	"github.com/k0marov/go-socnet/core/general/core_values"
+	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/k0marov/go-socnet/core/client_errors"
-	"github.com/k0marov/go-socnet/core/core_errors"
-	"github.com/k0marov/go-socnet/core/core_values"
-	likeable_contexters "github.com/k0marov/go-socnet/core/likeable/contexters"
-	. "github.com/k0marov/go-socnet/core/test_helpers"
 	"github.com/k0marov/go-socnet/features/comments/domain/entities"
 	"github.com/k0marov/go-socnet/features/comments/domain/models"
 	"github.com/k0marov/go-socnet/features/comments/domain/service"

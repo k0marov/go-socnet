@@ -4,6 +4,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
+	"github.com/k0marov/go-socnet/core/general/client_errors"
+	"github.com/k0marov/go-socnet/core/general/core_entities"
+	"github.com/k0marov/go-socnet/core/general/core_values"
+	"github.com/k0marov/go-socnet/core/general/core_values/ref"
 	"math"
 	random "math/rand"
 	"net/http"
@@ -13,9 +18,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/k0marov/go-socnet/core/core_values"
-	likeable_contexters "github.com/k0marov/go-socnet/core/likeable/contexters"
-	"github.com/k0marov/go-socnet/core/ref"
 	comment_entities "github.com/k0marov/go-socnet/features/comments/domain/entities"
 	comment_models "github.com/k0marov/go-socnet/features/comments/domain/models"
 	comment_values "github.com/k0marov/go-socnet/features/comments/domain/values"
@@ -25,9 +27,6 @@ import (
 
 	post_entities "github.com/k0marov/go-socnet/features/posts/domain/entities"
 	profile_entities "github.com/k0marov/go-socnet/features/profiles/domain/entities"
-
-	"github.com/k0marov/go-socnet/core/client_errors"
-	core_entities "github.com/k0marov/go-socnet/core/core_entities"
 
 	auth "github.com/k0marov/golang-auth"
 )

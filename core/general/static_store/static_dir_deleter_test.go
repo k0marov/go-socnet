@@ -1,16 +1,15 @@
 package static_store_test
 
 import (
+	static_store2 "github.com/k0marov/go-socnet/core/general/static_store"
+	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"path/filepath"
 	"testing"
-
-	"github.com/k0marov/go-socnet/core/static_store"
-	. "github.com/k0marov/go-socnet/core/test_helpers"
 )
 
 func TestStaticDirDeleter(t *testing.T) {
 	tPath := RandomString()
-	wantDirPath := filepath.Join(static_store.StaticDir, tPath)
+	wantDirPath := filepath.Join(static_store2.StaticDir, tPath)
 	t.Run("happy case", func(t *testing.T) {
 		deleteDir := func(dir string) error {
 			if dir == wantDirPath {
@@ -18,7 +17,7 @@ func TestStaticDirDeleter(t *testing.T) {
 			}
 			panic("unexpected args")
 		}
-		sut := static_store.NewStaticDirDeleter(deleteDir)
+		sut := static_store2.NewStaticDirDeleter(deleteDir)
 		err := sut(tPath)
 		AssertNoError(t, err)
 	})
@@ -26,7 +25,7 @@ func TestStaticDirDeleter(t *testing.T) {
 		deleteDir := func(string) error {
 			return RandomError()
 		}
-		err := static_store.NewStaticDirDeleter(deleteDir)(tPath)
+		err := static_store2.NewStaticDirDeleter(deleteDir)(tPath)
 		AssertSomeError(t, err)
 	})
 }
