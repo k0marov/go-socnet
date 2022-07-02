@@ -43,6 +43,12 @@ func TestSqlDB_ErrorHandling(t *testing.T) {
 	})
 }
 
+func TestSqlDB_Injection(t *testing.T) {
+	db := OpenSqliteDB(t)
+	_, err := sql_db.NewSqlDB(db, table_name.NewTableName("'; DROP TABLE Students; --"))
+	AssertSomeError(t, err)
+}
+
 func TestSqlDB(t *testing.T) {
 	db := OpenSqliteDB(t)
 	sqlDB := setupSqlDB(t, db)
