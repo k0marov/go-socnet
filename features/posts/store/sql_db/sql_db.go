@@ -103,16 +103,6 @@ func (db *SqlDB) AddPostImages(post values.PostId, images []models.PostImageMode
 	return nil
 }
 
-func (db *SqlDB) DeletePost(post values.PostId) error {
-	_, err := db.sql.Exec(`
-		DELETE FROM Post WHERE id = ?
-    `, post)
-	if err != nil {
-		return fmt.Errorf("while DELETEing a post by id: %w", err)
-	}
-	return nil
-}
-
 func (db *SqlDB) addImage(post values.PostId, image models.PostImageModel) error {
 	_, err := db.sql.Exec(`
 		INSERT INTO PostImage(post_id, path, ind) VALUES (?, ?, ?)

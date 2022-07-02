@@ -11,12 +11,12 @@ import (
 
 type (
 	Deleter      = service.Deleter
-	ForceDeleter service.ForceDeleter
+	ForceDeleter = service.ForceDeleter
 )
 
 type deletable struct {
 	Delete      Deleter
-	ForceDelete service.ForceDeleter
+	ForceDelete ForceDeleter
 }
 
 func NewDeletable(db *sql.DB, tableName table_name.TableName, ownerGetter ownable.OwnerGetter) (deletable, error) {

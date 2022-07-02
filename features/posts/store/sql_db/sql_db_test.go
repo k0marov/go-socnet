@@ -29,10 +29,6 @@ func TestSqlDB_ErrorHandling(t *testing.T) {
 		err := sut.AddPostImages(RandomString(), RandomPostImageModels())
 		AssertSomeError(t, err)
 	})
-	t.Run("DeletePost", func(t *testing.T) {
-		err := sut.DeletePost(RandomString())
-		AssertSomeError(t, err)
-	})
 }
 
 func TestSqlDB(t *testing.T) {
@@ -89,12 +85,6 @@ func TestSqlDB(t *testing.T) {
 			createRandomPost(t, sut, user2.Id),
 		}
 		assertPosts(t, sut, user2.Id, user2Posts)
-
-		// delete the second post
-		err = sut.DeletePost(user2Posts[1].Id)
-		AssertNoError(t, err)
-		// assert it was deleted
-		assertPosts(t, sut, user2.Id, user2Posts[:1])
 	})
 	t.Run("returning posts ordered by createdAt", func(t *testing.T) {
 		driver := OpenSqliteDB(t)

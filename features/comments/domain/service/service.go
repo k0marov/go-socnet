@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/k0marov/go-socnet/core/abstract/deletable"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
 	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
 	"github.com/k0marov/go-socnet/core/abstract/ownable"
@@ -24,6 +25,7 @@ type (
 	PostCommentsGetter func(post post_values.PostId, caller core_values.UserId) ([]entities.ContextedComment, error)
 	CommentCreator     func(newComment values.NewCommentValue) (entities.ContextedComment, error)
 	CommentLikeToggler func(values.CommentId, core_values.UserId) error
+	CommentDeleter     func(comment values.CommentId, caller core_values.UserId) error
 )
 
 func NewPostCommentsGetter(getComments store.CommentsGetter, addContexts contexters.CommentListContextAdder) PostCommentsGetter {
@@ -93,4 +95,8 @@ func NewCommentLikeToggler(getAuthor ownable.OwnerGetter, toggleLike likeable.Li
 		}
 		return nil
 	}
+}
+
+func NewCommentDeleter(delete deletable.Deleter) CommentDeleter {
+	return CommentDeleter(delete)
 }

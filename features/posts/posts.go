@@ -2,6 +2,7 @@ package posts
 
 import (
 	"database/sql"
+	"github.com/k0marov/go-socnet/core/abstract/deletable"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
 	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
 	"github.com/k0marov/go-socnet/core/abstract/ownable"
@@ -40,13 +41,19 @@ func NewPostsRouterImpl(db *sql.DB, getContextedProfile profile_service.ProfileG
 		log.Fatalf("error while creating a Post ownable: %v", err)
 	}
 
+	// deletable
+	deletablePost, err := deletable.NewDeletable(db, sqlDB.TableName, ownablePost.GetOwner)
+	if err != nil {
+		log.Fatalf("error while creating a Post deletable: %v", err)
+	}
+
 	// file storage
 	storeImages := file_storage.NewPostImageFilesCreator(static_store2.NewStaticFileCreatorImpl())
 	deleteFiles := file_storage.NewPostFilesDeleter(static_store2.NewStaticDirDeleterImpl())
 
 	// store
-	storeCreatePost := store.NewStorePostCreator(sqlDB.CreatePost, storeImages, sqlDB.AddPostImages, sqlDB.DeletePost, deleteFiles)
-	storeDeletePost := store.NewStorePostDeleter(sqlDB.DeletePost, deleteFiles)
+	storeCreatePost := store.NewStorePostCreator(sqlDB.CreatePost, storeImages, sqlDB.AddPostImages, deletablePost.ForceDelete, deleteFiles)
+	storeDeletePost := store.NewStorePostDeleter(deletablePost.ForceDelete, deleteFiles)
 	storeGetPosts := store.NewStorePostsGetter(sqlDB.GetPosts, likeablePost.GetLikesCount)
 
 	// service

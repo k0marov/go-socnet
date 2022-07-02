@@ -2,6 +2,7 @@ package store
 
 import (
 	"fmt"
+	"github.com/k0marov/go-socnet/core/abstract/deletable"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	"time"
@@ -18,12 +19,11 @@ type (
 
 	DBPostCreator     func(newPost models.PostToCreate) (values.PostId, error)
 	DBPostImagesAdder func(values.PostId, []models.PostImageModel) error
-	DBPostDeleter     func(values.PostId) error
 )
 
 func NewStorePostCreator(
 	createPost DBPostCreator, storeImages file_storage.PostImageFilesCreator, addImages DBPostImagesAdder,
-	deletePost DBPostDeleter, deleteImages file_storage.PostFilesDeleter) store.PostCreator {
+	deletePost deletable.ForceDeleter, deleteImages file_storage.PostFilesDeleter) store.PostCreator {
 	return func(post values.NewPostData, createdAt time.Time) error {
 		postToCreate := models.PostToCreate{
 			Author:    post.Author,
@@ -56,7 +56,7 @@ func NewStorePostCreator(
 	}
 }
 
-func NewStorePostDeleter(deletePost DBPostDeleter, deleteFiles file_storage.PostFilesDeleter) store.PostDeleter {
+func NewStorePostDeleter(deletePost deletable.ForceDeleter, deleteFiles file_storage.PostFilesDeleter) store.PostDeleter {
 	return func(post values.PostId, author core_values.UserId) error {
 		err := deletePost(post)
 		if err != nil {
