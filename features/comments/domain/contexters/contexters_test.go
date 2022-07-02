@@ -1,7 +1,7 @@
 package contexters_test
 
 import (
-	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
+	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/ownable_likeable/contexters"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"testing"
@@ -15,7 +15,7 @@ func TestCommentContextAdder(t *testing.T) {
 	comment := RandomComment()
 	author := RandomContextedProfile()
 	caller := RandomId()
-	context := likeable_contexters.LikeableContext{
+	context := likeable_contexters.OwnLikeContext{
 		IsLiked: RandomBool(),
 		IsMine:  RandomBool(),
 	}
@@ -33,15 +33,15 @@ func TestCommentContextAdder(t *testing.T) {
 		_, err := contexters.NewCommentContextAdder(authorGetter, nil)(comment, caller)
 		AssertSomeError(t, err)
 	})
-	contextGetter := func(target string, ownerId, callerId core_values.UserId) (likeable_contexters.LikeableContext, error) {
+	contextGetter := func(target string, ownerId, callerId core_values.UserId) (likeable_contexters.OwnLikeContext, error) {
 		if target == comment.Id && ownerId == author.Id && callerId == caller {
 			return context, nil
 		}
 		panic("unexpected args")
 	}
 	t.Run("error case - getting likeable context throws", func(t *testing.T) {
-		contextGetter := func(target string, ownerId, callerId core_values.UserId) (likeable_contexters.LikeableContext, error) {
-			return likeable_contexters.LikeableContext{}, RandomError()
+		contextGetter := func(target string, ownerId, callerId core_values.UserId) (likeable_contexters.OwnLikeContext, error) {
+			return likeable_contexters.OwnLikeContext{}, RandomError()
 		}
 		_, err := contexters.NewCommentContextAdder(authorGetter, contextGetter)(comment, caller)
 		AssertSomeError(t, err)
@@ -50,9 +50,9 @@ func TestCommentContextAdder(t *testing.T) {
 		contextedComment, err := contexters.NewCommentContextAdder(authorGetter, contextGetter)(comment, caller)
 		AssertNoError(t, err)
 		wantComment := entities.ContextedComment{
-			Comment:         comment,
-			LikeableContext: context,
-			Author:          author,
+			Comment:        comment,
+			OwnLikeContext: context,
+			Author:         author,
 		}
 		Assert(t, contextedComment, wantComment, "returned contexted comment")
 	})

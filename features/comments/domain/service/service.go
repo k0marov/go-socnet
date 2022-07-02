@@ -3,8 +3,8 @@ package service
 import (
 	"fmt"
 	"github.com/k0marov/go-socnet/core/abstract/deletable"
-	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
 	"github.com/k0marov/go-socnet/core/abstract/ownable_likeable"
+	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/ownable_likeable/contexters"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	"time"
 
@@ -67,7 +67,7 @@ func NewCommentCreator(validate validators.CommentValidator, getProfile profile_
 				},
 				Likes: 0,
 			},
-			LikeableContext: likeable_contexters.LikeableContext{
+			OwnLikeContext: likeable_contexters.OwnLikeContext{
 				IsLiked: false,
 				IsMine:  true,
 			},

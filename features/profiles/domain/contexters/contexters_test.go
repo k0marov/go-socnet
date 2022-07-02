@@ -1,7 +1,7 @@
 package contexters_test
 
 import (
-	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
+	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/ownable_likeable/contexters"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"testing"
@@ -15,7 +15,7 @@ func TestProfileContextAdder(t *testing.T) {
 	caller := RandomId()
 	t.Run("happy case", func(t *testing.T) {
 		context := RandomLikeableContext()
-		getContext := func(targetId string, owner, callerId core_values.UserId) (likeable_contexters.LikeableContext, error) {
+		getContext := func(targetId string, owner, callerId core_values.UserId) (likeable_contexters.OwnLikeContext, error) {
 			if targetId == profile.Id && owner == profile.Id && callerId == caller {
 				return context, nil
 			}
@@ -24,14 +24,14 @@ func TestProfileContextAdder(t *testing.T) {
 		contextedProfile, err := contexters.NewProfileContextAdder(getContext)(profile, caller)
 		AssertNoError(t, err)
 		wantProfile := entities.ContextedProfile{
-			Profile:         profile,
-			LikeableContext: context,
+			Profile:        profile,
+			OwnLikeContext: context,
 		}
 		Assert(t, contextedProfile, wantProfile, "returned profile")
 	})
 	t.Run("error case - getting context throws", func(t *testing.T) {
-		getContext := func(targetId string, owner, callerId core_values.UserId) (likeable_contexters.LikeableContext, error) {
-			return likeable_contexters.LikeableContext{}, RandomError()
+		getContext := func(targetId string, owner, callerId core_values.UserId) (likeable_contexters.OwnLikeContext, error) {
+			return likeable_contexters.OwnLikeContext{}, RandomError()
 		}
 		_, err := contexters.NewProfileContextAdder(getContext)(profile, caller)
 		AssertSomeError(t, err)

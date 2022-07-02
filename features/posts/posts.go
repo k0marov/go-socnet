@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"github.com/k0marov/go-socnet/core/abstract/deletable"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
-	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
 	"github.com/k0marov/go-socnet/core/abstract/ownable"
 	"github.com/k0marov/go-socnet/core/abstract/ownable_likeable"
+	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/ownable_likeable/contexters"
 	"github.com/k0marov/go-socnet/core/general/image_decoder"
 	static_store2 "github.com/k0marov/go-socnet/core/general/static_store"
 	"log"
@@ -64,7 +64,7 @@ func NewPostsRouterImpl(db *sql.DB, getContextedProfile profile_service.ProfileG
 	validatePost := validators.NewPostValidator(image_decoder.ImageDecoderImpl)
 
 	// contexters
-	addContext := contexters.NewPostListContextAdder(contexters.NewPostContextAdder(getContextedProfile, likeable_contexters.NewLikeableContextGetter(likeablePost.IsLiked)))
+	addContext := contexters.NewPostListContextAdder(contexters.NewPostContextAdder(getContextedProfile, likeable_contexters.NewOwnLikeContextGetter(likeablePost.IsLiked)))
 
 	createPost := service.NewPostCreator(validatePost, storeCreatePost)
 	deletePost := service.NewPostDeleter(ownablePost.GetOwner, storeDeletePost)

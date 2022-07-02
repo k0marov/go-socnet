@@ -3,7 +3,7 @@ package profiles
 import (
 	"database/sql"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
-	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
+	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/ownable_likeable/contexters"
 	"github.com/k0marov/go-socnet/core/general/core_entities"
 	"github.com/k0marov/go-socnet/core/general/image_decoder"
 	"github.com/k0marov/go-socnet/core/general/static_store"
@@ -48,7 +48,7 @@ func NewProfileGetterImpl(db *sql.DB) service.ProfileGetter {
 		log.Fatalf("Error while creating a likeable Profile: %v", err)
 	}
 
-	addContext := contexters.NewProfileContextAdder(likeable_contexters.NewLikeableContextGetter(likeableProfile.IsLiked))
+	addContext := contexters.NewProfileContextAdder(likeable_contexters.NewOwnLikeContextGetter(likeableProfile.IsLiked))
 
 	getProfile := store.NewStoreProfileGetter(sqlDB.GetProfile, likeableProfile.GetLikesCount, likeableProfile.GetUserLikesCount)
 	return service.NewProfileGetter(getProfile, addContext)
@@ -78,7 +78,7 @@ func NewProfilesRouterImpl(db *sql.DB) func(chi.Router) {
 	profileUpdateValidator := validators.NewProfileUpdateValidator()
 	avatarValidator := validators.NewAvatarValidator(image_decoder.ImageDecoderImpl)
 
-	addContext := contexters.NewProfileContextAdder(likeable_contexters.NewLikeableContextGetter(likeableProfile.IsLiked))
+	addContext := contexters.NewProfileContextAdder(likeable_contexters.NewOwnLikeContextGetter(likeableProfile.IsLiked))
 
 	profileGetter := service.NewProfileGetter(storeProfileGetter, addContext)
 	profileUpdater := service.NewProfileUpdater(profileUpdateValidator, storeProfileUpdater, profileGetter)

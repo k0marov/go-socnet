@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"github.com/k0marov/go-socnet/core/abstract/deletable"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
-	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
 	"github.com/k0marov/go-socnet/core/abstract/ownable"
 	"github.com/k0marov/go-socnet/core/abstract/ownable_likeable"
+	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/ownable_likeable/contexters"
 	"log"
 
 	"github.com/go-chi/chi/v5"
@@ -51,7 +51,7 @@ func NewCommentsRouterImpl(db *sql.DB, getProfile profile_service.ProfileGetter)
 
 	// service
 	validator := validators.NewCommentValidator()
-	contextAdder := contexters.NewCommentListContextAdder(contexters.NewCommentContextAdder(getProfile, likeable_contexters.NewLikeableContextGetter(likeableComment.IsLiked)))
+	contextAdder := contexters.NewCommentListContextAdder(contexters.NewCommentContextAdder(getProfile, likeable_contexters.NewOwnLikeContextGetter(likeableComment.IsLiked)))
 
 	getComments := service.NewPostCommentsGetter(storeGetComments, contextAdder)
 	createComment := service.NewCommentCreator(validator, getProfile, storeCreateComment)

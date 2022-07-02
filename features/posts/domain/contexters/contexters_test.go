@@ -1,7 +1,7 @@
 package contexters_test
 
 import (
-	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
+	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/ownable_likeable/contexters"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"testing"
@@ -30,24 +30,24 @@ func TestPostContextAdder(t *testing.T) {
 		_, err := contexters.NewPostContextAdder(getProfile, nil)(post, caller)
 		AssertSomeError(t, err)
 	})
-	getContext := func(target string, owner, callerId core_values.UserId) (likeable_contexters.LikeableContext, error) {
+	getContext := func(target string, owner, callerId core_values.UserId) (likeable_contexters.OwnLikeContext, error) {
 		if target == post.Id && owner == author.Id && callerId == caller {
 			return ctx, nil
 		}
 		panic("unexpected args")
 	}
 	t.Run("error case - getting context throws", func(t *testing.T) {
-		getContext := func(string, core_values.UserId, core_values.UserId) (likeable_contexters.LikeableContext, error) {
-			return likeable_contexters.LikeableContext{}, RandomError()
+		getContext := func(string, core_values.UserId, core_values.UserId) (likeable_contexters.OwnLikeContext, error) {
+			return likeable_contexters.OwnLikeContext{}, RandomError()
 		}
 		_, err := contexters.NewPostContextAdder(getProfile, getContext)(post, caller)
 		AssertSomeError(t, err)
 	})
 	t.Run("happy case", func(t *testing.T) {
 		wantPost := entities.ContextedPost{
-			Post:            post,
-			Author:          author,
-			LikeableContext: ctx,
+			Post:           post,
+			Author:         author,
+			OwnLikeContext: ctx,
 		}
 		gotPost, err := contexters.NewPostContextAdder(getProfile, getContext)(post, caller)
 		AssertNoError(t, err)

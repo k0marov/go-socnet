@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
+	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/ownable_likeable/contexters"
 	"github.com/k0marov/go-socnet/core/general/client_errors"
 	"github.com/k0marov/go-socnet/core/general/core_entities"
 	"github.com/k0marov/go-socnet/core/general/core_values"
@@ -129,8 +129,8 @@ func RandomProfile() profile_entities.Profile {
 
 func RandomContextedProfile() profile_entities.ContextedProfile {
 	return profile_entities.ContextedProfile{
-		Profile:         RandomProfile(),
-		LikeableContext: RandomLikeableContext(),
+		Profile:        RandomProfile(),
+		OwnLikeContext: RandomLikeableContext(),
 	}
 }
 
@@ -163,9 +163,9 @@ func RandomPostImages() []post_values.PostImage {
 
 func RandomContextedPost() post_entities.ContextedPost {
 	return post_entities.ContextedPost{
-		Post:            RandomPost(),
-		Author:          RandomContextedProfile(),
-		LikeableContext: RandomLikeableContext(),
+		Post:           RandomPost(),
+		Author:         RandomContextedProfile(),
+		OwnLikeContext: RandomLikeableContext(),
 	}
 }
 func RandomNewPostData() post_values.NewPostData {
@@ -176,8 +176,8 @@ func RandomNewPostData() post_values.NewPostData {
 	}
 }
 
-func RandomLikeableContext() likeable_contexters.LikeableContext {
-	return likeable_contexters.LikeableContext{
+func RandomLikeableContext() likeable_contexters.OwnLikeContext {
+	return likeable_contexters.OwnLikeContext{
 		IsMine:  RandomBool(),
 		IsLiked: RandomBool(),
 	}
@@ -244,9 +244,9 @@ func RandomClientError() client_errors.ClientError {
 
 func RandomContextedComment() comment_entities.ContextedComment {
 	return comment_entities.ContextedComment{
-		Comment:         RandomComment(),
-		Author:          RandomContextedProfile(),
-		LikeableContext: RandomLikeableContext(),
+		Comment:        RandomComment(),
+		Author:         RandomContextedProfile(),
+		OwnLikeContext: RandomLikeableContext(),
 	}
 }
 func RandomContextedComments() []comment_entities.ContextedComment {

@@ -2,7 +2,7 @@ package contexters
 
 import (
 	"fmt"
-	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
+	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/ownable_likeable/contexters"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 
 	"github.com/k0marov/go-socnet/core/helpers"
@@ -13,7 +13,7 @@ import (
 type CommentContextAdder func(comment entities.Comment, caller core_values.UserId) (entities.ContextedComment, error)
 type CommentListContextAdder func(comments []entities.Comment, caller core_values.UserId) ([]entities.ContextedComment, error)
 
-func NewCommentContextAdder(getProfile profile_service.ProfileGetter, getContext likeable_contexters.LikeableContextGetter) CommentContextAdder {
+func NewCommentContextAdder(getProfile profile_service.ProfileGetter, getContext likeable_contexters.OwnLikeContextGetter) CommentContextAdder {
 	return func(comment entities.Comment, caller core_values.UserId) (entities.ContextedComment, error) {
 		author, err := getProfile(comment.AuthorId, caller)
 		if err != nil {
@@ -24,9 +24,9 @@ func NewCommentContextAdder(getProfile profile_service.ProfileGetter, getContext
 			return entities.ContextedComment{}, fmt.Errorf("while getting context data of a comment: %w", err)
 		}
 		return entities.ContextedComment{
-			Comment:         comment,
-			Author:          author,
-			LikeableContext: context,
+			Comment:        comment,
+			Author:         author,
+			OwnLikeContext: context,
 		}, nil
 	}
 }

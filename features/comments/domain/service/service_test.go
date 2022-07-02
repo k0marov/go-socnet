@@ -1,7 +1,7 @@
 package service_test
 
 import (
-	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
+	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/ownable_likeable/contexters"
 	"github.com/k0marov/go-socnet/core/general/client_errors"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
@@ -31,7 +31,7 @@ func TestCommentCreator(t *testing.T) {
 			},
 			Likes: 0,
 		},
-		LikeableContext: likeable_contexters.LikeableContext{
+		OwnLikeContext: likeable_contexters.OwnLikeContext{
 			IsLiked: false,
 			IsMine:  true,
 		},
