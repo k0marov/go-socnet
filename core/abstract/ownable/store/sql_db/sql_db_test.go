@@ -2,8 +2,8 @@ package sql_db_test
 
 import (
 	"database/sql"
-	"github.com/k0marov/go-socnet/core/abstract/likeable/table_name"
 	"github.com/k0marov/go-socnet/core/abstract/ownable/store/sql_db"
+	"github.com/k0marov/go-socnet/core/abstract/table_name"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"github.com/k0marov/go-socnet/features/profiles/domain/models"

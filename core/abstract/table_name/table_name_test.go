@@ -1,7 +1,7 @@
 package table_name_test
 
 import (
-	"github.com/k0marov/go-socnet/core/abstract/likeable/table_name"
+	"github.com/k0marov/go-socnet/core/abstract/table_name"
 	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"testing"
 )

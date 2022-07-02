@@ -3,9 +3,9 @@ package ownable
 import (
 	"database/sql"
 	"fmt"
-	"github.com/k0marov/go-socnet/core/abstract/likeable/table_name"
 	"github.com/k0marov/go-socnet/core/abstract/ownable/service"
 	"github.com/k0marov/go-socnet/core/abstract/ownable/store/sql_db"
+	"github.com/k0marov/go-socnet/core/abstract/table_name"
 )
 
 type (

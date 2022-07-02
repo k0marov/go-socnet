@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/k0marov/go-socnet/core/abstract/likeable/service"
 	"github.com/k0marov/go-socnet/core/abstract/likeable/store/sql_db"
-	"github.com/k0marov/go-socnet/core/abstract/likeable/table_name"
+	"github.com/k0marov/go-socnet/core/abstract/table_name"
 )
 
 type (
