@@ -104,8 +104,15 @@ func TestComments(t *testing.T) {
 		r.ServeHTTP(response, request)
 		AssertStatusCode(t, response, http.StatusOK)
 	}
+	deleteComment := func(t testing.TB, comment values.CommentId, caller auth.User) {
+		t.Helper()
+		request := helpers.AddAuthDataToRequest(httptest.NewRequest(http.MethodDelete, "/comments/"+comment, nil), caller)
+		response := httptest.NewRecorder()
+		r.ServeHTTP(response, request)
+		AssertStatusCode(t, response, http.StatusOK)
+	}
 
-	t.Run("creating and reading comments", func(t *testing.T) {
+	t.Run("creating, reading and deleting comments", func(t *testing.T) {
 
 		// create 2 profiles
 		user1 := RandomAuthUser()
@@ -142,5 +149,14 @@ func TestComments(t *testing.T) {
 			comments = getComments(t, post, user1)
 			Assert(t, comments[0].IsLiked, false, "isLiked")
 		})
+		// delete the second comment
+		deleteComment(t, comment2.Id, user2)
+		// assert it was deleted
+		comments = getComments(t, post, user2)
+		assertComments(t, comments, []responses.CommentResponse{comment1})
+		// delete the first comment
+		deleteComment(t, comment1.Id, user2)
+		// assert it was deleted
+		assertComments(t, getComments(t, post, user2), []responses.CommentResponse{})
 	})
 }

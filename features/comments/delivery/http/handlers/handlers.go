@@ -35,6 +35,7 @@ func NewGetCommentsHandler(getComments service.PostCommentsGetter) http.HandlerF
 		http_helpers.WriteJson(w, responses.NewCommentListResponse(comments))
 	}
 }
+
 func NewCreateCommentHandler(createComment service.CommentCreator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		caller, ok := http_helpers.GetUserOrAddUnauthorized(w, r)
@@ -74,6 +75,25 @@ func NewToggleLikeCommentHandler(toggleLike service.CommentLikeToggler) http.Han
 			return
 		}
 		err := toggleLike(commentId, caller.Id)
+		if err != nil {
+			http_helpers.HandleServiceError(w, err)
+			return
+		}
+	}
+}
+
+func NewDeleteCommentHandler(delete service.CommentDeleter) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		caller, ok := http_helpers.GetUserOrAddUnauthorized(w, r)
+		if !ok {
+			return
+		}
+		commentId := chi.URLParam(r, "id")
+		if commentId == "" {
+			http_helpers.ThrowClientError(w, client_errors.IdNotProvided)
+			return
+		}
+		err := delete(commentId, caller.Id)
 		if err != nil {
 			http_helpers.HandleServiceError(w, err)
 			return

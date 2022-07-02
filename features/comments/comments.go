@@ -2,6 +2,7 @@ package comments
 
 import (
 	"database/sql"
+	"github.com/k0marov/go-socnet/core/abstract/deletable"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
 	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/likeable/contexters"
 	"github.com/k0marov/go-socnet/core/abstract/ownable"
@@ -34,6 +35,11 @@ func NewCommentsRouterImpl(db *sql.DB, getProfile profile_service.ProfileGetter)
 	if err != nil {
 		log.Fatalf("error while creating comment ownable: %v", err)
 	}
+	// deletable
+	deletableComment, err := deletable.NewDeletable(db, sqlDB.TableName, ownableComment.GetOwner)
+	if err != nil {
+		log.Fatalf("error while creating comment deletable: %v", err)
+	}
 
 	// store
 	storeCreateComment := store.NewCommentCreator(sqlDB.Create)
@@ -46,9 +52,11 @@ func NewCommentsRouterImpl(db *sql.DB, getProfile profile_service.ProfileGetter)
 	getComments := service.NewPostCommentsGetter(storeGetComments, contextAdder)
 	createComment := service.NewCommentCreator(validator, getProfile, storeCreateComment)
 	toggleLike := service.NewCommentLikeToggler(ownableComment.GetOwner, likeableComment.ToggleLike)
+	delete := service.NewCommentDeleter(deletableComment.Delete)
 	// handlers
 	getCommentsHandler := handlers.NewGetCommentsHandler(getComments)
 	createCommentHandler := handlers.NewCreateCommentHandler(createComment)
 	toggleLikeHandler := handlers.NewToggleLikeCommentHandler(toggleLike)
-	return router.NewCommentsRouter(getCommentsHandler, createCommentHandler, toggleLikeHandler)
+	deleteHandler := handlers.NewDeleteCommentHandler(delete)
+	return router.NewCommentsRouter(getCommentsHandler, createCommentHandler, toggleLikeHandler, deleteHandler)
 }

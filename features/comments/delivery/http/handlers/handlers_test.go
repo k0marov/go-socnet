@@ -98,14 +98,15 @@ func TestNewCreateCommentHandler(t *testing.T) {
 	})
 }
 
+func createRequestWithCommentId(id values.CommentId, caller auth.User) *http.Request {
+	request := helpers.CreateRequest(nil)
+	ctx := chi.NewRouteContext()
+	ctx.URLParams.Add("id", id)
+	request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, ctx))
+	return helpers.AddAuthDataToRequest(request, caller)
+}
+
 func TestNewToggleLikeCommentHandler(t *testing.T) {
-	createRequestWithCommentId := func(id values.CommentId, caller auth.User) *http.Request {
-		request := helpers.CreateRequest(nil)
-		ctx := chi.NewRouteContext()
-		ctx.URLParams.Add("id", id)
-		request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, ctx))
-		return helpers.AddAuthDataToRequest(request, caller)
-	}
 	helpers.BaseTest401(t, handlers.NewToggleLikeCommentHandler(nil))
 
 	user := RandomAuthUser()
@@ -131,5 +132,37 @@ func TestNewToggleLikeCommentHandler(t *testing.T) {
 			return err
 		}
 		handlers.NewToggleLikeCommentHandler(likeToggler).ServeHTTP(response, createRequestWithCommentId(comment, user))
+	})
+}
+
+func TestDeleteCommentHandler(t *testing.T) {
+	helpers.BaseTest401(t, handlers.NewDeleteCommentHandler(nil))
+	comment := RandomId()
+	caller := RandomAuthUser()
+	t.Run("happy case", func(t *testing.T) {
+		delete := func(commentId values.CommentId, callerId core_values.UserId) error {
+			if commentId == comment && callerId == caller.Id {
+				return nil
+			}
+			panic("unexpected args")
+		}
+		request := createRequestWithCommentId(comment, caller)
+		response := httptest.NewRecorder()
+		handlers.NewDeleteCommentHandler(delete)(response, request)
+
+		AssertStatusCode(t, response, http.StatusOK)
+	})
+	t.Run("error case - id is not provided", func(t *testing.T) {
+		request := helpers.AddAuthDataToRequest(helpers.CreateRequest(nil), caller)
+		response := httptest.NewRecorder()
+		handlers.NewDeleteCommentHandler(nil)(response, request)
+		AssertClientError(t, response, client_errors.IdNotProvided)
+	})
+	helpers.BaseTestServiceErrorHandling(t, func(err error, response *httptest.ResponseRecorder) {
+		delete := func(values.CommentId, core_values.UserId) error {
+			return err
+		}
+		request := createRequestWithCommentId(comment, caller)
+		handlers.NewDeleteCommentHandler(delete)(response, request)
 	})
 }
