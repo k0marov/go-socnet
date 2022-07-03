@@ -50,7 +50,7 @@ var AboutTooLong = ClientError{
 
 var InvalidImage = ClientError{
 	DetailCode:     "avatar-non-image",
-	ReadableDetail: "The provided avatar is not in one of supported image codecs.",
+	ReadableDetail: "The provided image is not in one of supported image codecs.",
 	HTTPCode:       http.StatusBadRequest,
 }
 
