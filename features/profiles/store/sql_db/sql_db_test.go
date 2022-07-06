@@ -1,7 +1,7 @@
 package sql_db_test
 
 import (
-	"github.com/k0marov/go-socnet/core/general/core_errors"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"testing"
 
@@ -64,7 +64,7 @@ func TestSqlDB(t *testing.T) {
 
 		// assert querying for unexisting profile returns ErrNotFound
 		_, err = db.GetProfile("9999")
-		AssertError(t, err, core_errors.ErrNotFound)
+		AssertError(t, err, core_err.ErrNotFound)
 	})
 	t.Run("updating profile", func(t *testing.T) {
 		newProfile1 := RandomProfileModel()

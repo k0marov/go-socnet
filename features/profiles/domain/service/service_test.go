@@ -3,7 +3,7 @@ package service_test
 import (
 	"fmt"
 	"github.com/k0marov/go-socnet/core/general/client_errors"
-	"github.com/k0marov/go-socnet/core/general/core_errors"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	"github.com/k0marov/go-socnet/core/general/core_values/ref"
 	"github.com/k0marov/go-socnet/core/general/static_store"
@@ -30,7 +30,7 @@ func TestProfileGetter(t *testing.T) {
 	}
 	t.Run("error case - store returns NotFoundErr", func(t *testing.T) {
 		getProfile := func(core_values.UserId) (entities.Profile, error) {
-			return entities.Profile{}, core_errors.ErrNotFound
+			return entities.Profile{}, core_err.ErrNotFound
 		}
 		sut := service.NewProfileGetter(getProfile, nil)
 		_, err := sut(target, caller)

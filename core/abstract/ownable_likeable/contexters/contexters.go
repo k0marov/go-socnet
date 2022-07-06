@@ -1,8 +1,8 @@
 package contexters
 
 import (
-	"fmt"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 )
 
@@ -17,7 +17,7 @@ func NewOwnLikeContextGetter(checkLiked likeable.LikeChecker) OwnLikeContextGett
 	return func(target string, owner, caller core_values.UserId) (OwnLikeContext, error) {
 		isLiked, err := checkLiked(target, caller)
 		if err != nil {
-			return OwnLikeContext{}, fmt.Errorf("while checking if target is liked: %w", err)
+			return OwnLikeContext{}, core_err.Rethrow("checking if target is liked", err)
 		}
 		return OwnLikeContext{
 			IsLiked: isLiked,

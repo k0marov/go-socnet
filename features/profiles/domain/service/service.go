@@ -5,7 +5,7 @@ import (
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
 	"github.com/k0marov/go-socnet/core/general/client_errors"
 	"github.com/k0marov/go-socnet/core/general/core_entities"
-	"github.com/k0marov/go-socnet/core/general/core_errors"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	"github.com/k0marov/go-socnet/core/general/static_store"
 
@@ -31,14 +31,14 @@ func NewProfileGetter(getProfile store.StoreProfileGetter, addContext contexters
 	return func(id core_values.UserId, caller core_values.UserId) (entities.ContextedProfile, error) {
 		profile, err := getProfile(id)
 		if err != nil {
-			if err == core_errors.ErrNotFound {
+			if err == core_err.ErrNotFound {
 				return entities.ContextedProfile{}, client_errors.NotFound
 			}
-			return entities.ContextedProfile{}, fmt.Errorf("while getting profile in a service: %w", err)
+			return entities.ContextedProfile{}, core_err.Rethrow("getting profile in a service", err)
 		}
 		contextedProfile, err := addContext(profile, caller)
 		if err != nil {
-			return entities.ContextedProfile{}, fmt.Errorf("while adding context to profile: %w", err)
+			return entities.ContextedProfile{}, core_err.Rethrow("adding context to profile", err)
 		}
 		return contextedProfile, nil
 	}
@@ -52,7 +52,7 @@ func NewFollowsGetter(getUserLikes likeable.UserLikesGetter, getProfile ProfileG
 	return func(target, caller core_values.UserId) ([]entities.ContextedProfile, error) {
 		followIds, err := getUserLikes(target)
 		if err != nil {
-			return []entities.ContextedProfile{}, fmt.Errorf("while getting a list of profile ids that target follows: %w", err)
+			return []entities.ContextedProfile{}, core_err.Rethrow("getting a list of profile ids that target follows", err)
 		}
 		var follows []entities.ContextedProfile
 		for _, followId := range followIds {

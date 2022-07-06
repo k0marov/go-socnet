@@ -3,6 +3,7 @@ package store
 import (
 	"fmt"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	"github.com/k0marov/go-socnet/core/general/core_values/ref"
 	"github.com/k0marov/go-socnet/core/general/static_store"
@@ -66,7 +67,7 @@ func NewStoreProfileGetter(getDBProfile DBProfileGetter, getFollowers likeable.L
 	return func(id core_values.UserId) (entities.Profile, error) {
 		profileModel, err := getDBProfile(id)
 		if err != nil {
-			return entities.Profile{}, fmt.Errorf("while getting the profile model from db: %w", err)
+			return entities.Profile{}, core_err.Rethrow("getting the profile model from db", err)
 		}
 		followers, err := getFollowers(id)
 		if err != nil {

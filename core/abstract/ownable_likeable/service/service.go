@@ -1,10 +1,10 @@
 package service
 
 import (
-	"fmt"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
 	"github.com/k0marov/go-socnet/core/abstract/ownable"
 	"github.com/k0marov/go-socnet/core/general/client_errors"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 )
 
@@ -14,14 +14,14 @@ func NewSafeLikeToggler(getOwner ownable.OwnerGetter, toggleLike likeable.LikeTo
 	return func(target string, caller core_values.UserId) error {
 		owner, err := getOwner(target)
 		if err != nil {
-			return fmt.Errorf("while getting owner of OwnableLikeable: %w", err)
+			return core_err.Rethrow("getting owner of OwnableLikeable", err)
 		}
 		if owner == caller {
 			return client_errors.LikingYourself
 		}
 		err = toggleLike(target, caller)
 		if err != nil {
-			return fmt.Errorf("while toggling like on OwnableLikeable: %w", err)
+			return core_err.Rethrow("toggling like on OwnableLikeable", err)
 		}
 		return nil
 	}

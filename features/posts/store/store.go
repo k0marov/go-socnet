@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/k0marov/go-socnet/core/abstract/deletable"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	"time"
 
@@ -32,12 +33,12 @@ func NewStorePostCreator(
 		}
 		postId, err := createPost(postToCreate)
 		if err != nil {
-			return fmt.Errorf("while creating a post in db: %w", err)
+			return core_err.Rethrow("creating a post in db", err)
 		}
 		imagePaths, err := storeImages(postId, post.Author, post.Images)
 		if err != nil || len(imagePaths) != len(post.Images) {
 			deletePost(postId)
-			return fmt.Errorf("while storing image files: %w", err)
+			return core_err.Rethrow("storing image files", err)
 		}
 		var postImages []models.PostImageModel
 		for i, path := range imagePaths {
@@ -50,7 +51,7 @@ func NewStorePostCreator(
 		if err != nil {
 			deletePost(postId)
 			deleteImages(postId, post.Author)
-			return fmt.Errorf("while adding image paths to db: %w", err)
+			return core_err.Rethrow("adding image paths to db", err)
 		}
 		return nil
 	}
@@ -74,7 +75,7 @@ func NewStorePostsGetter(getter DBPostsGetter, likesGetter likeable.LikesCountGe
 	return func(authorId core_values.UserId) (posts []entities.Post, err error) {
 		models, err := getter(authorId)
 		if err != nil {
-			return []entities.Post{}, fmt.Errorf("while getting posts from db: %w", err)
+			return []entities.Post{}, core_err.Rethrow("getting posts from db", err)
 		}
 		for _, model := range models {
 			likes, err := likesGetter(model.Id)

@@ -1,8 +1,8 @@
 package store
 
 import (
-	"fmt"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	"time"
 
@@ -23,12 +23,12 @@ func NewCommentsGetter(getComments DBCommentsGetter, getLikes likeable.LikesCoun
 	return func(post post_values.PostId) (comments []entities.Comment, error error) {
 		commentModels, err := getComments(post)
 		if err != nil {
-			return []entities.Comment{}, fmt.Errorf("while getting post comments from db: %w", err)
+			return []entities.Comment{}, core_err.Rethrow("getting post comments from db", err)
 		}
 		for _, model := range commentModels {
 			likes, err := getLikes(model.Id)
 			if err != nil {
-				return []entities.Comment{}, fmt.Errorf("while getting likes count for comment: %w", err)
+				return []entities.Comment{}, core_err.Rethrow("getting likes count for comment", err)
 			}
 			comment := entities.Comment{
 				CommentModel: model,

@@ -2,10 +2,10 @@ package likeable
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/k0marov/go-socnet/core/abstract/likeable/service"
 	"github.com/k0marov/go-socnet/core/abstract/likeable/store/sql_db"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 )
 
 type (
@@ -28,7 +28,7 @@ func NewLikeable(db *sql.DB, targetTableName table_name.TableName) (likeable, er
 	// store
 	store, err := sql_db.NewSqlDB(db, targetTableName)
 	if err != nil {
-		return likeable{}, fmt.Errorf("while opening the likeable sql db: %w", err)
+		return likeable{}, core_err.Rethrow("opening the likeable sql db", err)
 	}
 	// service
 	toggleLike := service.NewLikeToggler(store.IsLiked, store.Like, store.Unlike)

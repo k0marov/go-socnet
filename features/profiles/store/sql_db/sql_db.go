@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
-	"github.com/k0marov/go-socnet/core/general/core_errors"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 
 	"github.com/k0marov/go-socnet/features/profiles/domain/models"
@@ -33,7 +33,7 @@ func initSQL(sql *sql.DB) error {
 		avatarPath VARCHAR(255) NOT NULL
 	);`)
 	if err != nil {
-		return fmt.Errorf("while creating Profile table: %w", err)
+		return core_err.Rethrow("creating Profile table", err)
 	}
 	return nil
 }
@@ -58,10 +58,10 @@ func (db *SqlDB) GetProfile(profileId core_values.UserId) (models.ProfileModel, 
 	profile := models.ProfileModel{}
 	err := row.Scan(&profile.Id, &profile.Username, &profile.About, &profile.AvatarPath)
 	if err == sql.ErrNoRows {
-		return models.ProfileModel{}, core_errors.ErrNotFound
+		return models.ProfileModel{}, core_err.ErrNotFound
 	}
 	if err != nil {
-		return models.ProfileModel{}, fmt.Errorf("while getting a profile from profile table: %w", err)
+		return models.ProfileModel{}, core_err.Rethrow("getting a profile from profile table", err)
 	}
 
 	return profile, nil
@@ -74,7 +74,7 @@ func (db *SqlDB) UpdateProfile(userId core_values.UserId, upd store.DBUpdateData
 		about = 	 CASE WHEN ?2 = "" THEN about ELSE ?2 END 
 	WHERE id = ?`, upd.AvatarPath, upd.About, userId)
 	if err != nil {
-		return fmt.Errorf("while updating avatarPath in db: %w", err)
+		return core_err.Rethrow("updating avatarPath in db", err)
 	}
 	return nil
 }

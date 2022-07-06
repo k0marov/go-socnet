@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 	"time"
 
 	"github.com/k0marov/go-socnet/features/comments/domain/models"
@@ -19,7 +20,7 @@ type SqlDB struct {
 func NewSqlDB(db *sql.DB) (*SqlDB, error) {
 	err := initSQL(db)
 	if err != nil {
-		return nil, fmt.Errorf("while initializing sql for comments: %w", err)
+		return nil, core_err.Rethrow("initializing sql for comments", err)
 	}
 	return &SqlDB{db, table_name.NewTableName("Comment")}, nil
 }
@@ -37,7 +38,7 @@ func initSQL(db *sql.DB) error {
 		)
    `)
 	if err != nil {
-		return fmt.Errorf("while creating Comment table: %w", err)
+		return core_err.Rethrow("creating Comment table", err)
 	}
 	return nil
 }
@@ -50,7 +51,7 @@ func (db *SqlDB) GetComments(post post_values.PostId) ([]models.CommentModel, er
 		ORDER BY createdAt DESC
     `, post)
 	if err != nil {
-		return []models.CommentModel{}, fmt.Errorf("while SELECTing post comments: %w", err)
+		return []models.CommentModel{}, core_err.Rethrow("SELECTing post comments", err)
 	}
 	var comments []models.CommentModel
 	for rows.Next() {
@@ -58,7 +59,7 @@ func (db *SqlDB) GetComments(post post_values.PostId) ([]models.CommentModel, er
 		var createdAtUnix int64
 		err := rows.Scan(&comment.Id, &comment.AuthorId, &comment.Text, &createdAtUnix)
 		if err != nil {
-			return []models.CommentModel{}, fmt.Errorf("while scanning a comment: %w", err)
+			return []models.CommentModel{}, core_err.Rethrow("scanning a comment", err)
 		}
 		comment.CreatedAt = time.Unix(createdAtUnix, 0).UTC()
 		comments = append(comments, comment)
@@ -72,11 +73,11 @@ func (db *SqlDB) Create(newComment values.NewCommentValue, createdAt time.Time) 
 		VALUES (?, ?, ?, ?)
     `, newComment.Post, newComment.Author, newComment.Text, createdAt.Unix())
 	if err != nil {
-		return "", fmt.Errorf("while INSERTing a new comment: %w", err)
+		return "", core_err.Rethrow("INSERTing a new comment", err)
 	}
 	newId, err := res.LastInsertId()
 	if err != nil {
-		return "", fmt.Errorf("while getting the ID of newly inserted comment: %w", err)
+		return "", core_err.Rethrow("getting the ID of newly inserted comment", err)
 	}
 	return fmt.Sprintf("%d", newId), nil
 }

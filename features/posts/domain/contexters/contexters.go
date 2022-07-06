@@ -1,8 +1,8 @@
 package contexters
 
 import (
-	"fmt"
 	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/ownable_likeable/contexters"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 
 	"github.com/k0marov/go-socnet/core/helpers"
@@ -17,11 +17,11 @@ func NewPostContextAdder(getProfile profile_service.ProfileGetter, getContext li
 	return func(post entities.Post, caller core_values.UserId) (entities.ContextedPost, error) {
 		author, err := getProfile(post.PostModel.AuthorId, caller)
 		if err != nil {
-			return entities.ContextedPost{}, fmt.Errorf("while getting author of post: %w", err)
+			return entities.ContextedPost{}, core_err.Rethrow("getting author of post", err)
 		}
 		context, err := getContext(post.Id, author.Id, caller)
 		if err != nil {
-			return entities.ContextedPost{}, fmt.Errorf("while getting context of post: %w", err)
+			return entities.ContextedPost{}, core_err.Rethrow("getting context of post", err)
 		}
 		ctxPost := entities.ContextedPost{
 			Post:           post,

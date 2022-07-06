@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	"time"
 
@@ -35,7 +36,7 @@ func initSQL(sql *sql.DB) error {
 		)
 	`)
 	if err != nil {
-		return fmt.Errorf("while creating Post table: %w", err)
+		return core_err.Rethrow("creating Post table", err)
 	}
 	_, err = sql.Exec(`
 		CREATE TABLE IF NOT EXISTS PostImage(
@@ -46,7 +47,7 @@ func initSQL(sql *sql.DB) error {
 		)	
 	`)
 	if err != nil {
-		return fmt.Errorf("while creating PostImage table: %w", err)
+		return core_err.Rethrow("creating PostImage table", err)
 	}
 	return nil
 }
@@ -59,7 +60,7 @@ func (db *SqlDB) GetPosts(author core_values.UserId) (posts []models.PostModel, 
 		ORDER BY createdAt DESC
 	`, author)
 	if err != nil {
-		return []models.PostModel{}, fmt.Errorf("while getting posts from db: %w", err)
+		return []models.PostModel{}, core_err.Rethrow("getting posts from db", err)
 	}
 	defer rows.Close()
 	for rows.Next() {
@@ -67,7 +68,7 @@ func (db *SqlDB) GetPosts(author core_values.UserId) (posts []models.PostModel, 
 		var createdAt int64
 		err = rows.Scan(&post.Id, &post.AuthorId, &post.Text, &createdAt)
 		if err != nil {
-			return []models.PostModel{}, fmt.Errorf("while scanning a post: %w", err)
+			return []models.PostModel{}, core_err.Rethrow("scanning a post", err)
 		}
 		post.CreatedAt = time.Unix(createdAt, 0).UTC()
 		post.Images, err = db.getImages(post.Id)
@@ -84,11 +85,11 @@ func (db *SqlDB) CreatePost(newPost models.PostToCreate) (values.PostId, error) 
 		INSERT INTO Post(owner_id, textContent, createdAt) VALUES (?, ?, ?)
 	`, newPost.Author, newPost.Text, newPost.CreatedAt.Unix())
 	if err != nil {
-		return "", fmt.Errorf("while inserting a post: %w", err)
+		return "", core_err.Rethrow("inserting a post", err)
 	}
 	id, err := res.LastInsertId()
 	if err != nil {
-		return "", fmt.Errorf("while getting the inserted post id: %w", err)
+		return "", core_err.Rethrow("getting the inserted post id", err)
 	}
 	return fmt.Sprintf("%d", id), nil
 }
@@ -108,7 +109,7 @@ func (db *SqlDB) addImage(post values.PostId, image models.PostImageModel) error
 		INSERT INTO PostImage(post_id, path, ind) VALUES (?, ?, ?)
    `, post, image.Path, image.Index)
 	if err != nil {
-		return fmt.Errorf("while inserting a post image: %w", err)
+		return core_err.Rethrow("inserting a post image", err)
 	}
 	return nil
 }
@@ -118,14 +119,14 @@ func (db *SqlDB) getImages(post values.PostId) (images []models.PostImageModel, 
 		SELECT path, ind FROM PostImage WHERE post_id = ?
     `, post)
 	if err != nil {
-		return []models.PostImageModel{}, fmt.Errorf("while SELECTing post images: %w", err)
+		return []models.PostImageModel{}, core_err.Rethrow("SELECTing post images", err)
 	}
 	defer rows.Close()
 	for rows.Next() {
 		image := models.PostImageModel{}
 		err := rows.Scan(&image.Path, &image.Index)
 		if err != nil {
-			return []models.PostImageModel{}, fmt.Errorf("while scanning an image: %w", err)
+			return []models.PostImageModel{}, core_err.Rethrow("scanning an image", err)
 		}
 		images = append(images, image)
 	}

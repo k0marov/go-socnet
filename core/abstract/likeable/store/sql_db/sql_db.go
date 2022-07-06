@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 )
 
@@ -15,12 +16,12 @@ type SqlDB struct {
 func NewSqlDB(db *sql.DB, targetTable table_name.TableName) (*SqlDB, error) {
 	targetName, err := targetTable.Value()
 	if err != nil {
-		return nil, fmt.Errorf("while getting target table name: %w", err)
+		return nil, core_err.Rethrow("getting target table name", err)
 	}
 	likeableTable := table_name.NewTableName("Likeable" + targetName)
 	likeableName, err := likeableTable.Value()
 	if err != nil {
-		return nil, fmt.Errorf("while generating likeable table name: %w", err)
+		return nil, core_err.Rethrow("generating likeable table name", err)
 	}
 
 	err = initSQL(db, targetName, likeableName)
@@ -82,7 +83,7 @@ func (db *SqlDB) Unlike(target string, unliker core_values.UserId) error {
 		DELETE FROM `+db.safeLikeableTable+` WHERE target_id = ? AND liker_id = ?
 	`, target, unliker)
 	if err != nil {
-		return fmt.Errorf("while DELETEing a PostLike: %w", err)
+		return core_err.Rethrow("DELETEing a PostLike", err)
 	}
 	return nil
 }
@@ -94,7 +95,7 @@ func (db *SqlDB) GetLikesCount(target string) (int, error) {
 	var likes int
 	err := row.Scan(&likes)
 	if err != nil {
-		return 0, fmt.Errorf("while scanning the likes count: %w", err)
+		return 0, core_err.Rethrow("scanning the likes count", err)
 	}
 	return likes, nil
 }
@@ -106,7 +107,7 @@ func (db *SqlDB) GetUserLikesCount(user core_values.UserId) (int, error) {
 	var userLikes int
 	err := row.Scan(&userLikes)
 	if err != nil {
-		return 0, fmt.Errorf("while scanning the user likes count: %w", err)
+		return 0, core_err.Rethrow("scanning the user likes count", err)
 	}
 	return userLikes, nil
 }
@@ -116,13 +117,13 @@ func (db *SqlDB) GetUserLikes(user core_values.UserId) (targetIds []string, err 
 		SELECT target_id FROM `+db.safeLikeableTable+` WHERE liker_id = ? 
     `, user)
 	if err != nil {
-		return []string{}, fmt.Errorf("while SELECTing the target ids that are liked by user: %w", err)
+		return []string{}, core_err.Rethrow("SELECTing the target ids that are liked by user", err)
 	}
 	for rows.Next() {
 		var targetId string
 		err := rows.Scan(&targetId)
 		if err != nil {
-			return []string{}, fmt.Errorf("while scanning a target id liked by user: %w", err)
+			return []string{}, core_err.Rethrow("scanning a target id liked by user", err)
 		}
 		targetIds = append(targetIds, targetId)
 	}

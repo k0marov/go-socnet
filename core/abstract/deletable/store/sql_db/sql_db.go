@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 )
 
 type SqlDB struct {
@@ -14,7 +15,7 @@ type SqlDB struct {
 func NewSqlDB(db *sql.DB, tableName table_name.TableName) (*SqlDB, error) {
 	targetTable, err := tableName.Value()
 	if err != nil {
-		return nil, fmt.Errorf("while getting target table name: %w", err)
+		return nil, core_err.Rethrow("getting target table name", err)
 	}
 	return &SqlDB{sql: db, safeTargetTable: targetTable}, nil
 }

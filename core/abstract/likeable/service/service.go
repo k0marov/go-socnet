@@ -1,11 +1,11 @@
 package service
 
 import (
-	"fmt"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 )
 
-// TODO: add checks for core_errors.ErrNotFound to all services
+// TODO: add checks for core_err.ErrNotFound to all services
 
 type (
 	StoreLikeChecker          func(targetId string, fromUser core_values.UserId) (bool, error)
@@ -28,18 +28,18 @@ func NewLikeToggler(checkLiked StoreLikeChecker, like StoreLike, unlike StoreUnl
 	return func(target string, fromUser core_values.UserId) error {
 		isLiked, err := checkLiked(target, fromUser)
 		if err != nil {
-			return fmt.Errorf("while checking if the target Likeable is liked: %w", err)
+			return core_err.Rethrow("checking if the target Likeable is liked", err)
 		}
 
 		if isLiked {
 			err = unlike(target, fromUser)
 			if err != nil {
-				return fmt.Errorf("while unliking a Likeable in service: %w", err)
+				return core_err.Rethrow("unliking a Likeable in service", err)
 			}
 		} else {
 			err = like(target, fromUser)
 			if err != nil {
-				return fmt.Errorf("while liking a Likeable in service: %w", err)
+				return core_err.Rethrow("liking a Likeable in service", err)
 			}
 		}
 

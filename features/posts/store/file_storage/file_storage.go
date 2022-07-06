@@ -1,7 +1,7 @@
 package file_storage
 
 import (
-	"fmt"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	"github.com/k0marov/go-socnet/core/general/static_store"
 	"path/filepath"
@@ -25,7 +25,7 @@ func NewPostImageFilesCreator(createFile static_store.StaticFileCreator) PostIma
 			filename := ImagePrefix + strconv.Itoa(image.Index)
 			path, err := createFile(image.File, dir, filename)
 			if err != nil {
-				return paths, fmt.Errorf("while storing a file: %w", err)
+				return paths, core_err.Rethrow("storing a file", err)
 			}
 			paths = append(paths, path)
 		}
@@ -37,7 +37,7 @@ func NewPostFilesDeleter(deleteDir static_store.StaticDirDeleter) PostFilesDelet
 	return func(post values.PostId, author core_values.UserId) error {
 		err := deleteDir(GetPostDir(post, author))
 		if err != nil {
-			return fmt.Errorf("while deleting the post directory: %w", err)
+			return core_err.Rethrow("deleting the post directory", err)
 		}
 		return nil
 	}
