@@ -2,7 +2,6 @@ package sql_db
 
 import (
 	"database/sql"
-	"fmt"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
 	"github.com/k0marov/go-socnet/core/general/core_err"
 )
@@ -25,7 +24,7 @@ func (db *SqlDB) Delete(targetId string) error {
 		DELETE FROM `+db.safeTargetTable+` WHERE id = ?
     `, targetId)
 	if err != nil {
-		return fmt.Errorf("while DELETEing from table %s: %w", db.safeTargetTable, err)
+		return core_err.Rethrow("deleting a Deletable target", err)
 	}
 	return nil
 }

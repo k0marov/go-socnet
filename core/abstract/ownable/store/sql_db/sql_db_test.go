@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/k0marov/go-socnet/core/abstract/ownable/store/sql_db"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
+	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"github.com/k0marov/go-socnet/features/profiles/domain/models"
@@ -46,6 +47,9 @@ func TestSqlDB(t *testing.T) {
 	AssertNoError(t, err)
 	Assert(t, ownerId, gotOwner, "returned owner")
 
+	// getting owner of non-existing target throws ErrNotFound
+	_, err = sqlDB.GetOwner("9999")
+	AssertError(t, err, core_err.ErrNotFound)
 }
 
 func setupSqlDB(t testing.TB, db *sql.DB) *sql_db.SqlDB {
