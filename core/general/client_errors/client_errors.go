@@ -95,3 +95,15 @@ var EmptyText = ClientError{
 	ReadableDetail: "Text cannot be empty.",
 	HTTPCode:       http.StatusBadRequest,
 }
+
+var NonIntegerCount = ClientError{
+	DetailCode:     "non-integer-count",
+	ReadableDetail: "The \"count\" query argument of the feed endpoint should only be set to integers.",
+	HTTPCode:       http.StatusBadRequest,
+}
+
+var TooBigCount = ClientError{
+	DetailCode:     "too-big-count",
+	ReadableDetail: "The provided count is too big.",
+	HTTPCode:       http.StatusBadRequest,
+}
