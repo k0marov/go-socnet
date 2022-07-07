@@ -2,7 +2,6 @@ package service_test
 
 import (
 	"github.com/k0marov/go-socnet/core/general/client_errors"
-	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
 	"reflect"
@@ -84,15 +83,7 @@ func TestPostDeleter(t *testing.T) {
 		err := sut(RandomString(), RandomString())
 		AssertError(t, err, client_errors.InsufficientPermissions)
 	})
-	t.Run("error case - getting author returns post not found", func(t *testing.T) {
-		getAuthor := func(values.PostId) (core_values.UserId, error) {
-			return "", core_err.ErrNotFound
-		}
-		sut := service.NewPostDeleter(getAuthor, nil)
-		err := sut(RandomString(), RandomString())
-		AssertError(t, err, client_errors.NotFound)
-	})
-	t.Run("error case - getting author returns some other error", func(t *testing.T) {
+	t.Run("error case - getting author returns some error", func(t *testing.T) {
 		getAuthor := func(values.PostId) (core_values.UserId, error) {
 			return "", RandomError()
 		}

@@ -27,9 +27,6 @@ type (
 func NewPostDeleter(getAuthor ownable.OwnerGetter, deletePost store.PostDeleter) PostDeleter {
 	return func(post values.PostId, caller core_values.UserId) error {
 		author, err := getAuthor(post)
-		if err == core_err.ErrNotFound {
-			return client_errors.NotFound
-		}
 		if err != nil {
 			return core_err.Rethrow("getting post author", err)
 		}
