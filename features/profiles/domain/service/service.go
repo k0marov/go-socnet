@@ -8,6 +8,7 @@ import (
 	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	"github.com/k0marov/go-socnet/core/general/static_store"
+	"github.com/k0marov/go-socnet/core/helpers"
 
 	"github.com/k0marov/go-socnet/features/profiles/domain/contexters"
 	"github.com/k0marov/go-socnet/features/profiles/domain/models"
@@ -54,13 +55,11 @@ func NewFollowsGetter(getUserLikes likeable.UserLikesGetter, getProfile ProfileG
 		if err != nil {
 			return []entities.ContextedProfile{}, core_err.Rethrow("getting a list of profile ids that target follows", err)
 		}
-		var follows []entities.ContextedProfile
-		for _, followId := range followIds {
-			follow, err := getProfile(followId, caller)
-			if err != nil {
-				return []entities.ContextedProfile{}, fmt.Errorf("while getting profile details for a follow %s: %w", followId, err)
-			}
-			follows = append(follows, follow)
+		follows, err := helpers.MapForEachWithErr(followIds, func(followId string) (entities.ContextedProfile, error) {
+			return getProfile(followId, caller)
+		})
+		if err != nil {
+			return []entities.ContextedProfile{}, core_err.Rethrow("getting profiles of follows", err)
 		}
 		return follows, nil
 	}
