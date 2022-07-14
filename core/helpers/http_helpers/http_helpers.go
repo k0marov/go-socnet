@@ -54,7 +54,6 @@ func ParseFile(r *http.Request, field string) (core_values.FileData, bool) {
 	}
 	defer file.Close()
 	avatarData, err := io.ReadAll(file)
-	// TODO: make ParseFile return a Reader instead of using ReadAll and reading everything into memory
 	if err != nil {
 		return core_values.FileData{}, false
 	}

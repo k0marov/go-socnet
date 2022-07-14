@@ -23,6 +23,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("error while opening sql db: %v", err)
 	}
+	sql.Exec("PRAGMA foreign_keys = ON")
 
 	// profiles
 	onNewRegister := profiles.NewRegisterCallback(sql)
