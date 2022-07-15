@@ -9,11 +9,13 @@ import (
 )
 
 type (
-	RecsGetter = service.RecsGetter
+	RecsGetter  = service.RecsGetter
+	RecsUpdater = service.RecsUpdater
 )
 
 type recommendable struct {
-	GetRecs RecsGetter
+	GetRecs    RecsGetter
+	UpdateRecs RecsUpdater
 }
 
 func NewRecommendable(db *sql.DB, tableName table_name.TableName) (recommendable, error) {
@@ -24,7 +26,9 @@ func NewRecommendable(db *sql.DB, tableName table_name.TableName) (recommendable
 	}
 	// service
 	getRecs := service.NewRecsGetter(sqlDB.GetRecs)
+	updateRecs := service.NewRecsUpdater()
 	return recommendable{
-		GetRecs: getRecs,
+		GetRecs:    getRecs,
+		UpdateRecs: updateRecs,
 	}, nil
 }
