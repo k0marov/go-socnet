@@ -37,33 +37,42 @@ func TestSqlDB(t *testing.T) {
 	profilesDB, err := profiles_db.NewSqlDB(db)
 	AssertNoError(t, err)
 
-	profile1 := RandomProfileModel()
-	profilesDB.CreateProfile(profile1)
-	profile2 := RandomProfileModel()
-	profilesDB.CreateProfile(profile2)
+	profile := RandomProfileModel()
+	profilesDB.CreateProfile(profile)
 
-	// add a hundred recommendations for the first profile
+	// add a hundred recommendations for this profile
 	var targets []string
 	for i := 0; i < 100; i++ {
 		targets = append(targets, createTargetEntity(t, db))
 	}
 	sort.Strings(targets)
-	err = sqlDB.SetRecs(profile1.Id, targets)
+	err = sqlDB.SetRecs(profile.Id, targets)
 	AssertNoError(t, err)
 
-	gotRecs, err := sqlDB.GetRecs(profile1.Id, 100)
+	gotRecs, err := sqlDB.GetRecs(profile.Id, 100)
 	AssertNoError(t, err)
 	sort.Strings(gotRecs)
 	Assert(t, gotRecs, targets, "returned recommendations")
 
 	// assert randomness
-	gotRecs2, err := sqlDB.GetRecs(profile1.Id, 100)
+	gotRecs2, err := sqlDB.GetRecs(profile.Id, 100)
 	Assert(t, reflect.DeepEqual(gotRecs, gotRecs2), false, "the returned values are not equal")
 
 	// assert that limiting count works
-	gotRecsLimited, err := sqlDB.GetRecs(profile1.Id, 10)
+	gotRecsLimited, err := sqlDB.GetRecs(profile.Id, 10)
 	AssertNoError(t, err)
 	Assert(t, len(gotRecsLimited), 10, "length of limited recs")
+
+	// assert getting random posts works
+	gotRandom, err := sqlDB.GetRandom(100)
+	AssertNoError(t, err)
+	sort.Strings(gotRandom)
+	Assert(t, gotRandom, targets, "returned random recs")
+
+	// assert that limiting count on random posts works
+	gotRandomLimited, err := sqlDB.GetRandom(10)
+	AssertNoError(t, err)
+	Assert(t, len(gotRandomLimited), 10, "length of limited random recs")
 }
 
 func TestSqlDB_Injection(t *testing.T) {

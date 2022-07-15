@@ -10,8 +10,9 @@ import (
 )
 
 type SqlDB struct {
-	sql          *sqlx.DB
-	safeRecTable string
+	sql            *sqlx.DB
+	safeRecTable   string
+	safeTargeTable string
 }
 
 func NewSqlDB(db *sqlx.DB, targetTable table_name.TableName) (*SqlDB, error) {
@@ -27,7 +28,7 @@ func NewSqlDB(db *sqlx.DB, targetTable table_name.TableName) (*SqlDB, error) {
 	if err != nil {
 		return nil, core_err.Rethrow("while initializing sql", err)
 	}
-	return &SqlDB{sql: db, safeRecTable: recommendationTable}, nil
+	return &SqlDB{sql: db, safeRecTable: recommendationTable, safeTargeTable: targetName}, nil
 }
 
 func initSQL(db *sqlx.DB, verifiedTarget, verifiedRecommendation string) error {
@@ -65,7 +66,16 @@ func (db *SqlDB) GetRecs(user core_values.UserId, count int) ([]string, error) {
 	return recs, nil
 }
 func (db *SqlDB) GetRandom(count int) ([]string, error) {
-	panic("unimplemented")
+	var recs []string
+	err := db.sql.Select(&recs, `
+		SELECT id FROM `+db.safeTargeTable+` 
+		ORDER BY RANDOM() 
+		LIMIT ?
+    `, count)
+	if err != nil {
+		return []string{}, core_err.Rethrow("selecting random recs", err)
+	}
+	return recs, nil
 }
 
 type recModel struct {
