@@ -6,6 +6,7 @@ import (
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
 	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
+	"github.com/k0marov/go-socnet/core/helpers"
 )
 
 type SqlDB struct {
@@ -52,22 +53,32 @@ func initSQL(db *sqlx.DB, verifiedTarget, verifiedRecommendation string) error {
 }
 
 func (db *SqlDB) GetRecs(user core_values.UserId, count int) ([]string, error) {
-	panic("unimplemented")
+	var recs []string
+	err := db.sql.Select(&recs, `
+		SELECT recommendation_id FROM `+db.safeRecTable+` WHERE user_id = ?
+		ORDER BY RANDOM()
+	    LIMIT ? 
+    `, user, count)
+	if err != nil {
+		return []string{}, core_err.Rethrow("selecting recs from DB", err)
+	}
+	return recs, nil
 }
 func (db *SqlDB) GetRandom(count int) ([]string, error) {
 	panic("unimplemented")
 }
 
+type recModel struct {
+	UserId           string `db:"user_id"`
+	RecommendationId string `db:"recommendation_id"`
+}
+
 func (db *SqlDB) SetRecs(user core_values.UserId, recs []string) error {
-	panic("unimplemented")
-	//statement := "INSERT INTO " + db.safeRecTable + "(recommendation_id, user_id) VALUES " + strings.Repeat("(?, ?),", len(recs))
-	//statement = statement[:len(statement)-2] // remove the trailing comma
-	//statement += ";"
-	//var values []any
-	//for _, rec := range recs {
-	//	values = append(values, rec)
-	//	values = append(values, user)
-	//}
-	//db.sql.Exec(statement, values...)
-	//return nil
+	_, err := db.sql.NamedExec(`
+		INSERT INTO `+db.safeRecTable+`(recommendation_id, user_id) VALUES (:recommendation_id, :user_id)
+    `, helpers.MapForEach(recs, func(rec string) recModel { return recModel{UserId: user, RecommendationId: rec} }))
+	if err != nil {
+		return core_err.Rethrow("builk inserting recs into DB", err)
+	}
+	return nil
 }
