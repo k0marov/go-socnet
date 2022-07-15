@@ -1,8 +1,8 @@
 package sql_db
 
 import (
-	"database/sql"
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
 	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
@@ -13,11 +13,11 @@ import (
 )
 
 type SqlDB struct {
-	sql       *sql.DB
+	sql       *sqlx.DB
 	TableName table_name.TableName
 }
 
-func NewSqlDB(sql *sql.DB) (*SqlDB, error) {
+func NewSqlDB(sql *sqlx.DB) (*SqlDB, error) {
 	err := initSQL(sql)
 	if err != nil {
 		return nil, err
@@ -25,7 +25,7 @@ func NewSqlDB(sql *sql.DB) (*SqlDB, error) {
 	return &SqlDB{sql: sql, TableName: table_name.NewTableName("Post")}, nil
 }
 
-func initSQL(sql *sql.DB) error {
+func initSQL(sql *sqlx.DB) error {
 	_, err := sql.Exec(`
 		CREATE TABLE IF NOT EXISTS Post(
 		    id INTEGER PRIMARY KEY, 

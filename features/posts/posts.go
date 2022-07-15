@@ -1,7 +1,7 @@
 package posts
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"github.com/k0marov/go-socnet/core/abstract/deletable"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
 	"github.com/k0marov/go-socnet/core/abstract/ownable"
@@ -24,7 +24,7 @@ import (
 	profile_service "github.com/k0marov/go-socnet/features/profiles/domain/service"
 )
 
-func NewPostRecommendable(db *sql.DB) recommendable.Recommendable {
+func NewPostRecommendable(db *sqlx.DB) recommendable.Recommendable {
 	sqlDB, err := sql_db.NewSqlDB(db)
 	if err != nil {
 		log.Fatalf("error while opening sql db for posts: %v", err)
@@ -37,7 +37,7 @@ func NewPostRecommendable(db *sql.DB) recommendable.Recommendable {
 	return recommendablePost
 }
 
-func NewPostsRouterImpl(db *sql.DB, getContextedProfile profile_service.ProfileGetter) func(chi.Router) {
+func NewPostsRouterImpl(db *sqlx.DB, getContextedProfile profile_service.ProfileGetter) func(chi.Router) {
 	// db
 	sqlDB, err := sql_db.NewSqlDB(db)
 	if err != nil {

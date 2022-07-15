@@ -1,7 +1,7 @@
 package sql_db_test
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"github.com/k0marov/go-socnet/core/abstract/ownable/store/sql_db"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
 	"github.com/k0marov/go-socnet/core/general/core_err"
@@ -52,7 +52,7 @@ func TestSqlDB(t *testing.T) {
 	AssertError(t, err, core_err.ErrNotFound)
 }
 
-func setupSqlDB(t testing.TB, db *sql.DB) *sql_db.SqlDB {
+func setupSqlDB(t testing.TB, db *sqlx.DB) *sql_db.SqlDB {
 	t.Helper()
 	targetTable, err := targetTblName.Value()
 	AssertNoError(t, err)
@@ -69,7 +69,7 @@ func setupSqlDB(t testing.TB, db *sql.DB) *sql_db.SqlDB {
 	return sqlDB
 }
 
-func createTargetEntity(t testing.TB, db *sql.DB, owner core_values.UserId) (id string) {
+func createTargetEntity(t testing.TB, db *sqlx.DB, owner core_values.UserId) (id string) {
 	t.Helper()
 	targetTable, err := targetTblName.Value()
 	AssertNoError(t, err)

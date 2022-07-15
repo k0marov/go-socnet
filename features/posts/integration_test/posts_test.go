@@ -2,7 +2,6 @@ package posts_test
 
 import (
 	"bytes"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/k0marov/go-socnet/core/general/core_values"
@@ -40,10 +39,7 @@ func TestPosts(t *testing.T) {
 	}()
 
 	// db
-	sql, err := sql.Open("sqlite3", "file::memory:?cache=shared")
-	if err != nil {
-		t.Fatalf("error while opening in-memory database: %v", err)
-	}
+	sql := OpenSqliteDB(t)
 
 	r := chi.NewRouter()
 	// profiles

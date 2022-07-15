@@ -1,7 +1,7 @@
 package comments
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"github.com/k0marov/go-socnet/core/abstract/deletable"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
 	"github.com/k0marov/go-socnet/core/abstract/ownable"
@@ -20,7 +20,7 @@ import (
 	profile_service "github.com/k0marov/go-socnet/features/profiles/domain/service"
 )
 
-func NewCommentsRouterImpl(db *sql.DB, getProfile profile_service.ProfileGetter) func(chi.Router) {
+func NewCommentsRouterImpl(db *sqlx.DB, getProfile profile_service.ProfileGetter) func(chi.Router) {
 	// db
 	sqlDB, err := sql_db.NewSqlDB(db)
 	if err != nil {

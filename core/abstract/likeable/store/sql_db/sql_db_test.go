@@ -1,7 +1,7 @@
 package sql_db_test
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"github.com/k0marov/go-socnet/core/abstract/likeable/store/sql_db"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
 	. "github.com/k0marov/go-socnet/core/helpers/test_helpers"
@@ -120,7 +120,7 @@ func TestSqlDB(t *testing.T) {
 	})
 }
 
-func setupSqlDB(t testing.TB, db *sql.DB) *sql_db.SqlDB {
+func setupSqlDB(t testing.TB, db *sqlx.DB) *sql_db.SqlDB {
 	t.Helper()
 	targetTable, err := targetTblName.Value()
 	AssertNoError(t, err)
@@ -135,7 +135,7 @@ func setupSqlDB(t testing.TB, db *sql.DB) *sql_db.SqlDB {
 	return sqlDB
 }
 
-func createTargetEntity(t testing.TB, db *sql.DB) (id string) {
+func createTargetEntity(t testing.TB, db *sqlx.DB) (id string) {
 	t.Helper()
 	targetTable, err := targetTblName.Value()
 	AssertNoError(t, err)

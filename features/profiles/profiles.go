@@ -1,7 +1,7 @@
 package profiles
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"github.com/k0marov/go-socnet/core/abstract/likeable"
 	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/ownable_likeable/contexters"
 	"github.com/k0marov/go-socnet/core/general/core_entities"
@@ -23,7 +23,7 @@ import (
 	auth "github.com/k0marov/golang-auth"
 )
 
-func NewRegisterCallback(db *sql.DB) func(auth.User) {
+func NewRegisterCallback(db *sqlx.DB) func(auth.User) {
 	// db
 	sqlDB, err := sql_db.NewSqlDB(db)
 	if err != nil {
@@ -38,7 +38,7 @@ func NewRegisterCallback(db *sql.DB) func(auth.User) {
 	}
 }
 
-func NewProfileGetterImpl(db *sql.DB) service.ProfileGetter {
+func NewProfileGetterImpl(db *sqlx.DB) service.ProfileGetter {
 	sqlDB, err := sql_db.NewSqlDB(db)
 	if err != nil {
 		log.Fatalf("Error while opening sql db as a db for profiles: %v", err)
@@ -54,7 +54,7 @@ func NewProfileGetterImpl(db *sql.DB) service.ProfileGetter {
 	return service.NewProfileGetter(getProfile, addContext)
 }
 
-func NewProfilesRouterImpl(db *sql.DB) func(chi.Router) {
+func NewProfilesRouterImpl(db *sqlx.DB) func(chi.Router) {
 	// db
 	sqlDB, err := sql_db.NewSqlDB(db)
 	if err != nil {

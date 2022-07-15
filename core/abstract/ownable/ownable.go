@@ -1,7 +1,7 @@
 package ownable
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"github.com/k0marov/go-socnet/core/abstract/ownable/service"
 	"github.com/k0marov/go-socnet/core/abstract/ownable/store/sql_db"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
@@ -16,7 +16,7 @@ type ownable struct {
 	GetOwner OwnerGetter
 }
 
-func NewOwnable(db *sql.DB, tableName table_name.TableName) (ownable, error) {
+func NewOwnable(db *sqlx.DB, tableName table_name.TableName) (ownable, error) {
 	// store
 	sqlDB, err := sql_db.NewSqlDB(db, tableName)
 	if err != nil {

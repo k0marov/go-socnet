@@ -1,8 +1,8 @@
 package sql_db
 
 import (
-	"database/sql"
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
 	"github.com/k0marov/go-socnet/core/general/core_err"
 	"time"
@@ -13,11 +13,11 @@ import (
 )
 
 type SqlDB struct {
-	sql       *sql.DB
+	sql       *sqlx.DB
 	TableName table_name.TableName
 }
 
-func NewSqlDB(db *sql.DB) (*SqlDB, error) {
+func NewSqlDB(db *sqlx.DB) (*SqlDB, error) {
 	err := initSQL(db)
 	if err != nil {
 		return nil, core_err.Rethrow("initializing sql for comments", err)
@@ -25,7 +25,7 @@ func NewSqlDB(db *sql.DB) (*SqlDB, error) {
 	return &SqlDB{db, table_name.NewTableName("Comment")}, nil
 }
 
-func initSQL(db *sql.DB) error {
+func initSQL(db *sqlx.DB) error {
 	_, err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS Comment(
 		    id INTEGER PRIMARY KEY, 

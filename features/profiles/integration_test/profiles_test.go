@@ -3,8 +3,8 @@ package profiles_test
 import (
 	"bytes"
 	"context"
-	"database/sql"
 	"encoding/json"
+	"github.com/jmoiron/sqlx"
 	"github.com/k0marov/go-socnet/core/general/core_entities"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	"github.com/k0marov/go-socnet/core/general/static_store"
@@ -41,7 +41,7 @@ func TestProfiles(t *testing.T) {
 	}()
 
 	// profiles setup
-	sql, err := sql.Open("sqlite3", "file::memory:?cache=shared")
+	sql, err := sqlx.Open("sqlite3", "file::memory:?cache=shared")
 	if err != nil {
 		t.Fatalf("error while opening in-memory database: %v", err)
 	}

@@ -1,8 +1,8 @@
 package core
 
 import (
-	"database/sql"
 	"github.com/go-chi/chi/v5"
+	"github.com/jmoiron/sqlx"
 	"github.com/k0marov/go-socnet/core/general/periodic"
 	"github.com/k0marov/go-socnet/features/comments"
 	"github.com/k0marov/go-socnet/features/feed"
@@ -17,7 +17,7 @@ import (
 const AuthHashCost = 8
 
 func Setup() http.Handler {
-	sql, err := sql.Open("sqlite3", "db.sqlite3")
+	sql, err := sqlx.Open("sqlite3", "db.sqlite3")
 	if err != nil {
 		log.Fatalf("error while opening sql db: %v", err)
 	}

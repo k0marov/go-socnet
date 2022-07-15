@@ -1,7 +1,7 @@
 package deletable
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"github.com/k0marov/go-socnet/core/abstract/deletable/service"
 	"github.com/k0marov/go-socnet/core/abstract/deletable/store/sql_db"
 	"github.com/k0marov/go-socnet/core/abstract/ownable"
@@ -19,7 +19,7 @@ type deletable struct {
 	ForceDelete ForceDeleter
 }
 
-func NewDeletable(db *sql.DB, tableName table_name.TableName, ownerGetter ownable.OwnerGetter) (deletable, error) {
+func NewDeletable(db *sqlx.DB, tableName table_name.TableName, ownerGetter ownable.OwnerGetter) (deletable, error) {
 	// store
 	sqlDB, err := sql_db.NewSqlDB(db, tableName)
 	if err != nil {

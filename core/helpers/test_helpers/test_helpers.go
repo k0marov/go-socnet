@@ -1,9 +1,9 @@
 package test_helpers
 
 import (
-	"database/sql"
 	"encoding/json"
 	"errors"
+	"github.com/jmoiron/sqlx"
 	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/ownable_likeable/contexters"
 	"github.com/k0marov/go-socnet/core/general/client_errors"
 	"github.com/k0marov/go-socnet/core/general/core_entities"
@@ -211,9 +211,9 @@ func RandomPost() post_entities.Post {
 	}
 }
 
-func OpenSqliteDB(t testing.TB) *sql.DB {
+func OpenSqliteDB(t testing.TB) *sqlx.DB {
 	t.Helper()
-	sql, err := sql.Open("sqlite3", "file::memory:?cache=shared")
+	sql, err := sqlx.Open("sqlite3", "file::memory:?cache=shared")
 	if err != nil {
 		t.Fatalf("error while opening in-memory database: %v", err)
 	}

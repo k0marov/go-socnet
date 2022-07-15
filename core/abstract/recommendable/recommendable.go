@@ -1,7 +1,7 @@
 package recommendable
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"github.com/k0marov/go-socnet/core/abstract/recommendable/service"
 	"github.com/k0marov/go-socnet/core/abstract/recommendable/store/sql_db"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
@@ -18,7 +18,7 @@ type Recommendable struct {
 	UpdateRecs RecsUpdater
 }
 
-func NewRecommendable(db *sql.DB, tableName table_name.TableName) (Recommendable, error) {
+func NewRecommendable(db *sqlx.DB, tableName table_name.TableName) (Recommendable, error) {
 	// store
 	sqlDB, err := sql_db.NewSqlDB(db, tableName)
 	if err != nil {

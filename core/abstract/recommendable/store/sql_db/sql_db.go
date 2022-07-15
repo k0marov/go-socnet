@@ -1,19 +1,19 @@
 package sql_db
 
 import (
-	"database/sql"
 	"fmt"
+	"github.com/jmoiron/sqlx"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
 	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 )
 
 type SqlDB struct {
-	sql          *sql.DB
+	sql          *sqlx.DB
 	safeRecTable string
 }
 
-func NewSqlDB(db *sql.DB, targetTable table_name.TableName) (*SqlDB, error) {
+func NewSqlDB(db *sqlx.DB, targetTable table_name.TableName) (*SqlDB, error) {
 	targetName, err := targetTable.Value()
 	if err != nil {
 		return nil, core_err.Rethrow("getting target table name", err)
@@ -29,7 +29,7 @@ func NewSqlDB(db *sql.DB, targetTable table_name.TableName) (*SqlDB, error) {
 	return &SqlDB{sql: db, safeRecTable: recommendationTable}, nil
 }
 
-func initSQL(db *sql.DB, verifiedTarget, verifiedRecommendation string) error {
+func initSQL(db *sqlx.DB, verifiedTarget, verifiedRecommendation string) error {
 	_, err := db.Exec(`
 		CREATE TABLE IF NOT EXISTS ` + verifiedRecommendation + `(
 			recommendation_id INT NOT NULL, 

@@ -1,7 +1,7 @@
 package likeable
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"github.com/k0marov/go-socnet/core/abstract/likeable/service"
 	"github.com/k0marov/go-socnet/core/abstract/likeable/store/sql_db"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
@@ -24,7 +24,7 @@ type likeable struct {
 	GetUserLikes      UserLikesGetter
 }
 
-func NewLikeable(db *sql.DB, targetTableName table_name.TableName) (likeable, error) {
+func NewLikeable(db *sqlx.DB, targetTableName table_name.TableName) (likeable, error) {
 	// store
 	store, err := sql_db.NewSqlDB(db, targetTableName)
 	if err != nil {

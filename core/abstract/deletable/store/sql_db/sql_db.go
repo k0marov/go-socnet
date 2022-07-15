@@ -1,17 +1,17 @@
 package sql_db
 
 import (
-	"database/sql"
+	"github.com/jmoiron/sqlx"
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
 	"github.com/k0marov/go-socnet/core/general/core_err"
 )
 
 type SqlDB struct {
-	sql             *sql.DB
+	sql             *sqlx.DB
 	safeTargetTable string
 }
 
-func NewSqlDB(db *sql.DB, tableName table_name.TableName) (*SqlDB, error) {
+func NewSqlDB(db *sqlx.DB, tableName table_name.TableName) (*SqlDB, error) {
 	targetTable, err := tableName.Value()
 	if err != nil {
 		return nil, core_err.Rethrow("getting target table name", err)

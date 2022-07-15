@@ -2,7 +2,6 @@ package integration_test
 
 import (
 	"bytes"
-	"database/sql"
 	"encoding/json"
 	"github.com/k0marov/go-socnet/core/general/core_values"
 	helpers "github.com/k0marov/go-socnet/core/helpers/http_test_helpers"
@@ -28,10 +27,7 @@ import (
 
 func TestComments(t *testing.T) {
 	// db
-	sql, err := sql.Open("sqlite3", "file::memory:?cache=shared")
-	if err != nil {
-		t.Fatalf("error while opening in-memory database: %v", err)
-	}
+	sql := OpenSqliteDB(t)
 	r := chi.NewRouter()
 	// profiles
 	fakeRegisterProfile := profiles.NewRegisterCallback(sql)
