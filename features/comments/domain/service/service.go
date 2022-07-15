@@ -63,7 +63,7 @@ func NewCommentCreator(validate validators.CommentValidator, getProfile profile_
 					Id:        newId,
 					AuthorId:  newComment.Author,
 					Text:      newComment.Text,
-					CreatedAt: createdAt,
+					CreatedAt: createdAt.Unix(),
 				},
 				Likes: 0,
 			},

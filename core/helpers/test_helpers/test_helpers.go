@@ -258,7 +258,7 @@ func RandomCommentModel() comment_models.CommentModel {
 		Id:        RandomId(),
 		AuthorId:  RandomString(),
 		Text:      RandomString(),
-		CreatedAt: RandomTime(),
+		CreatedAt: RandomTime().Unix(),
 	}
 }
 func RandomComment() comment_entities.Comment {

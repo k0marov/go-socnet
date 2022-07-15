@@ -27,7 +27,7 @@ func TestCommentCreator(t *testing.T) {
 				Id:        createdId,
 				AuthorId:  newComment.Author,
 				Text:      newComment.Text,
-				CreatedAt: time.Now(),
+				CreatedAt: time.Now().Unix(),
 			},
 			Likes: 0,
 		},
@@ -81,9 +81,7 @@ func TestCommentCreator(t *testing.T) {
 	sut := service.NewCommentCreator(validator, profileGetter, creator)
 	gotCreated, err := sut(newComment)
 	AssertNoError(t, err)
-	Assert(t, TimeAlmostNow(gotCreated.CreatedAt), true, "createdAt is time.Now()")
-	_, zoneOffset := gotCreated.CreatedAt.Zone()
-	Assert(t, zoneOffset, 0, "time zone offset")
+	Assert(t, TimeAlmostNow(time.Unix(gotCreated.CreatedAt, 0)), true, "createdAt is time.Now()")
 	gotCreated.CreatedAt = createdComment.CreatedAt
 	Assert(t, gotCreated, createdComment, "the returned created comment")
 }

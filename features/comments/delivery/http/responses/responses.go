@@ -24,7 +24,7 @@ func NewCommentResponse(comment entities.ContextedComment) CommentResponse {
 		Id:        comment.Id,
 		Author:    profile_responses.NewProfileResponse(comment.Author),
 		Text:      comment.Text,
-		CreatedAt: comment.CreatedAt.Unix(),
+		CreatedAt: comment.CreatedAt,
 		Likes:     comment.Likes,
 		IsLiked:   comment.IsLiked,
 		IsMine:    comment.IsMine,

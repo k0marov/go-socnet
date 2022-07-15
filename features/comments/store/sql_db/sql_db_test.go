@@ -46,7 +46,7 @@ func TestSqlDB(t *testing.T) {
 			Id:        id,
 			AuthorId:  author,
 			Text:      newComment.Text,
-			CreatedAt: createdAt,
+			CreatedAt: createdAt.Unix(),
 		}
 	}
 	getComments := func(t testing.TB, db *sql_db.SqlDB, post post_values.PostId) []models.CommentModel {

@@ -56,12 +56,10 @@ func (db *SqlDB) GetComments(post post_values.PostId) ([]models.CommentModel, er
 	var comments []models.CommentModel
 	for rows.Next() {
 		comment := models.CommentModel{}
-		var createdAtUnix int64
-		err := rows.Scan(&comment.Id, &comment.AuthorId, &comment.Text, &createdAtUnix)
+		err := rows.Scan(&comment.Id, &comment.AuthorId, &comment.Text, &comment.CreatedAt)
 		if err != nil {
 			return []models.CommentModel{}, core_err.Rethrow("scanning a comment", err)
 		}
-		comment.CreatedAt = time.Unix(createdAtUnix, 0).UTC()
 		comments = append(comments, comment)
 	}
 	return comments, nil
