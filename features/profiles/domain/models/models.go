@@ -5,8 +5,8 @@ import (
 )
 
 type ProfileModel struct {
-	Id         core_values.UserId
-	Username   string
-	About      string
-	AvatarPath string
+	Id         core_values.UserId `db:"id"`
+	Username   string             `db:"username"`
+	About      string             `db:"about"`
+	AvatarPath string             `db:"avatarPath"`
 }

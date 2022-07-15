@@ -50,14 +50,13 @@ func (db *SqlDB) CreateProfile(newProfile models.ProfileModel) error {
 }
 
 func (db *SqlDB) GetProfile(profileId core_values.UserId) (models.ProfileModel, error) {
-	row := db.sql.QueryRow(`
+	var profile models.ProfileModel
+	err := db.sql.Get(&profile, `
 		SELECT id, username, about, avatarPath
 		FROM Profile
-		WHERE id = ?1`,
+		WHERE id = ?`,
 		profileId,
 	)
-	profile := models.ProfileModel{}
-	err := row.Scan(&profile.Id, &profile.Username, &profile.About, &profile.AvatarPath)
 	if err == sql.ErrNoRows {
 		return models.ProfileModel{}, core_err.ErrNotFound
 	}
