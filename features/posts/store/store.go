@@ -22,6 +22,7 @@ type (
 	DBPostImagesAdder func(values.PostId, []models.PostImageModel) error
 )
 
+// TODO: remove complexity by removing the "deleting on failure" logic by using transactions ?
 func NewStorePostCreator(
 	createPost DBPostCreator, storeImages file_storage.PostImageFilesCreator, addImages DBPostImagesAdder,
 	deletePost deletable.ForceDeleter, deleteImages file_storage.PostFilesDeleter) store.PostCreator {
