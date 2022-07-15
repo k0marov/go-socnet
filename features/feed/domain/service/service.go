@@ -1,8 +1,10 @@
 package service
 
 import (
+	"github.com/k0marov/go-socnet/core/abstract/recommendable"
+	"github.com/k0marov/go-socnet/core/general/client_errors"
 	"github.com/k0marov/go-socnet/core/general/core_values"
-	"github.com/k0marov/go-socnet/features/posts/domain/contexters"
+	"strconv"
 )
 
 type FeedGetter = func(count string, caller core_values.UserId) ([]string, error)
@@ -10,27 +12,23 @@ type FeedGetter = func(count string, caller core_values.UserId) ([]string, error
 const DefaultCount = 5
 const MaxCount = 50
 
-func NewFakeFeedGetter(addContext contexters.PostListContextAdder) FeedGetter {
+func convertCount(countStr string) (count int, ok bool) {
+	if countStr == "" {
+		return DefaultCount, true
+	}
+	countConv, err := strconv.Atoi(countStr)
+	return countConv, err == nil
+}
+
+func NewFeedGetter(getFeed recommendable.RecsGetter) FeedGetter {
 	return func(countStr string, caller core_values.UserId) ([]string, error) {
-		panic("unimplemented")
-		//var count int
-		//if countStr == "" {
-		//	count = DefaultCount
-		//} else {
-		//	var err error
-		//	count, err = strconv.Atoi(countStr)
-		//	if err != nil {
-		//		return []entities.ContextedPost{}, client_errors.NonIntegerCount
-		//	}
-		//}
-		//if count > MaxCount {
-		//	return []entities.ContextedPost{}, client_errors.TooBigCount
-		//}
-		//posts, err := getPosts(count)
-		//if err != nil {
-		//	return []entities.ContextedPost{}, core_err.Rethrow("getting posts", err)
-		//}
-		//postsWithCtx, err := addContext(posts, caller)
-		//return postsWithCtx, nil
+		count, ok := convertCount(countStr)
+		if !ok {
+			return []string{}, client_errors.NonIntegerCount
+		}
+		if count > MaxCount {
+			return []string{}, client_errors.TooBigCount
+		}
+		return getFeed(caller, count)
 	}
 }
