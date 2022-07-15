@@ -44,7 +44,7 @@ func NewPostListResponse(posts []entities.ContextedPost) PostsResponse {
 			Id:        post.Id,
 			Author:    profile_responses.NewProfileResponse(post.Author),
 			Text:      post.Text,
-			CreatedAt: post.CreatedAt.Unix(),
+			CreatedAt: post.CreatedAt,
 			Images:    newPostImageListResponse(post.Images),
 			Likes:     post.Likes,
 			IsLiked:   post.IsLiked,

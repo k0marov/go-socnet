@@ -44,7 +44,7 @@ func TestSqlDB(t *testing.T) {
 			Id:        post1Id,
 			AuthorId:  author,
 			Text:      post.Text,
-			CreatedAt: post.CreatedAt,
+			CreatedAt: post.CreatedAt.Unix(),
 			Images:    nil,
 		}
 	}

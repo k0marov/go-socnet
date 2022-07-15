@@ -192,7 +192,7 @@ func RandomPostModel() post_models.PostModel {
 		Id:        RandomString(),
 		AuthorId:  RandomString(),
 		Text:      RandomString(),
-		CreatedAt: RandomTime(),
+		CreatedAt: RandomTime().Unix(),
 		Images:    RandomPostImageModels(),
 	}
 }

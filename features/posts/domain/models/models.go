@@ -14,14 +14,14 @@ type PostToCreate struct {
 }
 
 type PostImageModel struct {
-	Index int
-	Path  core_values.StaticPath
+	Index int                    `db:"ind"`
+	Path  core_values.StaticPath `db:"path"`
 }
 
 type PostModel struct {
-	Id        values.PostId
-	AuthorId  core_values.UserId
-	Text      string
-	CreatedAt time.Time
+	Id        values.PostId      `db:"id"`
+	AuthorId  core_values.UserId `db:"owner_id"`
+	Text      string             `db:"textContent"`
+	CreatedAt int64              `db:"createdAt"`
 	Images    []PostImageModel
 }

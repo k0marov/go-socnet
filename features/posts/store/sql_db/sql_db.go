@@ -6,8 +6,6 @@ import (
 	"github.com/k0marov/go-socnet/core/abstract/table_name"
 	"github.com/k0marov/go-socnet/core/general/core_err"
 	"github.com/k0marov/go-socnet/core/general/core_values"
-	"time"
-
 	"github.com/k0marov/go-socnet/features/posts/domain/models"
 	"github.com/k0marov/go-socnet/features/posts/domain/values"
 )
@@ -65,12 +63,10 @@ func (db *SqlDB) GetPosts(author core_values.UserId) (posts []models.PostModel, 
 	defer rows.Close()
 	for rows.Next() {
 		post := models.PostModel{}
-		var createdAt int64
-		err = rows.Scan(&post.Id, &post.AuthorId, &post.Text, &createdAt)
+		err = rows.Scan(&post.Id, &post.AuthorId, &post.Text, &post.CreatedAt)
 		if err != nil {
 			return []models.PostModel{}, core_err.Rethrow("scanning a post", err)
 		}
-		post.CreatedAt = time.Unix(createdAt, 0).UTC()
 		post.Images, err = db.getImages(post.Id)
 		if err != nil {
 			return []models.PostModel{}, err
@@ -115,20 +111,11 @@ func (db *SqlDB) addImage(post values.PostId, image models.PostImageModel) error
 }
 
 func (db *SqlDB) getImages(post values.PostId) (images []models.PostImageModel, err error) {
-	rows, err := db.sql.Query(`
+	err = db.sql.Select(&images, `
 		SELECT path, ind FROM PostImage WHERE post_id = ?
     `, post)
 	if err != nil {
 		return []models.PostImageModel{}, core_err.Rethrow("SELECTing post images", err)
-	}
-	defer rows.Close()
-	for rows.Next() {
-		image := models.PostImageModel{}
-		err := rows.Scan(&image.Path, &image.Index)
-		if err != nil {
-			return []models.PostImageModel{}, core_err.Rethrow("scanning an image", err)
-		}
-		images = append(images, image)
 	}
 	return images, nil
 }

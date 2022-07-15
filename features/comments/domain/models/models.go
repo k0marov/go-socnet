@@ -6,8 +6,8 @@ import (
 )
 
 type CommentModel struct {
-	Id        values.CommentId
-	AuthorId  core_values.UserId
-	Text      string
-	CreatedAt int64
+	Id        values.CommentId   `db:"id"`
+	AuthorId  core_values.UserId `db:"owner_id"`
+	Text      string             `db:"textContent"`
+	CreatedAt int64              `db:"createdAt"`
 }

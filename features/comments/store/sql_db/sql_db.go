@@ -44,7 +44,8 @@ func initSQL(db *sqlx.DB) error {
 }
 
 func (db *SqlDB) GetComments(post post_values.PostId) ([]models.CommentModel, error) {
-	rows, err := db.sql.Query(`
+	var comments []models.CommentModel
+	err := db.sql.Select(&comments, `
 		SELECT id, owner_id, textContent, createdAt
 		FROM Comment 
 		WHERE post_id = ?
@@ -52,15 +53,6 @@ func (db *SqlDB) GetComments(post post_values.PostId) ([]models.CommentModel, er
     `, post)
 	if err != nil {
 		return []models.CommentModel{}, core_err.Rethrow("SELECTing post comments", err)
-	}
-	var comments []models.CommentModel
-	for rows.Next() {
-		comment := models.CommentModel{}
-		err := rows.Scan(&comment.Id, &comment.AuthorId, &comment.Text, &comment.CreatedAt)
-		if err != nil {
-			return []models.CommentModel{}, core_err.Rethrow("scanning a comment", err)
-		}
-		comments = append(comments, comment)
 	}
 	return comments, nil
 }
