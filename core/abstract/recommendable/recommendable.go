@@ -25,7 +25,7 @@ func NewRecommendable(db *sql.DB, tableName table_name.TableName) (Recommendable
 		return Recommendable{}, core_err.Rethrow("opening Recommendable sql db", err)
 	}
 	// service
-	getRecs := service.NewRecsGetter(sqlDB.GetRecs)
+	getRecs := service.NewRecsGetter(sqlDB.GetRecs, sqlDB.GetRandom)
 	updateRecs := service.NewRecsUpdater()
 	return Recommendable{
 		GetRecs:    getRecs,

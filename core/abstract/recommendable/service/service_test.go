@@ -12,12 +12,11 @@ func TestRecsGetter(t *testing.T) {
 	count := 5
 	recs := []string{RandomId(), RandomId(), RandomId(), RandomId(), RandomId()}
 	t.Run("error case - storeRecsGetter throws", func(t *testing.T) {
-		err := RandomError()
 		storeRecsGetter := func(core_values.UserId, int) ([]string, error) {
-			return nil, err
+			return nil, RandomError()
 		}
 		_, gotErr := service.NewRecsGetter(storeRecsGetter, nil)(target, count)
-		AssertError(t, gotErr, err)
+		AssertSomeError(t, gotErr)
 	})
 	t.Run("happy case - storeRecsGetter returns enough recs", func(t *testing.T) {
 		storeRecsGetter := func(targetId core_values.UserId, gotCount int) ([]string, error) {
