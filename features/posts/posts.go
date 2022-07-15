@@ -7,6 +7,7 @@ import (
 	"github.com/k0marov/go-socnet/core/abstract/ownable"
 	"github.com/k0marov/go-socnet/core/abstract/ownable_likeable"
 	likeable_contexters "github.com/k0marov/go-socnet/core/abstract/ownable_likeable/contexters"
+	"github.com/k0marov/go-socnet/core/abstract/recommendable"
 	"github.com/k0marov/go-socnet/core/general/image_decoder"
 	static_store2 "github.com/k0marov/go-socnet/core/general/static_store"
 	"log"
@@ -22,6 +23,19 @@ import (
 	"github.com/k0marov/go-socnet/features/posts/store/sql_db"
 	profile_service "github.com/k0marov/go-socnet/features/profiles/domain/service"
 )
+
+func NewPostRecommendable(db *sql.DB) recommendable.Recommendable {
+	sqlDB, err := sql_db.NewSqlDB(db)
+	if err != nil {
+		log.Fatalf("error while opening sql db for posts: %v", err)
+	}
+	// recommendable
+	recommendablePost, err := recommendable.NewRecommendable(db, sqlDB.TableName)
+	if err != nil {
+		log.Fatalf("error while creating a Post recommendable: %v", err)
+	}
+	return recommendablePost
+}
 
 func NewPostsRouterImpl(db *sql.DB, getContextedProfile profile_service.ProfileGetter) func(chi.Router) {
 	// db
