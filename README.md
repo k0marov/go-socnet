@@ -1,8 +1,7 @@
 # go-socnet
 
-My pet project from 2022.
+My pet project from 2022: Backend for a Social Network written in Go. 
 
-Backend for a Social Network written in Go. 
 [Frontend](https://github.com/k0marov/socnet-frontend)
 
 ### Highlights
