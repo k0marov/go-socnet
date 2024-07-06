@@ -1,3 +1,5 @@
+.idea
+.DS_Store
 deploy/static
 deploy/db.sqlite3
 deploy/deploy
